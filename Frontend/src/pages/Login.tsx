@@ -43,6 +43,7 @@ const ACCESS_EDITORIAL_IMAGE = '/assets/projects/signature-towers.jpg';
 const NAV_LINKS = [
   { id: 'experience', label: 'Investor Experience' },
   { id: 'access', label: 'Investor Access' },
+  { id: 'contact', label: 'Contact Us' },
 ];
 
 const iconCls = 'absolute left-3.5 top-1/2 -translate-y-1/2 text-redhill-muted w-[17px] h-[17px] pointer-events-none';
@@ -1081,8 +1082,44 @@ export default function Login({ onLogin }: LoginProps) {
         </div>
       </section>
 
+      {/* Contact Us */}
+      <section id="contact" className="bg-redhill-ivory border-t border-redhill-line py-10 sm:py-12">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="bg-white border border-redhill-line rounded-lg p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-1.5 max-w-xl">
+              <p className="eyebrow text-redhill-gold">03 — Contact Us</p>
+              <h2 className="font-serif text-2xl sm:text-3xl text-redhill-charcoal font-normal tracking-tight">
+                Speak with the Redhill Bengaluru Desk
+              </h2>
+              <p className="text-sm text-redhill-muted">
+                Questions about developments, investor onboarding, or scheduling a private site walkthrough? Reach our team directly.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 shrink-0 text-sm">
+              <div className="border-l border-redhill-line pl-4">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted">Email</p>
+                <a href="mailto:invest@redhillinfra.com" className="font-medium text-redhill-charcoal hover:text-redhill-red transition-colors mt-0.5 block">
+                  invest@redhillinfra.com
+                </a>
+              </div>
+              <div className="border-l border-redhill-line pl-4">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted">Telephone</p>
+                <a href="tel:+918041239000" className="font-medium text-redhill-charcoal hover:text-redhill-red transition-colors tabular-nums mt-0.5 block">
+                  +91 80 4123 9000
+                </a>
+              </div>
+              <div className="border-l border-redhill-line pl-4">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted">Office Hours</p>
+                <p className="font-medium text-redhill-charcoal mt-0.5">Mon–Sat · 9:30–18:30 IST</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="bg-white border-t border-redhill-line py-10">
+      <footer className="bg-white border-t border-redhill-line py-8">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <Logo />
           <p className="text-xs text-redhill-muted">
