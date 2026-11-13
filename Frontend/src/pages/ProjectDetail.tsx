@@ -803,39 +803,6 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                     </div>
                   )}
                 </section>
-
-                {/* Live Camera Section */}
-                <section className="bg-white rounded-2xl overflow-hidden shadow-sm border border-redhill-line">
-                  <div className="p-5 sm:p-6 border-b border-redhill-line flex items-center justify-between bg-redhill-ivory">
-                    <div className="flex items-center gap-3">
-                      <Video className="text-redhill-red w-5 h-5" />
-                      <h2 className="text-lg font-medium text-redhill-charcoal tracking-tight">Live Site Camera</h2>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-redhill-muted uppercase tracking-widest">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                        Site Feed
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="relative aspect-video bg-black group">
-                    {project.cctv_url ? (
-                      <video
-                        src={project.cctv_url}
-                        autoPlay
-                        muted
-                        loop
-                        className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-stone-400 gap-3">
-                        <Video className="w-12 h-12 opacity-30" />
-                        <p className="text-sm font-medium">Camera Feed Temporarily Unavailable</p>
-                      </div>
-                    )}
-                  </div>
-                </section>
               </motion.div>
             );
           })()}
@@ -846,93 +813,10 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
+              className="max-w-4xl mx-auto"
             >
-              {/* Left 4 Columns: Executive Concierge & Allocation Dossier Panel */}
-              <aside className="lg:col-span-4 flex flex-col justify-between gap-5">
-                <div className="lux-card p-6 space-y-5">
-                  <div className="flex items-start justify-between gap-3 pb-4 border-b border-redhill-line">
-                    <div>
-                      <span className="eyebrow text-redhill-gold">Private Client Advisory</span>
-                      <h3 className="font-serif text-lg font-bold text-redhill-charcoal mt-1">
-                        Dedicated Relationship Desk
-                      </h3>
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
-                      <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full" />
-                      Active
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-redhill-muted leading-relaxed">
-                    Direct communication thread with your Redhill Bengaluru asset-management team regarding site progress, statutory filings, and capital ledger statements for <strong className="text-redhill-charcoal">{project.name}</strong>.
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2.5 text-xs">
-                    <div className="bg-redhill-ivory border border-redhill-line rounded-md p-3">
-                      <span className="block text-[10px] uppercase tracking-wider text-redhill-muted">Response SLA</span>
-                      <span className="font-semibold text-redhill-charcoal mt-0.5 block">&lt; 4 Business Hrs</span>
-                    </div>
-                    <div className="bg-redhill-ivory border border-redhill-line rounded-md p-3">
-                      <span className="block text-[10px] uppercase tracking-wider text-redhill-muted">Desk Hours</span>
-                      <span className="font-semibold text-redhill-charcoal mt-0.5 block">Mon–Sat · IST</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-redhill-line space-y-2 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-redhill-muted">Concierge Email</span>
-                      <a href="mailto:invest@redhillinfra.com" className="font-mono text-redhill-red hover:underline">
-                        invest@redhillinfra.com
-                      </a>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-redhill-muted">Bengaluru Desk</span>
-                      <span className="font-mono text-redhill-charcoal">+91 80 4123 9000</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Topic Triggers */}
-                <div className="lux-card p-6 space-y-3 flex-1 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-redhill-charcoal">
-                        Quick Inquiry Topics
-                      </h4>
-                    </div>
-                    <p className="text-xs text-redhill-muted">
-                      Select a topic below to pre-fill your message to the project concierge:
-                    </p>
-                    <div className="space-y-2 pt-1">
-                      {[
-                        "Can I get an update on current milestone progress?",
-                        "Where can I find the latest payment receipts?",
-                        "Is the live CCTV feed active on site today?",
-                        "I would like to schedule a guided site walkthrough this week.",
-                      ].map((text, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setNewMessage(text)}
-                          className="w-full px-3.5 py-2.5 bg-redhill-ivory hover:bg-redhill-sand border border-redhill-line hover:border-redhill-red/30 rounded-lg text-xs text-stone-700 hover:text-redhill-charcoal transition-all cursor-pointer text-left flex items-center justify-between gap-2"
-                        >
-                          <span className="line-clamp-1">{text}</span>
-                          <ChevronRight className="w-3.5 h-3.5 text-redhill-gold shrink-0" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-4 mt-4 border-t border-redhill-line flex items-center justify-between text-xs text-redhill-muted">
-                    <span>Total Thread Messages</span>
-                    <span className="font-mono font-semibold text-redhill-charcoal">{queries.length} recorded</span>
-                  </div>
-                </div>
-              </aside>
-
-              {/* Right 8 Columns: Executive Support Desk Conversation Console */}
-              <div className="lg:col-span-8 h-[600px] sm:h-[640px] flex flex-col bg-white rounded-2xl border border-redhill-line shadow-xl overflow-hidden">
+              {/* Executive Support Desk Conversation Console */}
+              <div className="h-[600px] sm:h-[640px] flex flex-col bg-white rounded-2xl border border-redhill-line shadow-xl overflow-hidden">
                 {/* Support Desk Header */}
                 <div className="p-4 sm:p-5 border-b border-redhill-line bg-redhill-sand/70 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-3.5">
