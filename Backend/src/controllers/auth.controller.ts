@@ -18,16 +18,9 @@ const maskEmail = (email: string): string => {
   return `${visibleStart}***${visibleEnd}@${domain}`;
 };
 
-export const login = (req: AuthRequest, res: Response) => {
-  const { email, password } = req.body;
-  
-  const rawIdentifier = (email || '').trim();
-  const cleanIdentifier = rawIdentifier.toLowerCase();
-  const rawPassword = typeof password === 'string' ? password : '';
-
-  if (!rawIdentifier || !rawPassword) {
-    return res.status(400).json({ error: 'Please enter your email, Login ID, or phone number and password' });
-  }
+const findUserByIdentifier = (rawIdentifier: string): any => {
+  const cleanIdentifier = rawIdentifier.trim().toLowerCase();
+  if (!cleanIdentifier) return null;
 
   // 1. Try matching by email or login_id (case-insensitive & trimmed)
   let user: any = db.prepare(
@@ -39,10 +32,27 @@ export const login = (req: AuthRequest, res: Response) => {
     const digits = rawIdentifier.replace(/\D/g, '');
     if (digits.length >= 10) {
       const last10 = digits.slice(-10);
-      const allUsersWithPhone = db.prepare('SELECT * FROM users WHERE phone IS NOT NULL AND phone != ""').all() as any[];
+      const allUsersWithPhone = db.prepare(
+        "SELECT * FROM users WHERE phone IS NOT NULL AND TRIM(phone) != ''"
+      ).all() as any[];
       user = allUsersWithPhone.find(u => (u.phone || '').replace(/\D/g, '').slice(-10) === last10);
     }
   }
+
+  return user || null;
+};
+
+export const login = (req: AuthRequest, res: Response) => {
+  const { email, password } = req.body;
+  
+  const rawIdentifier = (email || '').trim();
+  const rawPassword = typeof password === 'string' ? password : '';
+
+  if (!rawIdentifier || !rawPassword) {
+    return res.status(400).json({ error: 'Please enter your email, Login ID, or phone number and password' });
+  }
+
+  const user = findUserByIdentifier(rawIdentifier);
 
   if (!user || !bcrypt.compareSync(rawPassword, user.password)) {
     return res.status(401).json({ error: 'Invalid email/ID or password. Please try again.' });
@@ -164,26 +174,12 @@ export const getMe = (req: AuthRequest, res: Response) => {
 export const forgotPassword = async (req: AuthRequest, res: Response) => {
   const { email } = req.body;
   const rawIdentifier = (email || '').trim();
-  const cleanIdentifier = rawIdentifier.toLowerCase();
 
   if (!rawIdentifier) {
     return res.status(400).json({ error: 'Please enter your registered email, Login ID, or phone number' });
   }
 
-  // 1. Try matching by email or login_id
-  let user: any = db.prepare(
-    'SELECT * FROM users WHERE LOWER(TRIM(email)) = ? OR LOWER(TRIM(login_id)) = ?'
-  ).get(cleanIdentifier, cleanIdentifier);
-
-  // 2. If not found, try matching by phone number digits (last 10 digits)
-  if (!user) {
-    const digits = rawIdentifier.replace(/\D/g, '');
-    if (digits.length >= 10) {
-      const last10 = digits.slice(-10);
-      const allUsersWithPhone = db.prepare('SELECT * FROM users WHERE phone IS NOT NULL AND phone != ""').all() as any[];
-      user = allUsersWithPhone.find(u => (u.phone || '').replace(/\D/g, '').slice(-10) === last10);
-    }
-  }
+  const user = findUserByIdentifier(rawIdentifier);
 
   if (!user || !user.email) {
     return res.status(404).json({ error: 'No account found matching this identifier. Please verify and try again.' });
