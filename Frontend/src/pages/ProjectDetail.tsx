@@ -3,10 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import {
   Building2, MapPin, Calendar, CheckCircle2, Clock, AlertCircle,
   FileText, Image as ImageIcon, Video, Bell, ChevronLeft,
-  Download, ExternalLink, LogOut, MessageCircle, Send, ChevronUp, ChevronRight, IndianRupee, Sparkles, Maximize2, X
+  Download, ExternalLink, LogOut, MessageCircle, Send, ChevronUp, ChevronRight, IndianRupee, Maximize2, X
 } from 'lucide-react';
 import { User, Project, Milestone, ProgressUpdate, Announcement, Query, LedgerEntry } from '../types';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -46,6 +46,8 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const reduceMotion = useReducedMotion();
+  const [reelIndex, setReelIndex] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [lightboxMedia, setLightboxMedia] = useState<{ url: string; caption: string; date?: string } | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -152,6 +154,20 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
 
   const { project, milestones = [], updates = [], announcements = [], queries = [] } = data || {};
 
+  const photoUpdatesForReel = (updates || []).filter(u => u.type === 'photo');
+  const reelImages = [
+    ...(project ? [{ url: getAssetUrl(project.image_url, project.id), caption: `${project.name} — ${project.location}` }] : []),
+    ...photoUpdatesForReel.map(u => ({ url: getAssetUrl(u.url), caption: u.caption || `${project?.name || 'Site'} Progress` }))
+  ];
+
+  useEffect(() => {
+    if (reduceMotion || reelImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setReelIndex((prev) => (prev + 1) % reelImages.length);
+    }, 6500);
+    return () => clearInterval(timer);
+  }, [reduceMotion, reelImages.length]);
+
   const docMilestones = (milestones || []).filter(m => m.category === 'documentation');
   const approvalMilestones = (milestones || []).filter(m => m.category === 'approval');
   const constructionMilestones = (milestones || []).filter(m => m.category === 'construction');
@@ -184,122 +200,143 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
       <div className="text-redhill-charcoal pb-20">
         
       {/* Navigation */}
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 pt-6">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-redhill-muted">
-          <Link 
-            to={['admin', 'super_admin', 'senior_admin', 'site_manager', 'financial_officer', 'marketing_manager', 'support_agent'].includes(user.role) ? '/admin' : '/dashboard'} 
-            className="hover:text-redhill-charcoal transition-colors flex items-center gap-1 font-medium"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 text-redhill-gold" />
-            Dashboard
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
-          <span className="text-redhill-charcoal font-medium truncate max-w-[240px] sm:max-w-xs">{project.name}</span>
+      <div className="bg-white border-b border-redhill-line">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 pt-4 pb-2">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-redhill-muted">
+            <Link 
+              to={['admin', 'super_admin', 'senior_admin', 'site_manager', 'financial_officer', 'marketing_manager', 'support_agent'].includes(user.role) ? '/admin' : '/dashboard'} 
+              className="hover:text-redhill-charcoal transition-colors flex items-center gap-1 font-medium"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 text-redhill-gold" />
+              Dashboard
+            </Link>
+            <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+            <span className="text-redhill-charcoal font-medium truncate max-w-[240px] sm:max-w-xs">{project.name}</span>
+          </div>
         </div>
       </div>
 
       {/* Hero Header */}
-      <div className="relative py-8 sm:py-10 bg-white border-b border-redhill-line">
+      <div className="relative py-5 sm:py-6 bg-white border-b border-redhill-line">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-            <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-7 space-y-4">
               <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="w-8 h-px bg-redhill-gold" />
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="w-6 h-px bg-redhill-gold" />
                   <span className="eyebrow text-redhill-gold">Boutique Residence Dossier · Bengaluru</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl lg:text-[2.65rem] font-serif text-redhill-charcoal tracking-tight mb-3">{project.name}</h1>
-                <div className="flex flex-wrap items-center gap-5 text-stone-600 text-xs sm:text-sm">
+                <h1 className="text-2xl sm:text-3xl lg:text-[2.35rem] font-serif text-redhill-charcoal tracking-tight leading-tight mb-2">{project.name}</h1>
+                <div className="flex flex-wrap items-center gap-4 text-stone-600 text-xs sm:text-sm">
                   <div className="flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-redhill-gold" />
+                    <MapPin className="w-3.5 h-3.5 text-redhill-gold" />
                     {project.location}
                   </div>
                   {project.investment_date && (
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-redhill-muted" />
+                      <Calendar className="w-3.5 h-3.5 text-redhill-muted" />
                       Commenced: {formatDate(project.investment_date)}
                     </div>
                   )}
                   {updates.length > 0 && (
                     <div className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-emerald-700" />
-                      Last Site Update: {formatDate(updates[0].date)}
+                      <Clock className="w-3.5 h-3.5 text-emerald-700" />
+                      Last Update: {formatDate(updates[0].date)}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Boutique High-Rise Architectural Preview + Telemetry Strip */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch pt-1">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setLightboxMedia({
-                      url: getAssetUrl(project.image_url, project.id),
-                      caption: `${project.name} — ${project.location}`,
-                    })
-                  }
-                  className="sm:col-span-6 relative rounded-lg overflow-hidden border border-redhill-line bg-redhill-sand min-h-[156px] text-left group cursor-pointer"
-                >
-                  <img
-                    src={getAssetUrl(project.image_url, project.id)}
-                    alt={project.name}
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = getAssetUrl(null, project.id);
-                    }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
-                  <div className="absolute bottom-3 left-3.5 right-3.5 text-white flex items-end justify-between gap-2">
-                    <div>
-                      <span className="block text-[9px] uppercase tracking-[0.18em] text-redhill-gold-soft font-semibold">
-                        Asset #{project.id} · 12+ Storeys
-                      </span>
-                      <span className="text-xs font-medium text-white/95 line-clamp-1">
-                        {project.location} · Boutique High-Rise
+              {/* Cinematic Movie-Style Architectural Showcase + Compact 3-Cell Summary */}
+              {(() => {
+                const activeSlide = reelImages[reelIndex % Math.max(1, reelImages.length)] || {
+                  url: getAssetUrl(project.image_url, project.id),
+                  caption: `${project.name} — ${project.location}`,
+                };
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setLightboxMedia(activeSlide)}
+                    className="w-full relative rounded-lg overflow-hidden border border-redhill-line bg-redhill-ink h-[240px] sm:h-[290px] text-left group cursor-pointer block"
+                  >
+                    <AnimatePresence mode="sync">
+                      <motion.img
+                        key={activeSlide.url}
+                        src={activeSlide.url}
+                        alt={project.name}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = getAssetUrl(null, project.id);
+                        }}
+                        initial={{ opacity: 0.4, scale: 1.02 }}
+                        animate={
+                          reduceMotion
+                            ? { opacity: 1, scale: 1 }
+                            : {
+                                opacity: 1,
+                                scale: [1.02, 1.1, 1.05, 1.11, 1.02],
+                                x: ['0%', '-1.6%', '1.2%', '-0.8%', '0%'],
+                                y: ['0%', '-1.2%', '0.6%', '-0.6%', '0%'],
+                              }
+                        }
+                        exit={{ opacity: 0 }}
+                        transition={
+                          reduceMotion
+                            ? { duration: 0.4 }
+                            : {
+                                opacity: { duration: 1.1, ease: 'easeOut' },
+                                scale: { duration: 24, repeat: Infinity, ease: 'easeInOut' },
+                                x: { duration: 24, repeat: Infinity, ease: 'easeInOut' },
+                                y: { duration: 24, repeat: Infinity, ease: 'easeInOut' },
+                              }
+                        }
+                        className="absolute inset-0 w-full h-full object-cover will-change-transform"
+                      />
+                    </AnimatePresence>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/10 pointer-events-none" />
+                    <div className="absolute bottom-3.5 left-4 right-4 text-white flex items-end justify-between gap-3 z-10">
+                      <div className="min-w-0">
+                        <span className="block text-[10px] uppercase tracking-[0.18em] text-redhill-gold-soft font-medium">
+                          {project.location} · Boutique High-Rise
+                        </span>
+                        <span className="text-xs sm:text-sm font-medium text-white/95 line-clamp-1">
+                          {activeSlide.caption}
+                        </span>
+                      </div>
+                      <span className="w-8 h-8 rounded-md bg-white/90 text-redhill-charcoal flex items-center justify-center shrink-0 group-hover:bg-white transition-colors">
+                        <Maximize2 className="w-3.5 h-3.5" />
                       </span>
                     </div>
-                    <span className="w-7 h-7 rounded-md bg-white/90 text-redhill-charcoal flex items-center justify-center shrink-0">
-                      <Maximize2 className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </button>
+                  </button>
+                );
+              })()}
 
-                <div className="sm:col-span-6 grid grid-cols-2 gap-2.5">
-                  <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3 flex flex-col justify-between">
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Milestones</p>
-                    <p className="font-serif text-lg font-semibold text-redhill-charcoal tabular mt-1">
-                      {milestones.filter(m => m.status === 'completed').length}/{milestones.length}
-                      <span className="text-[11px] font-normal text-redhill-muted ml-1">Done</span>
-                    </p>
-                  </div>
-                  <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3 flex flex-col justify-between">
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Approvals &amp; Docs</p>
-                    <p className="font-serif text-lg font-semibold text-redhill-charcoal tabular mt-1">
-                      {docMilestones.length + approvalMilestones.length}
-                      <span className="text-[11px] font-normal text-redhill-muted ml-1">Filed</span>
-                    </p>
-                  </div>
-                  <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3 flex flex-col justify-between">
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Site Dispatches</p>
-                    <p className="font-serif text-lg font-semibold text-redhill-charcoal tabular mt-1">
-                      {updates.length}
-                      <span className="text-[11px] font-normal text-redhill-muted ml-1">Media</span>
-                    </p>
-                  </div>
-                  <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3 flex flex-col justify-between">
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Ledger Entries</p>
-                    <p className="font-serif text-lg font-semibold text-redhill-charcoal tabular mt-1">
-                      {ledgerEntries.length}
-                      <span className="text-[11px] font-normal text-redhill-muted ml-1">Audited</span>
-                    </p>
-                  </div>
+              <div className="bg-[#FBF9F5] border border-redhill-line rounded-lg grid grid-cols-3 divide-x divide-redhill-line">
+                <div className="px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Milestones</p>
+                  <p className="font-serif text-base sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5">
+                    {milestones.filter(m => m.status === 'completed').length}/{milestones.length}
+                    <span className="text-[11px] font-sans font-normal text-redhill-muted ml-1">Done</span>
+                  </p>
+                </div>
+                <div className="px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Approvals &amp; Docs</p>
+                  <p className="font-serif text-base sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5">
+                    {docMilestones.length + approvalMilestones.length}
+                    <span className="text-[11px] font-sans font-normal text-redhill-muted ml-1">Filed</span>
+                  </p>
+                </div>
+                <div className="px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Ledger Entries</p>
+                  <p className="font-serif text-base sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5">
+                    {ledgerEntries.length}
+                    <span className="text-[11px] font-sans font-normal text-redhill-muted ml-1">Audited</span>
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-5 lux-card p-6 sm:p-7 flex flex-col justify-between space-y-5">
+            <div className="lg:col-span-5 lux-card p-5 sm:p-6 space-y-4">
               <div>
                 <div className="flex justify-between items-baseline mb-2">
                   <span className="eyebrow text-redhill-muted">Overall Construction Progress</span>
