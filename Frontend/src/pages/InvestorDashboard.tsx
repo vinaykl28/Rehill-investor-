@@ -295,7 +295,6 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
                 onClick={() => setViewMode('explore')}
                 className="btn-secondary py-2 px-4 text-xs uppercase tracking-[0.14em]"
               >
-                <Sparkles className="w-3.5 h-3.5 text-redhill-gold" />
                 Explore New Launches
               </button>
             </div>
@@ -999,7 +998,6 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
                   onClick={() => setViewMode('explore')}
                   className="btn-secondary py-2 px-4 text-xs uppercase tracking-[0.14em]"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-redhill-gold" />
                   View All ({newProjects.length})
                 </button>
                 <button

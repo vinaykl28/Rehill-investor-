@@ -1,22 +1,13 @@
 import React from 'react';
-import { 
-  Building2, 
-  Users, 
-  Bell, 
-  Shield, 
-  Sparkles, 
-  MapPin, 
-  ArrowUpRight, 
-  PlusCircle, 
-  UserPlus, 
-  MessageSquare, 
-  CheckCircle2, 
-  TrendingUp, 
-  Compass, 
-  Clock, 
+import {
+  ArrowUpRight,
+  Plus,
+  UserPlus,
+  MessageSquare,
+  MapPin,
   ChevronRight,
-  ExternalLink,
-  Lock
+  Building2,
+  Users
 } from 'lucide-react';
 import { Project, User } from '../../types';
 import { ROLE_CONFIG } from '../../constants/roles';
@@ -54,377 +45,280 @@ export default function AdminOverview({
   const isSuperAdmin = user?.role === 'super_admin' || user?.role === 'senior_admin';
   const isSiteManager = user?.role === 'site_manager';
   const isFinancialOfficer = user?.role === 'financial_officer';
-  const isMarketingManager = user?.role === 'marketing_manager';
   const isSupportAgent = user?.role === 'support_agent';
 
   const roleMeta = ROLE_CONFIG[user?.role || 'super_admin'] || ROLE_CONFIG.super_admin;
-  const RoleIcon = roleMeta?.icon || Shield;
+
+  const metricCells = [
+    !isSupportAgent && {
+      key: 'projects',
+      label: 'Projects',
+      value: projects.length,
+      sub: projects.length === 1 ? '1 development' : `${projects.length} developments`,
+      onClick: () => setActiveView('projects'),
+    },
+    (isSuperAdmin || isFinancialOfficer) && {
+      key: 'investors',
+      label: 'Investors',
+      value: investors.length,
+      sub: investors.length === 1 ? '1 registered account' : `${investors.length} registered accounts`,
+      onClick: () => setActiveView('investors'),
+    },
+    {
+      key: 'queries',
+      label: 'Inquiries',
+      value: unansweredCount,
+      sub: unansweredCount > 0 ? `${unansweredCount} awaiting reply` : 'All answered',
+      highlight: unansweredCount > 0,
+      onClick: () => setActiveView('queries'),
+    },
+    isSuperAdmin && {
+      key: 'admins',
+      label: 'Team',
+      value: adminsCount,
+      sub: adminsCount === 1 ? '1 staff member' : `${adminsCount} staff members`,
+      onClick: () => setActiveView('admins'),
+    },
+  ].filter(Boolean) as Array<{
+    key: string;
+    label: string;
+    value: number;
+    sub: string;
+    highlight?: boolean;
+    onClick: () => void;
+  }>;
 
   return (
-    <div className="space-y-10 relative">
-      {/* Ambient Lighting Orbs */}
-      <div className="absolute top-0 right-10 w-[500px] h-[500px] bg-redhill-red/10 rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute top-40 left-0 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none -z-10" />
-
-      {/* ======================================================== */}
-      {/* 1. EXECUTIVE WELCOME BANNER (Matching Showcase Hero Theme) */}
-      {/* ======================================================== */}
-      <div className="relative rounded-xl overflow-hidden bg-white border border-redhill-line p-6 sm:p-8 lg:p-10">
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
-            {/* Gold Tagline Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-redhill-ivory border border-redhill-line">
-              <span className="w-2 h-2 rounded-full bg-redhill-red" />
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-redhill-gold flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-redhill-gold" />
-                REDHILL ENTERPRISE EXECUTIVE CONSOLE
-              </span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="text-3xl sm:text-4xl font-bold text-redhill-charcoal tracking-tight leading-tight">
-              Welcome back,{' '}
-              <span className="text-redhill-gold">
-                {user?.name || user?.email || 'Administrator'}
-              </span>
-            </h1>
-
-            {/* Subheadline & Role Pill */}
-            <div className="flex flex-wrap items-center gap-3 pt-0.5">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${roleMeta?.bg || 'bg-amber-500/15'} ${roleMeta?.color || 'text-amber-700'} border ${roleMeta?.border || 'border-amber-500/30'} shadow-sm`}>
-                <RoleIcon className="w-3.5 h-3.5" />
-                {roleMeta?.badge || 'STAFF'}
-              </span>
-              <p className="text-stone-700 text-xs sm:text-sm font-medium">
-                {roleMeta?.desc || 'Real-time project oversight & client relationship portal.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Action Shortcuts */}
-          <div className="flex flex-wrap items-center gap-3 pt-2 lg:pt-0">
-            {!isSiteManager && !isSupportAgent && onNewProject && (
-              <button
-                onClick={onNewProject}
-                className="bg-redhill-red hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg  transition-all flex items-center gap-2 cursor-pointer text-xs sm:text-sm hover:scale-[1.02]"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>New Project</span>
-              </button>
-            )}
-
-            {(isSuperAdmin || isFinancialOfficer) && onNewInvestor && (
-              <button
-                onClick={onNewInvestor}
-                className="bg-redhill-sand hover:bg-redhill-sand text-redhill-charcoal font-bold px-5 py-3 rounded-xl border border-redhill-line transition-all flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
-              >
-                <UserPlus className="w-4 h-4 text-emerald-700" />
-                <span>Add Investor</span>
-              </button>
-            )}
-
-            <button
-              onClick={() => setActiveView('queries')}
-              className="bg-redhill-ivory hover:bg-black/60 text-redhill-charcoal hover:text-redhill-charcoal font-bold px-4 py-3 rounded-xl border border-redhill-line transition-all flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
-            >
-              <MessageSquare className="w-4 h-4 text-amber-700" />
-              <span>Inquiries</span>
-              {unansweredCount > 0 && (
-                <span className="bg-redhill-red text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">
-                  {unansweredCount}
-                </span>
-              )}
-            </button>
-          </div>
+    <div className="space-y-8">
+      {/* 1. Quiet Editorial Header */}
+      <div className="bg-white border border-redhill-line rounded-lg p-6 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-redhill-muted font-medium">
+            Administration · {roleMeta?.badge || 'Staff'}
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-normal text-redhill-charcoal tracking-tight">
+            Welcome, {user?.name || user?.email || 'Administrator'}
+          </h1>
+          <p className="text-sm text-redhill-muted">
+            Portfolio oversight, investor allocations, and site progress updates.
+          </p>
         </div>
-      </div>
 
-      {/* ======================================================== */}
-      {/* 2. MODERN KPI CARDS GRID (Clean, No "Total Capital Raised") */}
-      {/* ======================================================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Card 1: Total Projects */}
-        {!isSupportAgent && (
-          <div
-            onClick={() => setActiveView('projects')}
-            className="group relative bg-white rounded-2xl p-6 border border-redhill-line hover:border-blue-500/50 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:-translate-y-1"
+        <div className="flex flex-wrap items-center gap-2.5">
+          {!isSiteManager && !isSupportAgent && onNewProject && (
+            <button
+              onClick={onNewProject}
+              className="bg-redhill-red hover:bg-red-700 text-white font-medium px-4 py-2.5 rounded-md transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Project</span>
+            </button>
+          )}
+
+          {(isSuperAdmin || isFinancialOfficer) && onNewInvestor && (
+            <button
+              onClick={onNewInvestor}
+              className="bg-white hover:bg-redhill-ivory text-redhill-charcoal font-medium px-4 py-2.5 rounded-md border border-redhill-line transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
+            >
+              <UserPlus className="w-4 h-4 text-redhill-muted" />
+              <span>Add Investor</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setActiveView('queries')}
+            className="bg-white hover:bg-redhill-ivory text-redhill-charcoal font-medium px-4 py-2.5 rounded-md border border-redhill-line transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
           >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all" />
-            
-            <div className="flex items-center justify-between pb-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/15 text-blue-700 border border-blue-500/30 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                <Building2 className="w-6 h-6" />
-              </div>
-              <div className="w-8 h-8 rounded-full bg-redhill-sand/70 group-hover:bg-blue-500 flex items-center justify-center text-redhill-muted group-hover:text-white transition-all">
-                <ArrowUpRight className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-redhill-muted block mb-1">
-                Projects
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-black text-redhill-charcoal font-sans tracking-tight">
-                  {projects.length}
-                </span>
-                <span className="text-xs font-extrabold text-blue-700 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                  Active Launches
-                </span>
-              </div>
-              <p className="text-[11px] text-redhill-muted mt-2 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                <span>100% RERA Registered</span>
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Card 2: Registered Investors */}
-        {(isSuperAdmin || isFinancialOfficer) && (
-          <div
-            onClick={() => setActiveView('investors')}
-            className="group relative bg-white rounded-2xl p-6 border border-redhill-line hover:border-emerald-500/50 shadow-xl hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:-translate-y-1"
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all" />
-
-            <div className="flex items-center justify-between pb-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6" />
-              </div>
-              <div className="w-8 h-8 rounded-full bg-redhill-sand/70 group-hover:bg-emerald-500 flex items-center justify-center text-redhill-muted group-hover:text-white transition-all">
-                <ArrowUpRight className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-redhill-muted block mb-1">
-                Verified Investors & Clients
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-black text-redhill-charcoal font-sans tracking-tight">
-                  {investors.length}
-                </span>
-                <span className="text-xs font-extrabold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  Active Portfolios
-                </span>
-              </div>
-              <p className="text-[11px] text-redhill-muted mt-2 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                <span>Allocations & Ledgers Synced</span>
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Card 3: Inquiries & Site Walkthroughs */}
-        <div
-          onClick={() => setActiveView('queries')}
-          className="group relative bg-white rounded-2xl p-6 border border-redhill-line hover:border-redhill-red/50 shadow-xl hover:shadow-2xl hover:shadow-redhill-red/10 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 bg-redhill-red/10 rounded-full blur-2xl group-hover:bg-redhill-red/20 transition-all" />
-
-          <div className="flex items-center justify-between pb-4">
-            <div className="w-12 h-12 rounded-xl bg-redhill-red/15 text-redhill-red border border-redhill-red/30 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-              <MessageSquare className="w-6 h-6" />
-            </div>
-            <div className="w-8 h-8 rounded-full bg-redhill-sand/70 group-hover:bg-redhill-red flex items-center justify-center text-redhill-muted group-hover:text-white transition-all">
-              <ArrowUpRight className="w-4 h-4" />
-            </div>
-          </div>
-
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-redhill-muted block mb-1">
-              Investor Inquiries & Site Visits
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl sm:text-4xl font-black text-redhill-charcoal font-sans tracking-tight">
+            <MessageSquare className="w-4 h-4 text-redhill-muted" />
+            <span>Inquiries</span>
+            {unansweredCount > 0 && (
+              <span className="bg-redhill-red text-white text-[11px] font-medium px-1.5 py-0.5 rounded tabular-nums">
                 {unansweredCount}
               </span>
-              <span className={`text-xs font-extrabold px-2 py-0.5 rounded border ${
-                unansweredCount > 0 
-                  ? 'text-redhill-red bg-redhill-red/10 border-redhill-red/30 animate-pulse'
-                  : 'text-emerald-700 bg-emerald-500/10 border-emerald-500/20'
-              }`}>
-                {unansweredCount > 0 ? 'Pending Action' : 'All Answered'}
-              </span>
-            </div>
-            <p className="text-[11px] text-redhill-muted mt-2 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-              <span>Real-time Chat & Direct Messaging</span>
-            </p>
-          </div>
+            )}
+          </button>
         </div>
+      </div>
 
-        {/* Card 4: Admin Staff & Roles */}
-        {isSuperAdmin && (
-          <div
-            onClick={() => setActiveView('admins')}
-            className="group relative bg-white rounded-2xl p-6 border border-redhill-line hover:border-amber-500/50 shadow-xl hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:-translate-y-1"
+      {/* 2. Architectural Summary Strip */}
+      <div className="bg-white border border-redhill-line rounded-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-redhill-line overflow-hidden">
+        {metricCells.map((cell) => (
+          <button
+            key={cell.key}
+            type="button"
+            onClick={cell.onClick}
+            className="group text-left p-6 hover:bg-redhill-ivory/60 transition-colors cursor-pointer flex flex-col justify-between gap-4"
           >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
-
-            <div className="flex items-center justify-between pb-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/15 text-amber-700 border border-amber-500/30 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                <Shield className="w-6 h-6" />
-              </div>
-              <div className="w-8 h-8 rounded-full bg-redhill-sand/70 group-hover:bg-amber-500 flex items-center justify-center text-redhill-muted group-hover:text-gray-950 transition-all">
-                <ArrowUpRight className="w-4 h-4" />
-              </div>
+            <div className="flex items-center justify-between w-full">
+              <span className="text-[11px] uppercase tracking-[0.16em] text-redhill-muted font-medium">
+                {cell.label}
+              </span>
+              <ArrowUpRight className="w-4 h-4 text-redhill-muted group-hover:text-redhill-charcoal transition-colors" />
             </div>
 
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-redhill-muted block mb-1">
-                Admin & Operations Staff
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-black text-redhill-charcoal font-sans tracking-tight">
-                  {adminsCount}
-                </span>
-                <span className="text-xs font-extrabold text-amber-700 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                  Role Permissions
-                </span>
+              <div className="text-3xl font-light text-redhill-charcoal tabular-nums tracking-tight">
+                {cell.value}
               </div>
-              <p className="text-[11px] text-redhill-muted mt-2 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                <span>Super Admins, Engineers & Support</span>
+              <p className={`text-xs mt-1.5 ${cell.highlight ? 'text-redhill-red font-medium' : 'text-redhill-muted'}`}>
+                {cell.sub}
               </p>
             </div>
-          </div>
-        )}
+          </button>
+        ))}
       </div>
 
-      {/* ======================================================== */}
-      {/* 3. SHOWCASE PREVIEW PANELS (Matching Showcase Style)     */}
-      {/* ======================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column: Active Projects */}
+      {/* 3. Projects & Recent Investors */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {!isSupportAgent && (
-          <div className="bg-white rounded-3xl border border-redhill-line shadow-2xl overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-redhill-line bg-redhill-ivory flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-3 h-3 rounded-full bg-blue-400 animate-ping" />
-                <div>
-                  <h2 className="font-bold text-redhill-charcoal text-lg font-serif">Projects</h2>
-                  <p className="text-xs text-redhill-muted">Live construction progress & milestones</p>
-                </div>
+          <div className="bg-white rounded-lg border border-redhill-line overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-redhill-line flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-medium text-redhill-charcoal">Projects</h2>
+                <p className="text-xs text-redhill-muted mt-0.5">Construction progress and milestones</p>
               </div>
               <button
                 onClick={() => setActiveView('projects')}
-                className="text-xs font-bold text-redhill-red hover:text-red-700 flex items-center gap-1 transition-colors cursor-pointer bg-redhill-red/10 px-3 py-1.5 rounded-lg border border-redhill-red/20"
+                className="text-xs font-medium text-redhill-charcoal hover:text-redhill-red flex items-center gap-1 transition-colors cursor-pointer"
               >
-                <span>View All ({projects.length})</span>
+                <span>View all ({projects.length})</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <div className="divide-y divide-redhill-line p-2 flex-1">
-              {projects.slice(0, 4).map(p => (
-                <div 
-                  key={p.id} 
-                  onClick={() => onSelectProject ? onSelectProject(p) : setActiveView('projects')}
-                  className="p-4 rounded-2xl hover:bg-redhill-sand/70 border border-transparent hover:border-redhill-line transition-all flex items-center justify-between gap-4 group cursor-pointer"
-                  title="Click to manage milestones, CCTV and progress updates"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-redhill-ivory border border-redhill-line shrink-0 relative">
-                      <img
-                        src={getAssetUrl(p.image_url, p.id)}
-                        alt={p.name}
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = getAssetUrl(null, p.id);
-                        }}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-sm text-redhill-charcoal group-hover:text-amber-700 transition-colors truncate flex items-center gap-1.5">
-                        <span>{p.name}</span>
-                        <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-amber-700" />
-                      </h4>
-                      <p className="text-xs text-redhill-muted flex items-center gap-1 mt-0.5 truncate">
-                        <MapPin className="w-3 h-3 text-redhill-red shrink-0" />
-                        <span>{p.location}</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
-                    <span className="text-[10px] font-extrabold text-amber-700 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
-                      {p.status}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-redhill-ivory h-1.5 rounded-full overflow-hidden border border-redhill-line">
-                        <div 
-                          className="bg-redhill-gold h-full rounded-full" 
-                          style={{ width: `${p.completion_percentage}%` }}
+            {projects.length === 0 ? (
+              <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
+                <Building2 className="w-6 h-6 text-redhill-muted/60 mb-3" />
+                <p className="text-sm text-redhill-charcoal font-medium">No developments added yet</p>
+                <p className="text-xs text-redhill-muted mt-1 max-w-xs">
+                  Add a project to start uploading progress photos, documents, and investor allocations.
+                </p>
+                {!isSiteManager && onNewProject && (
+                  <button
+                    onClick={onNewProject}
+                    className="mt-4 text-xs font-medium text-redhill-red hover:underline cursor-pointer"
+                  >
+                    + Create first project
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="divide-y divide-redhill-line flex-1">
+                {projects.slice(0, 4).map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => (onSelectProject ? onSelectProject(p) : setActiveView('projects'))}
+                    className="px-6 py-4 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-12 h-12 rounded-md overflow-hidden bg-redhill-ivory border border-redhill-line shrink-0">
+                        <img
+                          src={getAssetUrl(p.image_url, p.id)}
+                          alt={p.name}
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = getAssetUrl(null, p.id);
+                          }}
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="text-xs font-mono font-bold text-redhill-charcoal">
-                        {p.completion_percentage}%
-                      </span>
+                      <div className="min-w-0">
+                        <h4 className="font-medium text-sm text-redhill-charcoal group-hover:text-redhill-red transition-colors truncate">
+                          {p.name}
+                        </h4>
+                        <p className="text-xs text-redhill-muted flex items-center gap-1 mt-0.5 truncate">
+                          <MapPin className="w-3 h-3 text-redhill-muted shrink-0" />
+                          <span>{p.location}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
+                      <span className="text-[11px] text-redhill-muted">{p.status}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-redhill-ivory h-1 rounded-full overflow-hidden">
+                          <div
+                            className="bg-redhill-charcoal h-full"
+                            style={{ width: `${p.completion_percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-mono text-redhill-charcoal tabular-nums">
+                          {p.completion_percentage}%
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Right Column: Recent Verified Investors */}
         {(isSuperAdmin || isFinancialOfficer) && (
-          <div className="bg-white rounded-3xl border border-redhill-line shadow-2xl overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-redhill-line bg-redhill-ivory flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
-                <div>
-                  <h2 className="font-bold text-redhill-charcoal text-lg font-serif">Recent Investor Accounts</h2>
-                  <p className="text-xs text-redhill-muted">Verified investor directory & access credentials</p>
-                </div>
+          <div className="bg-white rounded-lg border border-redhill-line overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-redhill-line flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-medium text-redhill-charcoal">Recent Investor Accounts</h2>
+                <p className="text-xs text-redhill-muted mt-0.5">Verified directory &amp; access credentials</p>
               </div>
               <button
                 onClick={() => setActiveView('investors')}
-                className="text-xs font-bold text-redhill-red hover:text-red-700 flex items-center gap-1 transition-colors cursor-pointer bg-redhill-red/10 px-3 py-1.5 rounded-lg border border-redhill-red/20"
+                className="text-xs font-medium text-redhill-charcoal hover:text-redhill-red flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <span>Directory ({investors.length})</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <div className="divide-y divide-redhill-line p-2 flex-1">
-              {investors.slice(0, 4).map(i => (
-                <div 
-                  key={i.id} 
-                  className="p-4 rounded-2xl hover:bg-[#FBF9F5] transition-all flex items-center justify-between gap-4 group"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-12 h-12 rounded-2xl bg-redhill-charcoal border border-white/10 flex items-center justify-center text-sm font-black text-white shadow-md shrink-0">
-                      {i.name ? i.name.charAt(0).toUpperCase() : 'I'}
+            {investors.length === 0 ? (
+              <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
+                <Users className="w-6 h-6 text-redhill-muted/60 mb-3" />
+                <p className="text-sm text-redhill-charcoal font-medium">No investor accounts yet</p>
+                <p className="text-xs text-redhill-muted mt-1 max-w-xs">
+                  Add an investor to generate login credentials and assign project allocations.
+                </p>
+                {onNewInvestor && (
+                  <button
+                    onClick={onNewInvestor}
+                    className="mt-4 text-xs font-medium text-redhill-red hover:underline cursor-pointer"
+                  >
+                    + Add investor
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="divide-y divide-redhill-line flex-1">
+                {investors.slice(0, 4).map((i) => (
+                  <div
+                    key={i.id}
+                    onClick={() => setActiveView('investors')}
+                    className="px-6 py-4 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-10 h-10 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center text-sm font-medium text-redhill-charcoal shrink-0">
+                        {i.name ? i.name.charAt(0).toUpperCase() : 'I'}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-medium text-sm text-redhill-charcoal truncate">{i.name}</h4>
+                        <p className="text-xs text-redhill-muted truncate">{i.email}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-sm text-redhill-charcoal group-hover:text-amber-700 transition-colors truncate">
-                        {i.name}
-                      </h4>
-                      <p className="text-xs text-redhill-muted font-mono truncate">{i.email}</p>
-                    </div>
-                  </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-[10px] font-mono font-bold text-amber-700 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">
-                      ID: {i.login_id || 'N/A'}
-                    </span>
-                    <p className="text-[11px] text-redhill-muted mt-1">
-                      {i.phone || 'Phone verified'}
-                    </p>
+                    <div className="text-right shrink-0">
+                      <span className="text-xs font-mono text-redhill-charcoal">
+                        {i.login_id || '—'}
+                      </span>
+                      <p className="text-[11px] text-redhill-muted mt-0.5 tabular-nums">
+                        {i.phone || '—'}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
-
     </div>
   );
 }

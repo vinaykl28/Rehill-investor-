@@ -316,7 +316,7 @@ export default function ManageMilestonesModal({
       />
 
       {/* Main Container */}
-      <div className="relative bg-[#11141a] border border-redhill-line rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden z-10 text-redhill-charcoal animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white border border-redhill-line rounded-lg w-full max-w-5xl max-h-[92vh] flex flex-col shadow-xl overflow-hidden z-10 text-redhill-charcoal">
         
         {/* Header Banner */}
         <div className="p-6 border-b border-redhill-line bg-redhill-ivory flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -808,20 +808,14 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                 <section className="bg-white rounded-2xl overflow-hidden shadow-sm border border-redhill-line">
                   <div className="p-5 sm:p-6 border-b border-redhill-line flex items-center justify-between bg-redhill-ivory">
                     <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <Video className="text-redhill-red w-5 h-5" />
-                        <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                        </span>
-                      </div>
-                      <h2 className="text-lg font-bold text-redhill-charcoal tracking-tight font-serif">Live Site Camera</h2>
+                      <Video className="text-redhill-red w-5 h-5" />
+                      <h2 className="text-lg font-medium text-redhill-charcoal tracking-tight">Live Site Camera</h2>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-redhill-sand/70 rounded-full border border-redhill-line">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-bold text-redhill-muted uppercase tracking-widest">Site Feed</span>
-                      </div>
+                      <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-redhill-muted uppercase tracking-widest">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                        Site Feed
+                      </span>
                     </div>
                   </div>
 
@@ -864,8 +858,8 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                         Dedicated Relationship Desk
                       </h3>
                     </div>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
-                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
+                      <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full" />
                       Active
                     </span>
                   </div>
@@ -903,8 +897,7 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                 <div className="lux-card p-6 space-y-3 flex-1 flex flex-col justify-between">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-redhill-gold" />
-                      <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-redhill-charcoal">
+                      <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-redhill-charcoal">
                         Quick Inquiry Topics
                       </h4>
                     </div>
@@ -949,9 +942,9 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                     <div>
                       <div className="flex items-center gap-2">
                         <h2 className="font-bold text-redhill-charcoal text-base font-serif">Redhill Executive Support Desk</h2>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
-                          <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                          Online &amp; Active
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
+                          <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full" />
+                          Online
                         </span>
                       </div>
                       <p className="text-xs text-redhill-muted mt-0.5">

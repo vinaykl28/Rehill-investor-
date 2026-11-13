@@ -35,7 +35,7 @@ export default function EmailPreviewModal({
       />
 
       {/* Modal Container */}
-      <div className="relative bg-[#13171F] border border-redhill-line rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden z-10 text-redhill-charcoal animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white border border-redhill-line rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col shadow-xl overflow-hidden z-10 text-redhill-charcoal">
         
         {/* Header */}
         <div className="p-6 border-b border-redhill-line flex items-center justify-between bg-redhill-ivory">

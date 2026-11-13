@@ -590,7 +590,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             <item.icon className={cn("w-4 h-4", isActive ? "text-redhill-gold-soft" : "text-redhill-muted")} />
             <span className="flex-1 text-left">{item.label}</span>
             {item.id === 'queries' && unansweredCount > 0 && (
-              <span className="min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse shadow-sm">
+              <span className="min-w-[20px] h-5 px-1.5 bg-redhill-red text-white text-[10px] font-medium rounded flex items-center justify-center tabular-nums">
                 {unansweredCount}
               </span>
             )}
@@ -622,34 +622,51 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         {/* Projects Tab */}
         {activeView === 'projects' && !isSupportAgent && (
           <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-redhill-line">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-5 border-b border-redhill-line">
               <div>
-                <div className="flex items-center gap-2 text-redhill-red font-bold uppercase tracking-[0.2em] text-xs mb-1">
-                  <span className="w-5 h-[2px] bg-redhill-red" />
-                  Projects
-                </div>
-                <h1 className="text-3xl font-extrabold text-redhill-charcoal font-serif tracking-tight">Project Management</h1>
-                <p className="text-redhill-muted mt-1 text-xs sm:text-sm">Manage construction developments, milestone schedules, and live CCTV feeds.</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-redhill-muted font-medium mb-1">
+                  Developments
+                </p>
+                <h1 className="text-2xl sm:text-3xl font-normal text-redhill-charcoal tracking-tight">Project Management</h1>
+                <p className="text-redhill-muted mt-1 text-xs sm:text-sm">Manage developments, milestone schedules, and site progress updates.</p>
               </div>
               {!isSiteManager && (
                 <button
                   onClick={() => setShowProjectModal(true)}
-                  className="bg-redhill-red hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold flex items-center gap-2 shadow-xl  transition-all cursor-pointer text-xs sm:text-sm hover:scale-[1.02]"
+                  className="bg-redhill-red hover:bg-red-700 text-white px-4 py-2.5 rounded-md font-medium flex items-center gap-2 transition-colors cursor-pointer text-xs sm:text-sm"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  <span>New Project Launch</span>
+                  <span>New Project</span>
                 </button>
               )}
             </div>
 
+            {projects.length === 0 ? (
+              <div className="bg-white border border-redhill-line rounded-lg p-12 text-center">
+                <Building2 className="w-7 h-7 text-redhill-muted/60 mx-auto mb-3" />
+                <p className="text-sm font-medium text-redhill-charcoal">No developments added yet</p>
+                <p className="text-xs text-redhill-muted mt-1 max-w-sm mx-auto">
+                  Create your first project to upload architectural imagery, monthly progress photos, and documents.
+                </p>
+                {!isSiteManager && (
+                  <button
+                    onClick={() => setShowProjectModal(true)}
+                    className="mt-5 inline-flex items-center gap-2 bg-redhill-red hover:bg-red-700 text-white px-4 py-2 rounded-md text-xs font-medium transition-colors cursor-pointer"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>New Project</span>
+                  </button>
+                )}
+              </div>
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {projects.map(p => (
                 <div 
                   key={p.id} 
-                  className="bg-white rounded-2xl border border-redhill-line shadow-xl overflow-hidden flex flex-col hover:border-redhill-red/50 hover:shadow-2xl hover: transition-all duration-300 group hover:-translate-y-1 cursor-pointer"
+                  className="bg-white rounded-lg border border-redhill-line overflow-hidden flex flex-col hover:border-redhill-charcoal/40 transition-colors group cursor-pointer"
                   onClick={() => openProjectDrawer(p)}
                 >
-                  <div className="h-48 relative overflow-hidden">
+                  <div className="h-48 relative overflow-hidden bg-redhill-ivory">
                     <img
                       src={getAssetUrl(p.image_url, p.id)}
                       alt={p.name}
@@ -657,31 +674,31 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = getAssetUrl(null, p.id);
                       }}
-                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700"
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-                    <div className="absolute top-3 right-3 shadow-lg rounded-full bg-black/60 backdrop-blur border border-white/20">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                    <div className="absolute top-3 right-3 rounded-md bg-white/95 border border-redhill-line">
                       <StatusChip status={p.status} />
                     </div>
                   </div>
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div>
                       <div className="flex justify-between items-start gap-4 mb-1">
-                        <h3 className="text-lg font-bold text-redhill-charcoal font-serif leading-tight group-hover:text-amber-700 transition-colors">
+                        <h3 className="text-base font-medium text-redhill-charcoal leading-snug group-hover:text-redhill-red transition-colors">
                           {p.name}
                         </h3>
                         <Link
                           to={`/project/${p.id}`}
                           target="_blank"
                           onClick={(e) => e.stopPropagation()}
-                          className="p-1.5 bg-redhill-sand/70 hover:bg-redhill-sand text-stone-700 hover:text-redhill-charcoal rounded-lg transition-colors border border-redhill-line"
+                          className="p-1.5 hover:bg-redhill-ivory text-redhill-muted hover:text-redhill-charcoal rounded-md transition-colors border border-redhill-line"
                           title="Preview as Investor"
                         >
-                          <ExternalLink className="w-4 h-4" />
+                          <ExternalLink className="w-3.5 h-3.5" />
                         </Link>
                       </div>
                       <p className="text-xs text-redhill-muted flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-redhill-red shrink-0" />
+                        <MapPin className="w-3 h-3 text-redhill-muted shrink-0" />
                         <span className="truncate">{p.location}</span>
                       </p>
                     </div>
@@ -689,12 +706,12 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                     <div className="space-y-3 pt-3 border-t border-redhill-line">
                       <div>
                         <div className="flex justify-between text-xs text-redhill-muted mb-1.5">
-                          <span>Construction Completion</span>
-                          <span className="font-bold text-amber-700">{p.completion_percentage}%</span>
+                          <span>Completion</span>
+                          <span className="font-mono text-redhill-charcoal tabular-nums">{p.completion_percentage}%</span>
                         </div>
-                        <div className="w-full bg-redhill-ivory h-2 rounded-full overflow-hidden border border-redhill-line">
+                        <div className="w-full bg-redhill-ivory h-1 rounded-full overflow-hidden">
                           <div 
-                            className="bg-redhill-gold h-full rounded-full transition-all duration-500" 
+                            className="bg-redhill-charcoal h-full transition-all duration-500" 
                             style={{ width: `${p.completion_percentage}%` }} 
                           />
                         </div>
@@ -704,9 +721,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                           e.stopPropagation();
                           openProjectDrawer(p);
                         }}
-                        className="w-full py-3 bg-redhill-sand/70 hover:bg-redhill-red text-redhill-charcoal text-xs font-bold rounded-xl transition-all border border-redhill-line hover:border-redhill-red cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                        className="w-full py-2.5 bg-redhill-ivory hover:bg-redhill-charcoal text-redhill-charcoal hover:text-white text-xs font-medium rounded-md transition-colors border border-redhill-line cursor-pointer flex items-center justify-center gap-1.5"
                       >
-                        <span>Manage Milestones & CCTV Updates</span>
+                        <span>Manage Milestones &amp; Updates</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -714,32 +731,32 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                 </div>
               ))}
             </div>
+            )}
           </div>
         )}
 
         {/* Investors Tab */}
         {activeView === 'investors' && (isSuperAdmin || isFinancialOfficer) && (
           <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-redhill-line">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-5 border-b border-redhill-line">
               <div>
-                <div className="flex items-center gap-2 text-emerald-700 font-bold uppercase tracking-[0.2em] text-xs mb-1">
-                  <span className="w-5 h-[2px] bg-emerald-400" />
-                  Client Relationship Desk
-                </div>
-                <h1 className="text-3xl font-extrabold text-redhill-charcoal font-serif tracking-tight">Investor Directory & Allocations</h1>
-                <p className="text-redhill-muted mt-1 text-xs sm:text-sm">Manage investor accounts, login credentials, and project portfolio allocations.</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-redhill-muted font-medium mb-1">
+                  Client Relations
+                </p>
+                <h1 className="text-2xl sm:text-3xl font-normal text-redhill-charcoal tracking-tight">Investor Directory &amp; Allocations</h1>
+                <p className="text-redhill-muted mt-1 text-xs sm:text-sm">Manage investor accounts, login credentials, and project allocations.</p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2.5">
                 <button
                   onClick={() => setShowAssignModal(true)}
-                  className="px-5 py-3 bg-redhill-sand/70 hover:bg-redhill-sand text-redhill-charcoal rounded-xl font-bold border border-redhill-line transition-all flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
+                  className="px-4 py-2.5 bg-white hover:bg-redhill-ivory text-redhill-charcoal rounded-md font-medium border border-redhill-line transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
                 >
-                  <PlusCircle className="w-4 h-4 text-amber-700" />
+                  <PlusCircle className="w-4 h-4 text-redhill-muted" />
                   <span>Assign Project</span>
                 </button>
                 <button
                   onClick={() => setShowInvestorModal(true)}
-                  className="px-5 py-3 bg-redhill-red hover:bg-red-700 text-white rounded-xl font-bold transition-all shadow-lg  flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
+                  className="px-4 py-2.5 bg-redhill-red hover:bg-red-700 text-white rounded-md font-medium transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>Add Investor</span>
@@ -748,53 +765,53 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             </div>
 
             {/* Investors Table */}
-            <div className="bg-white rounded-3xl border border-redhill-line shadow-2xl overflow-hidden">
-              <div className="p-6 border-b border-redhill-line flex flex-col sm:flex-row justify-between items-center gap-4 bg-redhill-ivory">
-                <h2 className="font-bold text-redhill-charcoal text-lg font-serif">Registered Investors ({investors.length})</h2>
+            <div className="bg-white rounded-lg border border-redhill-line overflow-hidden">
+              <div className="px-6 py-4 border-b border-redhill-line flex flex-col sm:flex-row justify-between items-center gap-4 bg-redhill-ivory/50">
+                <h2 className="font-medium text-redhill-charcoal text-base">Registered Investors ({investors.length})</h2>
                 <div className="relative w-full sm:w-72">
-                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500" />
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-redhill-muted" />
                   <input
                     type="text"
                     placeholder="Search name, email, or ID..."
                     value={investorSearch}
                     onChange={(e) => setInvestorSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-redhill-sand/70 border border-redhill-line rounded-xl outline-none text-xs sm:text-sm text-redhill-charcoal focus:bg-redhill-sand focus:border-redhill-red/40"
+                    className="w-full pl-10 pr-4 py-2 bg-white border border-redhill-line rounded-md outline-none text-xs sm:text-sm text-redhill-charcoal focus:border-redhill-charcoal"
                   />
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-redhill-ivory border-b border-redhill-line text-[10px] font-black text-redhill-muted uppercase tracking-widest">
-                      <th className="px-6 py-4">Investor</th>
-                      <th className="px-6 py-4">Email</th>
-                      <th className="px-6 py-4">Login ID</th>
-                      <th className="px-6 py-4">Phone</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
+                    <tr className="bg-redhill-ivory/40 border-b border-redhill-line text-[11px] font-medium text-redhill-muted uppercase tracking-[0.12em]">
+                      <th className="px-6 py-3.5">Investor</th>
+                      <th className="px-6 py-3.5">Email</th>
+                      <th className="px-6 py-3.5">Login ID</th>
+                      <th className="px-6 py-3.5">Phone</th>
+                      <th className="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-redhill-line text-sm">
                     {paginatedInvestors.map(i => (
-                      <tr key={i.id} className="hover:bg-[#FBF9F5] transition-colors">
+                      <tr key={i.id} className="hover:bg-redhill-ivory/40 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-redhill-charcoal flex items-center justify-center text-white font-bold text-xs shadow-md">
+                            <div className="w-8 h-8 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center text-redhill-charcoal font-medium text-xs">
                               {i.name ? i.name.charAt(0).toUpperCase() : 'I'}
                             </div>
-                            <span className="font-bold text-redhill-charcoal">{i.name}</span>
+                            <span className="font-medium text-redhill-charcoal">{i.name}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-stone-700 font-mono text-xs">{i.email}</td>
+                        <td className="px-6 py-4 text-redhill-muted text-xs">{i.email}</td>
                         <td className="px-6 py-4">
-                          <span className="font-mono text-xs bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20 text-amber-700 font-bold">
-                            {i.login_id || 'N/A'}
+                          <span className="font-mono text-xs text-redhill-charcoal">
+                            {i.login_id || '—'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-redhill-muted text-xs">{i.phone || 'N/A'}</td>
+                        <td className="px-6 py-4 text-redhill-muted text-xs tabular-nums">{i.phone || '—'}</td>
                         <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => handleDeleteInvestor(i.id, i.name)}
-                            className="p-2 text-stone-500 hover:text-redhill-red hover:bg-redhill-sand/70 rounded-lg transition-colors cursor-pointer"
+                            className="p-2 text-redhill-muted hover:text-redhill-red hover:bg-redhill-ivory rounded-md transition-colors cursor-pointer"
                             title="Delete Investor"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -809,10 +826,10 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
 
             {/* Assignments Table */}
             {assignments.length > 0 && (
-              <div className="bg-white rounded-3xl border border-redhill-line shadow-2xl overflow-hidden">
-                <div className="p-6 border-b border-redhill-line bg-redhill-ivory flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="bg-white rounded-lg border border-redhill-line overflow-hidden">
+                <div className="px-6 py-4 border-b border-redhill-line bg-redhill-ivory/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h2 className="font-bold text-redhill-charcoal text-lg font-serif">Active Portfolio Allocations</h2>
+                    <h2 className="font-medium text-redhill-charcoal text-base">Active Portfolio Allocations</h2>
                     <p className="text-xs text-redhill-muted mt-0.5">Assigned developments and allotted area per investor.</p>
                   </div>
                 </div>
