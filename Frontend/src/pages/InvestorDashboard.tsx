@@ -303,7 +303,7 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
               <div>
                 <h1 className="display text-3xl sm:text-4xl text-redhill-charcoal font-semibold">
                   Welcome Back,{' '}
-                  <span className="text-redhill-gold">{user.name.split(' ')[0]}</span>
+                  <span className="text-redhill-gold">{(user?.name || 'Investor').split(' ')[0]}</span>
                 </h1>
                 <p className="text-redhill-muted text-sm sm:text-base mt-2 max-w-xl">
                   Your investments. Your projects. Your journey.

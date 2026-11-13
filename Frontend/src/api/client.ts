@@ -34,9 +34,13 @@ export async function apiFetch(endpoint: string, options: ApiFetchOptions = {}):
 
   // Include Bearer token from localStorage for seamless cross-domain auth across Render subdomains
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('redhill_auth_token');
-    if (token) {
-      defaultHeaders['Authorization'] = `Bearer ${token}`;
+    try {
+      const token = localStorage.getItem('redhill_auth_token');
+      if (token) {
+        defaultHeaders['Authorization'] = `Bearer ${token}`;
+      }
+    } catch {
+      // Ignore storage access errors in strict private browsing
     }
   }
 

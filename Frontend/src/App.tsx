@@ -1,40 +1,71 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { User } from './types';
 import { apiFetch } from './api/client';
-
-// Lazy loaded pages
-const Login = lazy(() => import('./pages/Login'));
-const InvestorDashboard = lazy(() => import('./pages/InvestorDashboard'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
-const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
-const ShowcaseExplore = lazy(() => import('./components/ShowcaseExplore'));
+import Login from './pages/Login';
+import InvestorDashboard from './pages/InvestorDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import ProjectDetail from './pages/ProjectDetail';
+import ShowcaseExplore from './components/ShowcaseExplore';
 
 const LoadingScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-white">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-redhill-red"></div>
+  <div className="min-h-screen flex items-center justify-center bg-redhill-ivory">
+    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-redhill-red"></div>
   </div>
 );
 
+function getStoredToken(): string | null {
+  try {
+    return typeof window !== 'undefined' ? localStorage.getItem('redhill_auth_token') : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearStoredToken(): void {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('redhill_auth_token');
+    }
+  } catch {
+    // ignore storage errors in private browsing
+  }
+}
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(() => Boolean(getStoredToken()));
 
   useEffect(() => {
+    let active = true;
+    const timeout = window.setTimeout(() => {
+      if (active) setLoading(false);
+    }, 6000);
+
     apiFetch('/api/me')
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
-        if (data) {
+        if (!active) return;
+        if (data && data.id && data.role) {
           setUser(data);
         } else {
-          localStorage.removeItem('redhill_auth_token');
+          clearStoredToken();
           setUser(null);
         }
         setLoading(false);
       })
       .catch(() => {
+        if (!active) return;
         setLoading(false);
+      })
+      .finally(() => {
+        window.clearTimeout(timeout);
       });
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -43,7 +74,7 @@ export default function App() {
     } catch (err) {
       console.error('Logout failed', err);
     }
-    localStorage.removeItem('redhill_auth_token');
+    clearStoredToken();
     setUser(null);
   };
 
@@ -53,36 +84,39 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Suspense fallback={<LoadingScreen />}>
-        <Routes>
-          <Route 
-            path="/login" 
-            element={user ? <Navigate to={user.role === 'investor' ? '/dashboard' : '/admin'} /> : <Login onLogin={setUser} />} 
-          />
-          
-          <Route 
-            path="/dashboard" 
-            element={user?.role === 'investor' ? <InvestorDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-          />
-          
-          <Route 
-            path="/project/:id" 
-            element={user ? <ProjectDetail user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-          />
+      <Routes>
+        <Route 
+          path="/" 
+          element={user ? <Navigate to={user.role === 'investor' ? '/dashboard' : '/admin'} /> : <Login onLogin={setUser} />} 
+        />
 
-          <Route 
-            path="/explore" 
-            element={user ? <ShowcaseExplore user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-          />
+        <Route 
+          path="/login" 
+          element={user ? <Navigate to={user.role === 'investor' ? '/dashboard' : '/admin'} /> : <Login onLogin={setUser} />} 
+        />
+        
+        <Route 
+          path="/dashboard" 
+          element={user?.role === 'investor' ? <InvestorDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+        />
+        
+        <Route 
+          path="/project/:id" 
+          element={user ? <ProjectDetail user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+        />
 
-          <Route 
-            path="/admin" 
-            element={user && user.role !== 'investor' ? <AdminDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-          />
+        <Route 
+          path="/explore" 
+          element={user ? <ShowcaseExplore user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+        />
 
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-      </Suspense>
+        <Route 
+          path="/admin" 
+          element={user && user.role !== 'investor' ? <AdminDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+        />
+
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
     </BrowserRouter>
   );
 }

@@ -215,7 +215,11 @@ export default function Login({ onLogin }: LoginProps) {
       if (res.ok) {
         const user = await res.json();
         if (user.token) {
-          localStorage.setItem('redhill_auth_token', user.token);
+          try {
+            localStorage.setItem('redhill_auth_token', user.token);
+          } catch {
+            // ignore storage errors in private browsing
+          }
         }
         completeLogin(user);
       } else {

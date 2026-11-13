@@ -314,11 +314,11 @@ export default function ShowcaseExplore({
             {/* User Pill */}
             <div className="flex items-center gap-3 bg-redhill-sand/70 hover:bg-redhill-sand px-3.5 py-1.5 rounded-full border border-redhill-line transition-all">
               <div className="w-8 h-8 rounded-full bg-redhill-charcoal flex items-center justify-center text-white font-bold text-xs shadow-md">
-                {user.name.charAt(0).toUpperCase()}
+                {(user?.name || 'I').charAt(0).toUpperCase()}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-xs font-bold text-redhill-charcoal leading-none">{user.name}</p>
-                <p className="text-[10px] text-redhill-muted capitalize mt-0.5">{user.role.replace('_', ' ')}</p>
+                <p className="text-xs font-bold text-redhill-charcoal leading-none">{user?.name || 'Investor'}</p>
+                <p className="text-[10px] text-redhill-muted capitalize mt-0.5">{(user?.role || 'investor').replace('_', ' ')}</p>
               </div>
             </div>
 

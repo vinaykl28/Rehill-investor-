@@ -127,6 +127,22 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
 
   const sending = sendMessageMutation.isPending;
 
+  const { project, milestones = [], updates = [], announcements = [], queries = [] } = data || ({} as any);
+
+  const photoUpdatesForReel = (updates || []).filter((u: ProgressUpdate) => u.type === 'photo');
+  const reelImages = [
+    ...(project ? [{ url: getAssetUrl(project.image_url, project.id), caption: `${project.name} — ${project.location}` }] : []),
+    ...photoUpdatesForReel.map((u: ProgressUpdate) => ({ url: getAssetUrl(u.url), caption: u.caption || `${project?.name || 'Site'} Progress` }))
+  ];
+
+  useEffect(() => {
+    if (reduceMotion || reelImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setReelIndex((prev) => (prev + 1) % reelImages.length);
+    }, 6500);
+    return () => clearInterval(timer);
+  }, [reduceMotion, reelImages.length]);
+
   if (loading) {
     return (
       <Layout user={user} onLogout={onLogout}>
@@ -150,23 +166,7 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
     );
   }
 
-  if (!data) return <div className="text-center py-20 text-redhill-charcoal">Project not found</div>;
-
-  const { project, milestones = [], updates = [], announcements = [], queries = [] } = data || {};
-
-  const photoUpdatesForReel = (updates || []).filter(u => u.type === 'photo');
-  const reelImages = [
-    ...(project ? [{ url: getAssetUrl(project.image_url, project.id), caption: `${project.name} — ${project.location}` }] : []),
-    ...photoUpdatesForReel.map(u => ({ url: getAssetUrl(u.url), caption: u.caption || `${project?.name || 'Site'} Progress` }))
-  ];
-
-  useEffect(() => {
-    if (reduceMotion || reelImages.length <= 1) return;
-    const timer = setInterval(() => {
-      setReelIndex((prev) => (prev + 1) % reelImages.length);
-    }, 6500);
-    return () => clearInterval(timer);
-  }, [reduceMotion, reelImages.length]);
+  if (!data || !project) return <div className="text-center py-20 text-redhill-charcoal">Project not found</div>;
 
   const docMilestones = (milestones || []).filter(m => m.category === 'documentation');
   const approvalMilestones = (milestones || []).filter(m => m.category === 'approval');
