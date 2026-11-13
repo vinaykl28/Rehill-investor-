@@ -129,7 +129,7 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
     return (
       <Layout user={user} onLogout={onLogout}>
         <div className="pb-20">
-        <div className="relative py-16">
+        <div className="relative py-8 sm:py-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Skeleton type="text" className="w-1/3 mb-4" />
             <Skeleton type="text" className="w-2/3 h-12 mb-8" />

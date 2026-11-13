@@ -278,7 +278,7 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
       {/* ================================================================ */}
       {/* EDITORIAL PORTFOLIO HEADER                                       */}
       {/* ================================================================ */}
-      <section className="bg-white border-b border-redhill-line pt-10 sm:pt-12 pb-8">
+      <section className="bg-white border-b border-redhill-line pt-7 sm:pt-9 pb-6">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
@@ -336,7 +336,7 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
       </section>
 
       {/* Primary Report Container (captured by html2canvas for PDF) */}
-      <div id="portfolio-report" className="py-10 sm:py-12 max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 space-y-14">
+      <div id="portfolio-report" className="py-6 sm:py-8 max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 sm:space-y-10">
 
         {/* ============================================================== */}
         {/* 01 — INVESTMENT OVERVIEW KPI STRIP                             */}

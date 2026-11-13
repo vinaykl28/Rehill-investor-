@@ -7,16 +7,20 @@ import {
   MapPin,
   ChevronRight,
   Building2,
-  Users
+  Users,
+  BookOpen
 } from 'lucide-react';
-import { Project, User } from '../../types';
+import { Project, User, Query, LedgerEntry } from '../../types';
 import { ROLE_CONFIG } from '../../constants/roles';
 import { getAssetUrl } from '../../config/env';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 
 interface AdminOverviewProps {
   user: User;
   projects: Project[];
   investors: User[];
+  threads?: Query[];
+  ledgerEntries?: LedgerEntry[];
   unansweredCount: number;
   adminsCount?: number;
   analytics?: {
@@ -35,6 +39,8 @@ export default function AdminOverview({
   user,
   projects = [],
   investors = [],
+  threads = [],
+  ledgerEntries = [],
   unansweredCount = 0,
   adminsCount = 0,
   setActiveView,
@@ -89,17 +95,17 @@ export default function AdminOverview({
   }>;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* 1. Quiet Editorial Header */}
-      <div className="bg-white border border-redhill-line rounded-lg p-6 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-        <div className="space-y-2">
+      <div className="bg-white border border-redhill-line rounded-lg px-5 py-5 sm:px-6 sm:py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="space-y-1">
           <p className="text-[11px] uppercase tracking-[0.18em] text-redhill-muted font-medium">
             Administration · {roleMeta?.badge || 'Staff'}
           </p>
-          <h1 className="text-2xl sm:text-3xl font-normal text-redhill-charcoal tracking-tight">
+          <h1 className="text-2xl font-normal text-redhill-charcoal tracking-tight">
             Welcome, {user?.name || user?.email || 'Administrator'}
           </h1>
-          <p className="text-sm text-redhill-muted">
+          <p className="text-xs sm:text-sm text-redhill-muted">
             Portfolio oversight, investor allocations, and site progress updates.
           </p>
         </div>
@@ -108,7 +114,7 @@ export default function AdminOverview({
           {!isSiteManager && !isSupportAgent && onNewProject && (
             <button
               onClick={onNewProject}
-              className="bg-redhill-red hover:bg-red-700 text-white font-medium px-4 py-2.5 rounded-md transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
+              className="bg-redhill-red hover:bg-red-700 text-white font-medium px-4 py-2 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer text-xs sm:text-sm"
             >
               <Plus className="w-4 h-4" />
               <span>New Project</span>
@@ -118,7 +124,7 @@ export default function AdminOverview({
           {(isSuperAdmin || isFinancialOfficer) && onNewInvestor && (
             <button
               onClick={onNewInvestor}
-              className="bg-white hover:bg-redhill-ivory text-redhill-charcoal font-medium px-4 py-2.5 rounded-md border border-redhill-line transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
+              className="bg-white hover:bg-redhill-ivory text-redhill-charcoal font-medium px-4 py-2 rounded-md border border-redhill-line transition-colors flex items-center gap-1.5 cursor-pointer text-xs sm:text-sm"
             >
               <UserPlus className="w-4 h-4 text-redhill-muted" />
               <span>Add Investor</span>
@@ -127,7 +133,7 @@ export default function AdminOverview({
 
           <button
             onClick={() => setActiveView('queries')}
-            className="bg-white hover:bg-redhill-ivory text-redhill-charcoal font-medium px-4 py-2.5 rounded-md border border-redhill-line transition-colors flex items-center gap-2 cursor-pointer text-xs sm:text-sm"
+            className="bg-white hover:bg-redhill-ivory text-redhill-charcoal font-medium px-4 py-2 rounded-md border border-redhill-line transition-colors flex items-center gap-1.5 cursor-pointer text-xs sm:text-sm"
           >
             <MessageSquare className="w-4 h-4 text-redhill-muted" />
             <span>Inquiries</span>
@@ -147,7 +153,7 @@ export default function AdminOverview({
             key={cell.key}
             type="button"
             onClick={cell.onClick}
-            className="group text-left p-6 hover:bg-redhill-ivory/60 transition-colors cursor-pointer flex flex-col justify-between gap-4"
+            className="group text-left px-5 py-4 hover:bg-redhill-ivory/60 transition-colors cursor-pointer flex flex-col justify-between gap-2.5"
           >
             <div className="flex items-center justify-between w-full">
               <span className="text-[11px] uppercase tracking-[0.16em] text-redhill-muted font-medium">
@@ -156,26 +162,26 @@ export default function AdminOverview({
               <ArrowUpRight className="w-4 h-4 text-redhill-muted group-hover:text-redhill-charcoal transition-colors" />
             </div>
 
-            <div>
-              <div className="text-3xl font-light text-redhill-charcoal tabular-nums tracking-tight">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-2xl sm:text-3xl font-light text-redhill-charcoal tabular-nums tracking-tight">
                 {cell.value}
-              </div>
-              <p className={`text-xs mt-1.5 ${cell.highlight ? 'text-redhill-red font-medium' : 'text-redhill-muted'}`}>
+              </span>
+              <span className={`text-xs ${cell.highlight ? 'text-redhill-red font-medium' : 'text-redhill-muted'}`}>
                 {cell.sub}
-              </p>
+              </span>
             </div>
           </button>
         ))}
       </div>
 
-      {/* 3. Projects & Recent Investors */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 3. Operational Panels (Projects, Investors, Inquiries, Ledger) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         {!isSupportAgent && (
-          <div className="bg-white rounded-lg border border-redhill-line overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-redhill-line flex items-center justify-between">
+          <div className="bg-white rounded-lg border border-redhill-line overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-redhill-line flex items-center justify-between">
               <div>
-                <h2 className="text-base font-medium text-redhill-charcoal">Projects</h2>
-                <p className="text-xs text-redhill-muted mt-0.5">Construction progress and milestones</p>
+                <h2 className="text-sm font-medium text-redhill-charcoal">Projects</h2>
+                <p className="text-xs text-redhill-muted">Construction progress and milestones</p>
               </div>
               <button
                 onClick={() => setActiveView('projects')}
@@ -187,31 +193,37 @@ export default function AdminOverview({
             </div>
 
             {projects.length === 0 ? (
-              <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
-                <Building2 className="w-6 h-6 text-redhill-muted/60 mb-3" />
-                <p className="text-sm text-redhill-charcoal font-medium">No developments added yet</p>
-                <p className="text-xs text-redhill-muted mt-1 max-w-xs">
-                  Add a project to start uploading progress photos, documents, and investor allocations.
-                </p>
+              <div className="px-5 py-6 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center shrink-0">
+                    <Building2 className="w-4 h-4 text-redhill-muted" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-redhill-charcoal font-medium">No developments added yet</p>
+                    <p className="text-xs text-redhill-muted truncate">
+                      Add a project to upload photos, documents, and allocations.
+                    </p>
+                  </div>
+                </div>
                 {!isSiteManager && onNewProject && (
                   <button
                     onClick={onNewProject}
-                    className="mt-4 text-xs font-medium text-redhill-red hover:underline cursor-pointer"
+                    className="shrink-0 text-xs font-medium text-redhill-red hover:underline cursor-pointer"
                   >
-                    + Create first project
+                    + Create
                   </button>
                 )}
               </div>
             ) : (
-              <div className="divide-y divide-redhill-line flex-1">
+              <div className="divide-y divide-redhill-line">
                 {projects.slice(0, 4).map((p) => (
                   <div
                     key={p.id}
                     onClick={() => (onSelectProject ? onSelectProject(p) : setActiveView('projects'))}
-                    className="px-6 py-4 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 group cursor-pointer"
+                    className="px-5 py-3.5 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 group cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-12 h-12 rounded-md overflow-hidden bg-redhill-ivory border border-redhill-line shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-11 h-11 rounded-md overflow-hidden bg-redhill-ivory border border-redhill-line shrink-0">
                         <img
                           src={getAssetUrl(p.image_url, p.id)}
                           alt={p.name}
@@ -233,10 +245,10 @@ export default function AdminOverview({
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
+                    <div className="text-right shrink-0 flex flex-col items-end gap-1">
                       <span className="text-[11px] text-redhill-muted">{p.status}</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-20 bg-redhill-ivory h-1 rounded-full overflow-hidden">
+                        <div className="w-16 bg-redhill-ivory h-1 rounded-full overflow-hidden">
                           <div
                             className="bg-redhill-charcoal h-full"
                             style={{ width: `${p.completion_percentage}%` }}
@@ -255,11 +267,11 @@ export default function AdminOverview({
         )}
 
         {(isSuperAdmin || isFinancialOfficer) && (
-          <div className="bg-white rounded-lg border border-redhill-line overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-redhill-line flex items-center justify-between">
+          <div className="bg-white rounded-lg border border-redhill-line overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-redhill-line flex items-center justify-between">
               <div>
-                <h2 className="text-base font-medium text-redhill-charcoal">Recent Investor Accounts</h2>
-                <p className="text-xs text-redhill-muted mt-0.5">Verified directory &amp; access credentials</p>
+                <h2 className="text-sm font-medium text-redhill-charcoal">Recent Investor Accounts</h2>
+                <p className="text-xs text-redhill-muted">Verified directory &amp; access credentials</p>
               </div>
               <button
                 onClick={() => setActiveView('investors')}
@@ -271,31 +283,37 @@ export default function AdminOverview({
             </div>
 
             {investors.length === 0 ? (
-              <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
-                <Users className="w-6 h-6 text-redhill-muted/60 mb-3" />
-                <p className="text-sm text-redhill-charcoal font-medium">No investor accounts yet</p>
-                <p className="text-xs text-redhill-muted mt-1 max-w-xs">
-                  Add an investor to generate login credentials and assign project allocations.
-                </p>
+              <div className="px-5 py-6 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-redhill-muted" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-redhill-charcoal font-medium">No investor accounts yet</p>
+                    <p className="text-xs text-redhill-muted truncate">
+                      Add an investor to generate credentials and assign allocations.
+                    </p>
+                  </div>
+                </div>
                 {onNewInvestor && (
                   <button
                     onClick={onNewInvestor}
-                    className="mt-4 text-xs font-medium text-redhill-red hover:underline cursor-pointer"
+                    className="shrink-0 text-xs font-medium text-redhill-red hover:underline cursor-pointer"
                   >
-                    + Add investor
+                    + Add
                   </button>
                 )}
               </div>
             ) : (
-              <div className="divide-y divide-redhill-line flex-1">
+              <div className="divide-y divide-redhill-line">
                 {investors.slice(0, 4).map((i) => (
                   <div
                     key={i.id}
                     onClick={() => setActiveView('investors')}
-                    className="px-6 py-4 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 cursor-pointer"
+                    className="px-5 py-3.5 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-10 h-10 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center text-sm font-medium text-redhill-charcoal shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center text-xs font-medium text-redhill-charcoal shrink-0">
                         {i.name ? i.name.charAt(0).toUpperCase() : 'I'}
                       </div>
                       <div className="min-w-0">
@@ -312,6 +330,110 @@ export default function AdminOverview({
                         {i.phone || '—'}
                       </p>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bottom-Left: Recent Inquiries */}
+        <div className="bg-white rounded-lg border border-redhill-line overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-redhill-line flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-medium text-redhill-charcoal">Inquiries &amp; Site Visits</h2>
+              <p className="text-xs text-redhill-muted">Latest investor questions and requests</p>
+            </div>
+            <button
+              onClick={() => setActiveView('queries')}
+              className="text-xs font-medium text-redhill-charcoal hover:text-redhill-red flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <span>Open desk ({threads.length})</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {threads.length === 0 ? (
+            <div className="px-5 py-6 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center shrink-0">
+                <MessageSquare className="w-4 h-4 text-redhill-muted" />
+              </div>
+              <div>
+                <p className="text-sm text-redhill-charcoal font-medium">No active inquiries</p>
+                <p className="text-xs text-redhill-muted">New messages from investors will appear here.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="divide-y divide-redhill-line">
+              {threads.slice(0, 4).map((t: any) => (
+                <div
+                  key={t.id}
+                  onClick={() => setActiveView('queries')}
+                  className="px-5 py-3.5 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 cursor-pointer"
+                >
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-sm text-redhill-charcoal truncate">
+                      {t.investor_name || 'Investor'} · <span className="text-redhill-muted font-normal">{t.project_name || 'General'}</span>
+                    </h4>
+                    <p className="text-xs text-redhill-muted truncate mt-0.5">
+                      {t.last_message || t.message || 'Inquiry thread'}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 text-[11px] font-medium ${t.last_sender_role === 'investor' ? 'text-redhill-red' : 'text-redhill-muted'}`}>
+                    {t.last_sender_role === 'investor' ? 'Needs reply' : 'Replied'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom-Right: Recent Investment Ledger */}
+        {(isSuperAdmin || isFinancialOfficer) && (
+          <div className="bg-white rounded-lg border border-redhill-line overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-redhill-line flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-medium text-redhill-charcoal">Recent Ledger Activity</h2>
+                <p className="text-xs text-redhill-muted">Capital receipts and allotment entries</p>
+              </div>
+              <button
+                onClick={() => setActiveView('ledger')}
+                className="text-xs font-medium text-redhill-charcoal hover:text-redhill-red flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <span>View ledger ({ledgerEntries.length})</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {ledgerEntries.length === 0 ? (
+              <div className="px-5 py-6 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-md bg-redhill-ivory border border-redhill-line flex items-center justify-center shrink-0">
+                  <BookOpen className="w-4 h-4 text-redhill-muted" />
+                </div>
+                <div>
+                  <p className="text-sm text-redhill-charcoal font-medium">No ledger entries recorded</p>
+                  <p className="text-xs text-redhill-muted">Payments and receipts will show here once recorded.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="divide-y divide-redhill-line">
+                {ledgerEntries.slice(0, 4).map((entry: any) => (
+                  <div
+                    key={entry.id}
+                    onClick={() => setActiveView('ledger')}
+                    className="px-5 py-3.5 hover:bg-redhill-ivory/60 transition-colors flex items-center justify-between gap-4 cursor-pointer"
+                  >
+                    <div className="min-w-0">
+                      <h4 className="font-medium text-sm text-redhill-charcoal truncate">
+                        {entry.investor_name || 'Investor'}
+                      </h4>
+                      <p className="text-xs text-redhill-muted truncate mt-0.5">
+                        {entry.project_name || 'Project'} · {entry.payment_date ? formatDate(entry.payment_date) : '—'}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-sm font-mono text-redhill-charcoal tabular-nums">
+                      {formatCurrency(entry.amount || 0)}
+                    </span>
                   </div>
                 ))}
               </div>
