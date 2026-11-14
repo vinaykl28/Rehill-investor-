@@ -1,3 +1,5 @@
+import heroBiophilicImg from '../assets/hero-biophilic.jpg';
+
 /**
  * Redhill Infra Showcase & Explorer Configuration
  * 
@@ -53,7 +55,7 @@ export const SHOWCASE_CONFIG = {
     subheadline: 'Contemporary residential communities crafted for modern urban living.',
     ctaExploreText: 'Explore Developments',
     ctaSiteVisitText: 'Book Visit',
-    backgroundImage: '/assets/projects/hero-highrise.jpg',
+    backgroundImage: heroBiophilicImg,
   },
 
   // Social Media Handles - Update your links here

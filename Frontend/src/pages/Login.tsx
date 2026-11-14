@@ -26,6 +26,7 @@ import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } fr
 import Logo from '../components/Logo';
 import Reveal from '../components/Reveal';
 import { apiFetch } from '../api/client';
+import heroBiophilicImg from '../assets/hero-biophilic.jpg';
 
 type AuthMode = 'login' | 'signup' | 'forgot_request' | 'forgot_reset';
 
@@ -34,9 +35,7 @@ interface LoginProps {
 }
 
 const HERO_VIDEO = import.meta.env.VITE_HERO_VIDEO_URL || '';
-const HERO_IMAGE =
-  import.meta.env.VITE_HERO_POSTER_URL ||
-  '/assets/projects/hero-highrise.jpg';
+const HERO_IMAGE = heroBiophilicImg;
 const EXPERIENCE_IMAGE = '/assets/projects/pinnacle-heights.jpg';
 const ACCESS_EDITORIAL_IMAGE = '/assets/projects/signature-towers.jpg';
 
