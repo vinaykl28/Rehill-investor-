@@ -12,3 +12,4 @@ build/
 uploads/*
 !uploads/.gitkeep
 .neon
+*.backup*

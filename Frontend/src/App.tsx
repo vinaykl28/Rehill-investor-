@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { User } from './types';
 import { apiFetch } from './api/client';
 import Login from './pages/Login';
-import InvestorDashboard from './pages/InvestorDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import ProjectDetail from './pages/ProjectDetail';
-import ShowcaseExplore from './components/ShowcaseExplore';
+
+// Route-level code splitting for enhanced performance and fast initial page load
+const InvestorDashboard = lazy(() => import('./pages/InvestorDashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
+const ShowcaseExplore = lazy(() => import('./components/ShowcaseExplore'));
 
 const LoadingScreen = () => (
   <div className="min-h-screen flex items-center justify-center bg-redhill-ivory">
@@ -84,61 +86,63 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route 
-          path="/" 
-          element={
-            user ? (
-              <Navigate to={user.role === 'investor' ? (user.has_investments === false ? '/explore' : '/dashboard') : '/admin'} replace />
-            ) : (
-              <Login onLogin={setUser} />
-            )
-          } 
-        />
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              user ? (
+                <Navigate to={user.role === 'investor' ? (user.has_investments === false ? '/explore' : '/dashboard') : '/admin'} replace />
+              ) : (
+                <Login onLogin={setUser} />
+              )
+            } 
+          />
 
-        <Route 
-          path="/login" 
-          element={
-            user ? (
-              <Navigate to={user.role === 'investor' ? (user.has_investments === false ? '/explore' : '/dashboard') : '/admin'} replace />
-            ) : (
-              <Login onLogin={setUser} />
-            )
-          } 
-        />
-        
-        <Route 
-          path="/dashboard" 
-          element={
-            !user ? (
-              <Navigate to="/login" replace />
-            ) : user.role !== 'investor' ? (
-              <Navigate to="/admin" replace />
-            ) : user.has_investments === false ? (
-              <Navigate to="/explore" replace />
-            ) : (
-              <InvestorDashboard user={user} onLogout={handleLogout} />
-            )
-          } 
-        />
-        
-        <Route 
-          path="/project/:id" 
-          element={user ? <ProjectDetail user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-        />
+          <Route 
+            path="/login" 
+            element={
+              user ? (
+                <Navigate to={user.role === 'investor' ? (user.has_investments === false ? '/explore' : '/dashboard') : '/admin'} replace />
+              ) : (
+                <Login onLogin={setUser} />
+              )
+            } 
+          />
+          
+          <Route 
+            path="/dashboard" 
+            element={
+              !user ? (
+                <Navigate to="/login" replace />
+              ) : user.role !== 'investor' ? (
+                <Navigate to="/admin" replace />
+              ) : user.has_investments === false ? (
+                <Navigate to="/explore" replace />
+              ) : (
+                <InvestorDashboard user={user} onLogout={handleLogout} />
+              )
+            } 
+          />
+          
+          <Route 
+            path="/project/:id" 
+            element={user ? <ProjectDetail user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          />
 
-        <Route 
-          path="/explore" 
-          element={user ? <ShowcaseExplore user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-        />
+          <Route 
+            path="/explore" 
+            element={user ? <ShowcaseExplore user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          />
 
-        <Route 
-          path="/admin" 
-          element={user && user.role !== 'investor' ? <AdminDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-        />
+          <Route 
+            path="/admin" 
+            element={user && user.role !== 'investor' ? <AdminDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          />
 
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

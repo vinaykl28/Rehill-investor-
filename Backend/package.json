@@ -7,6 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "test": "tsx --test src/tests/production_readiness.test.ts",
     "migrate:pg": "tsx src/scripts/migrate_sqlite_to_pg.ts",
     "reset:pg": "tsx src/scripts/reset_neon_db.ts"
   },

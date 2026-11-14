@@ -891,7 +891,7 @@ export default function Login({ onLogin }: LoginProps) {
             <video
               className="w-full h-full object-cover object-center"
               src={HERO_VIDEO}
-              poster={HERO_IMAGE}
+              poster="/assets/projects/hero-biophilic-desktop.jpg"
               autoPlay
               muted
               loop
@@ -899,40 +899,58 @@ export default function Login({ onLogin }: LoginProps) {
               preload="metadata"
             />
           ) : (
-            <motion.img
-              initial={{ scale: 1.0, opacity: 1 }}
+            <motion.div
+              initial={{ scale: 1.0 }}
               animate={
                 reduceMotion
-                  ? { scale: 1, opacity: 1 }
-                  : {
-                      scale: [1.0, 1.03, 1.0],
-                    }
+                  ? { scale: 1.0 }
+                  : { scale: [1.0, 1.025, 1.0] }
               }
               transition={
                 reduceMotion
                   ? { duration: 0.6 }
                   : {
-                      duration: 20,
+                      duration: 22,
                       repeat: Infinity,
                       repeatType: 'reverse',
                       ease: 'easeInOut',
                     }
               }
-              src={HERO_IMAGE}
-              alt="Redhill contemporary biophilic boutique residential community in Bengaluru"
-              className="w-full h-full object-cover object-center select-none pointer-events-none"
+              className="w-full h-full"
               style={{
-                imageRendering: 'auto',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'translateZ(0)',
               }}
-            />
+            >
+              <picture className="w-full h-full block">
+                <source media="(max-width: 640px)" type="image/avif" srcSet="/assets/projects/hero-biophilic-mobile.avif" />
+                <source media="(max-width: 640px)" type="image/webp" srcSet="/assets/projects/hero-biophilic-mobile.webp" />
+                <source media="(max-width: 640px)" srcSet="/assets/projects/hero-biophilic-mobile.jpg" />
+                <source media="(max-width: 1280px)" type="image/avif" srcSet="/assets/projects/hero-biophilic-tablet.avif" />
+                <source media="(max-width: 1280px)" type="image/webp" srcSet="/assets/projects/hero-biophilic-tablet.webp" />
+                <source media="(max-width: 1280px)" srcSet="/assets/projects/hero-biophilic-tablet.jpg" />
+                <source type="image/avif" srcSet="/assets/projects/hero-biophilic-desktop.avif" />
+                <source type="image/webp" srcSet="/assets/projects/hero-biophilic-desktop.webp" />
+                <img
+                  src="/assets/projects/hero-biophilic-desktop.jpg"
+                  alt="Redhill contemporary biophilic boutique residential community in Bengaluru"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-full object-cover object-[54%_center] sm:object-[64%_center] select-none pointer-events-none"
+                  style={{
+                    imageRendering: 'auto',
+                    WebkitBackfaceVisibility: 'hidden',
+                  }}
+                />
+              </picture>
+            </motion.div>
           )}
         </motion.div>
 
-        {/* Ambient Photographic Clarity Scrim (Minimal, non-intrusive, keeps original picture natural & vibrant) */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
-        <div className="hidden md:block absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
+        {/* Ambient Architectural Scrim (Subtle, non-intrusive gradient preserving natural photography clarity) */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-transparent to-black/25 pointer-events-none" />
+        <div className="hidden md:block absolute inset-0 z-10 bg-gradient-to-r from-black/45 via-black/10 to-transparent pointer-events-none" />
 
         {/* Top Header Spacer */}
         <div className="h-16 sm:h-20 shrink-0" aria-hidden="true" />
@@ -973,7 +991,7 @@ export default function Login({ onLogin }: LoginProps) {
                 onClick={() => scrollToSection('experience')}
                 className="btn-press inline-flex items-center justify-center gap-2 rounded-xs px-6 sm:px-7 py-3.5 sm:py-4 text-xs font-semibold uppercase tracking-[0.16em] bg-white text-redhill-charcoal hover:bg-redhill-sand transition-all cursor-pointer shadow-lg active:scale-98"
               >
-                Investor Experience
+                Explore Our Projects
                 <ArrowRight className="w-4 h-4 text-redhill-gold" />
               </button>
               <button
