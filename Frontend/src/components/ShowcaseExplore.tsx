@@ -349,28 +349,28 @@ export default function ShowcaseExplore({
             <Logo className="scale-105" />
             
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1 bg-redhill-ivory p-1 rounded-xl border border-redhill-line">
+            <nav className="hidden md:flex items-center gap-1 bg-redhill-sand p-1 rounded-xs border border-redhill-line">
               <button
                 onClick={() => scrollToSection('projects-grid')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeSection === 'projects' ? 'bg-redhill-red text-white shadow-md shadow-redhill-red/25' : 'text-redhill-muted hover:text-redhill-charcoal'
+                className={`px-4 py-2 rounded-xs text-xs uppercase tracking-[0.12em] font-medium transition-all cursor-pointer ${
+                  activeSection === 'projects' ? 'bg-redhill-charcoal text-white shadow-xs' : 'text-redhill-muted hover:text-redhill-charcoal'
                 }`}
               >
                 Featured Projects
               </button>
               <button
                 onClick={() => scrollToSection('referral-section')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeSection === 'referral' ? 'bg-redhill-red text-white shadow-md shadow-redhill-red/25' : 'text-redhill-muted hover:text-redhill-charcoal'
+                className={`px-4 py-2 rounded-xs text-xs uppercase tracking-[0.12em] font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeSection === 'referral' ? 'bg-redhill-charcoal text-white shadow-xs' : 'text-redhill-muted hover:text-redhill-charcoal'
                 }`}
               >
-                <Gift className="w-3.5 h-3.5 text-amber-700" />
+                <Gift className="w-3.5 h-3.5 text-redhill-gold" />
                 Refer & Earn
               </button>
               <button
                 onClick={() => scrollToSection('events-section')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeSection === 'events' ? 'bg-redhill-red text-white shadow-md shadow-redhill-red/25' : 'text-redhill-muted hover:text-redhill-charcoal'
+                className={`px-4 py-2 rounded-xs text-xs uppercase tracking-[0.12em] font-medium transition-all cursor-pointer ${
+                  activeSection === 'events' ? 'bg-redhill-charcoal text-white shadow-xs' : 'text-redhill-muted hover:text-redhill-charcoal'
                 }`}
               >
                 Events & Conclaves
@@ -389,20 +389,20 @@ export default function ShowcaseExplore({
                   navigate('/dashboard');
                 }
               }}
-              className="hidden sm:flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 px-4 py-2 rounded-xl border border-emerald-500/20 text-xs font-bold transition-all cursor-pointer"
+              className="hidden sm:flex items-center gap-2 btn-secondary py-2 px-3.5 text-xs uppercase tracking-[0.14em]"
             >
-              <Building2 className="w-4 h-4" />
+              <Building2 className="w-4 h-4 text-redhill-gold" />
               My Portfolio
             </button>
 
             {/* User Pill */}
-            <div className="flex items-center gap-3 bg-redhill-sand/70 hover:bg-redhill-sand px-3.5 py-1.5 rounded-full border border-redhill-line transition-all">
-              <div className="w-8 h-8 rounded-full bg-redhill-charcoal flex items-center justify-center text-white font-bold text-xs shadow-md">
+            <div className="flex items-center gap-3 bg-white px-3.5 py-1.5 rounded-full border border-redhill-line transition-all">
+              <div className="w-7 h-7 rounded-full bg-redhill-charcoal flex items-center justify-center text-white font-medium text-xs">
                 {(user?.name || 'I').charAt(0).toUpperCase()}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-xs font-bold text-redhill-charcoal leading-none">{user?.name || 'Investor'}</p>
-                <p className="text-[10px] text-redhill-muted capitalize mt-0.5">{(user?.role || 'investor').replace('_', ' ')}</p>
+                <p className="text-xs font-medium text-redhill-charcoal leading-none">{user?.name || 'Investor'}</p>
+                <p className="text-[10px] text-redhill-gold uppercase tracking-[0.16em] mt-0.5">{(user?.role || 'investor').replace('_', ' ')}</p>
               </div>
             </div>
 
@@ -410,7 +410,7 @@ export default function ShowcaseExplore({
             <button
               onClick={onLogout}
               title="Sign Out"
-              className="p-2.5 text-redhill-muted hover:text-redhill-red hover:bg-redhill-sand/70 rounded-xl transition-all cursor-pointer"
+              className="p-2.5 text-redhill-muted hover:text-redhill-red hover:bg-redhill-sand rounded-xs transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -421,16 +421,16 @@ export default function ShowcaseExplore({
       {/* ======================================================== */}
       {/* 2. PC / DESKTOP FULL-BLEED LUXURY HERO BANNER            */}
       {/* ======================================================== */}
-      <section className="relative overflow-hidden min-h-[520px] lg:min-h-[580px] flex items-center">
+      <section className="relative overflow-hidden min-h-[520px] lg:min-h-[580px] flex items-center border-b border-redhill-line">
         {/* Background Image with Ambient Overlays */}
         <div className="absolute inset-0 z-0">
           <img 
             src={SHOWCASE_CONFIG.hero.backgroundImage} 
             alt="Redhill Architectural Horizon" 
-            className="w-full h-full object-cover brightness-[0.65] contrast-[1.05] scale-105 transition-transform duration-1000"
+            className="w-full h-full object-cover brightness-[0.7] contrast-[1.05] scale-105 transition-transform duration-1000"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-redhill-ivory via-redhill-ivory/90 to-redhill-ivory/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-redhill-ivory via-transparent to-redhill-ivory/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-redhill-ivory via-redhill-ivory/95 to-redhill-ivory/45" />
+          <div className="absolute inset-0 bg-gradient-to-t from-redhill-ivory via-transparent to-redhill-ivory/30" />
         </div>
 
         {/* Hero Content Container */}
@@ -439,50 +439,50 @@ export default function ShowcaseExplore({
             
             {/* Left Column: Headlines & CTAs */}
             <motion.div 
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-8 space-y-6"
             >
               {/* Gold Collection Tag */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 border border-redhill-line shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-redhill-red" />
-                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-redhill-gold">
+              <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-xs bg-white/95 border border-redhill-line shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-redhill-red" />
+                <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-redhill-gold">
                   {SHOWCASE_CONFIG.brand.taglineBadge}
                 </span>
               </div>
 
-              {/* Bold Hero Headline */}
-              <h1 className="text-4xl sm:text-6xl font-bold text-redhill-charcoal tracking-tight leading-[1.08] font-sans">
+              {/* Editorial Display Headline */}
+              <h1 className="text-[clamp(2.4rem,4.5vw,4.25rem)] font-serif font-light text-redhill-charcoal tracking-tight leading-[1.08]">
                 {SHOWCASE_CONFIG.hero.headlinePrefix} <br />
-                <span className="text-redhill-gold">
+                <span className="text-redhill-gold italic">
                   {SHOWCASE_CONFIG.hero.headlineMain}
                 </span>
               </h1>
 
               {/* Subheadline */}
-              <p className="text-stone-700 text-base sm:text-lg max-w-2xl leading-relaxed font-normal">
+              <p className="text-stone-700 text-sm sm:text-base lg:text-lg max-w-2xl leading-relaxed font-light">
                 {SHOWCASE_CONFIG.hero.subheadline}
               </p>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-4">
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   onClick={() => {
                     const el = document.getElementById('projects-grid');
                     el?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="bg-redhill-red hover:bg-red-700 text-white font-bold px-8 py-4 rounded-xl shadow-xl  transition-all flex items-center gap-2 group cursor-pointer hover:scale-[1.02]"
+                  className="btn-primary px-7 py-3.5 text-xs uppercase tracking-[0.14em]"
                 >
                   <span>{SHOWCASE_CONFIG.hero.ctaExploreText}</span>
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={() => setShowSiteVisitModal(true)}
-                  className="bg-redhill-sand hover:bg-redhill-sand-deep text-redhill-charcoal backdrop-blur-md border border-redhill-stone font-bold px-7 py-4 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                  className="btn-secondary px-7 py-3.5 text-xs uppercase tracking-[0.14em]"
                 >
-                  <Car className="w-4 h-4 text-amber-700" />
+                  <Car className="w-4 h-4 text-redhill-gold" />
                   <span>{SHOWCASE_CONFIG.hero.ctaSiteVisitText}</span>
                 </button>
               </div>
@@ -490,39 +490,32 @@ export default function ShowcaseExplore({
 
             {/* Right Column: Social Media Hub & Redhill Highlights Card */}
             <motion.div 
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 24 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="lg:col-span-4 space-y-5"
+              transition={{ duration: 0.65, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-4 space-y-4"
             >
               {/* Redhill Premier Badge Card */}
-              <div className="bg-redhill-sand-deep backdrop-blur-xl rounded-2xl p-6 border border-redhill-line shadow-2xl space-y-4 hover:border-amber-500/30 transition-all duration-300">
+              <div className="lux-card p-6 space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-redhill-line">
                   <div>
-                    <span className="text-[10px] uppercase tracking-widest text-amber-700 font-extrabold">
-                      Official Portals
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-redhill-gold font-medium">
+                      Official Channels
                     </span>
-                    <h3 className="text-sm font-bold text-redhill-charcoal mt-0.5">Connect With Redhill</h3>
+                    <h3 className="text-sm font-medium text-redhill-charcoal mt-0.5">Connect With Redhill</h3>
                   </div>
-                  <div className="w-9 h-9 rounded-xl bg-redhill-sand border border-amber-500/30 flex items-center justify-center shadow-inner">
-                    <Sparkles className="w-4 h-4 text-amber-700" />
+                  <div className="w-8 h-8 rounded-xs bg-redhill-sand border border-redhill-line flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5 text-redhill-gold" />
                   </div>
                 </div>
 
-                <p className="text-xs text-stone-700 leading-relaxed">
-                  Join our official digital communities for weekly drone walkthroughs, architectural progress feeds, and executive launch announcements.
+                <p className="text-xs text-stone-600 leading-relaxed font-light">
+                  Join our official digital channels for weekly drone walkthroughs, architectural progress feeds, and executive launch announcements.
                 </p>
 
-                {/* Social Media Circular Handle Buttons with Vibrant Branded Hover Colors */}
-                <div className="flex items-center justify-between gap-2.5 pt-2">
+                {/* Social Media Circular Handle Buttons */}
+                <div className="flex items-center justify-between gap-2 pt-1">
                   {SHOWCASE_CONFIG.socialMediaHandles.map((social) => {
-                    const hoverColorClass = 
-                      social.icon === 'youtube' ? 'hover:bg-[#FF0000] hover:border-[#FF0000] hover:shadow-red-600/40' :
-                      social.icon === 'linkedin' ? 'hover:bg-[#0A66C2] hover:border-[#0A66C2] hover:shadow-blue-600/40' :
-                      social.icon === 'instagram' ? 'hover:bg-gradient-to-tr hover:from-[#833ab4] hover:via-[#fd1d1d] hover:to-[#fcb045] hover:border-pink-500 hover:shadow-pink-500/40' :
-                      social.icon === 'facebook' ? 'hover:bg-[#1877F2] hover:border-[#1877F2] hover:shadow-blue-600/40' :
-                      'hover:bg-white hover:text-gray-950 hover:border-white hover:shadow-white/30';
-
                     return (
                       <a
                         key={social.name}
@@ -530,7 +523,7 @@ export default function ShowcaseExplore({
                         target="_blank"
                         rel="noopener noreferrer"
                         title={`${social.name}: ${social.handle}`}
-                        className={`w-11 h-11 rounded-2xl bg-redhill-sand/70 text-redhill-charcoal hover:text-redhill-charcoal transition-all duration-300 flex items-center justify-center border border-redhill-line shadow-lg hover:scale-115 hover:-translate-y-0.5 ${hoverColorClass} group cursor-pointer`}
+                        className="w-10 h-10 rounded-xs bg-white text-redhill-charcoal hover:bg-redhill-sand hover:text-redhill-red transition-all flex items-center justify-center border border-redhill-line shadow-xs cursor-pointer"
                       >
                         {renderSocialIcon(social.icon)}
                       </a>
@@ -543,35 +536,33 @@ export default function ShowcaseExplore({
               {allShowcaseProjects.length > 0 && (
                 <div 
                   onClick={() => setSelectedProject(allShowcaseProjects[0])}
-                  className="group relative bg-white rounded-2xl p-4 border border-amber-500/20 hover:border-amber-500/50 transition-all duration-300 shadow-xl cursor-pointer overflow-hidden"
+                  className="group lux-card lux-card-hover p-4 cursor-pointer"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
-                  
-                  <div className="flex items-center gap-3.5 relative z-10">
-                    <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-redhill-line">
+                  <div className="flex items-center gap-3.5">
+                    <div className="relative w-16 h-16 rounded-xs overflow-hidden flex-shrink-0 bg-redhill-sand border border-redhill-line">
                       <img 
                         src={allShowcaseProjects[0].image} 
                         alt="Spotlight"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        className="w-full h-full object-cover img-zoom" 
                       />
                     </div>
                     
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-[9px] font-black uppercase tracking-wider bg-amber-400 text-gray-950 px-2 py-0.5 rounded-md shadow-sm">
-                          Featured Development
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-[9px] font-medium uppercase tracking-[0.18em] bg-redhill-sand text-redhill-charcoal px-2 py-0.5 rounded-xs border border-redhill-line">
+                          Featured Residence
                         </span>
                       </div>
-                      <h4 className="text-sm font-bold text-redhill-charcoal truncate group-hover:text-amber-700 transition-colors">
+                      <h4 className="text-sm font-medium text-redhill-charcoal font-serif truncate group-hover:text-redhill-gold transition-colors">
                         {allShowcaseProjects[0].name}
                       </h4>
-                      <p className="text-[11px] text-redhill-muted truncate">
+                      <p className="text-[11px] text-redhill-muted truncate mt-0.5">
                         {allShowcaseProjects[0].location}
                       </p>
                     </div>
 
-                    <div className="w-8 h-8 rounded-full bg-redhill-sand group-hover:bg-redhill-red flex items-center justify-center text-stone-700 group-hover:text-white transition-all flex-shrink-0">
-                      <ArrowUpRight className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-xs bg-redhill-sand group-hover:bg-redhill-charcoal flex items-center justify-center text-stone-700 group-hover:text-white transition-all flex-shrink-0">
+                      <ArrowUpRight className="w-3.5 h-3.5" />
                     </div>
                   </div>
                 </div>
@@ -585,21 +576,23 @@ export default function ShowcaseExplore({
       {/* ======================================================== */}
       {/* 3. FEATURED REDHILL PROJECTS SHOWCASE (Desktop Grid)     */}
       {/* ======================================================== */}
-      <section id="projects-grid" className="py-16 bg-white border-t border-redhill-line flex-1">
+      <section id="projects-grid" className="py-16 sm:py-20 bg-white border-t border-redhill-line flex-1">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           
           {/* Section Header with Category Filters */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-redhill-line">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-5 border-b border-redhill-line">
             <div>
-              <div className="flex items-center gap-2 text-redhill-red font-bold uppercase tracking-[0.2em] text-xs mb-2">
-                <span className="w-6 h-[2px] bg-redhill-red" />
-                Contemporary Boutique High-Rise Portfolio
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="w-6 h-px bg-redhill-gold" />
+                <span className="eyebrow text-redhill-gold">
+                  Boutique Residential Portfolio · Bengaluru
+                </span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-redhill-charcoal tracking-tight font-sans">
+              <h2 className="text-3xl sm:text-4xl font-serif font-normal text-redhill-charcoal tracking-tight">
                 Redhill Residential Developments
               </h2>
-              <p className="text-redhill-muted text-sm mt-1 max-w-xl">
-                Explore active residential communities published by Redhill Infrastructure.
+              <p className="text-redhill-muted text-sm mt-1 max-w-xl font-light">
+                Explore active residential communities developed and managed by Redhill Infrastructure.
               </p>
             </div>
 
@@ -611,15 +604,15 @@ export default function ShowcaseExplore({
                   <button
                     key={tab.id}
                     onClick={() => setSelectedCategory(tab.id)}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    className={`px-4 py-2 rounded-xs text-xs uppercase tracking-[0.14em] font-medium transition-all flex items-center gap-2 cursor-pointer border ${
                       selectedCategory === tab.id
-                        ? 'bg-redhill-red text-white shadow-lg border border-redhill-red scale-105'
-                        : 'bg-redhill-sand/70 text-stone-700 hover:text-redhill-charcoal border border-redhill-line hover:bg-redhill-sand'
+                        ? 'bg-redhill-charcoal text-white border-redhill-charcoal shadow-xs'
+                        : 'bg-white text-stone-700 hover:text-redhill-charcoal border-redhill-line hover:border-redhill-stone'
                     }`}
                   >
                     <span>{tab.label}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
-                      selectedCategory === tab.id ? 'bg-redhill-ivory text-redhill-charcoal' : 'bg-redhill-sand text-redhill-muted'
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-xs tabular font-medium ${
+                      selectedCategory === tab.id ? 'bg-white/20 text-white' : 'bg-redhill-sand text-redhill-muted'
                     }`}>
                       {tab.count}
                     </span>
@@ -631,74 +624,74 @@ export default function ShowcaseExplore({
 
           {/* Project Cards Grid or Empty State when no Admin projects exist */}
           {filteredProjects.length === 0 ? (
-            <div className="rounded-xl border border-redhill-line bg-redhill-ivory p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-white border border-redhill-line flex items-center justify-center mx-auto text-redhill-gold">
+            <div className="rounded-xs border border-redhill-line bg-redhill-ivory p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-3">
+              <div className="w-12 h-12 rounded-xs bg-white border border-redhill-line flex items-center justify-center mx-auto text-redhill-gold">
                 <Building2 className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-redhill-charcoal font-serif">
+              <h3 className="text-xl font-normal text-redhill-charcoal font-serif">
                 No Developments Published Yet
               </h3>
-              <p className="text-xs sm:text-sm text-redhill-muted leading-relaxed">
+              <p className="text-xs sm:text-sm text-redhill-muted leading-relaxed font-light">
                 New residential developments added by the Redhill administration will appear here automatically.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProjects.map((project, idx) => (
-                <motion.div
+                <motion.article
                   key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1, duration: 0.5 }}
-                  className="group bg-white rounded-2xl overflow-hidden border border-redhill-line hover:border-redhill-red/60 transition-all duration-500 flex flex-col shadow-xl hover:shadow-2xl hover:-translate-y-1.5"
+                  transition={{ delay: idx * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="group lux-card lux-card-hover overflow-hidden flex flex-col h-full"
                 >
                   {/* Project Image Container */}
-                  <div className="relative h-60 overflow-hidden">
+                  <div className="relative h-64 overflow-hidden bg-redhill-sand">
                     <img 
                       src={project.image} 
                       alt={project.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-[0.92]"
+                      className="w-full h-full object-cover img-zoom"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                     {/* Top-Left Status Ribbon */}
-                    <div className="absolute top-3 left-3 bg-redhill-charcoal text-white font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
+                    <div className="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-xs text-redhill-charcoal font-medium text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded-xs border border-stone-200/80 shadow-xs flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-redhill-red" />
                       <span>{project.badge}</span>
                     </div>
 
                     {/* Price / Value Overlay */}
-                    <div className="absolute bottom-3 left-4">
-                      <span className="text-[10px] font-bold text-white/75 uppercase tracking-widest block">Valuation / Rate</span>
-                      <span className="text-lg font-black text-redhill-gold-soft drop-shadow">{project.priceStarting}</span>
+                    <div className="absolute bottom-3.5 left-4 right-4">
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-white/70 block">Starting Valuation</span>
+                      <span className="font-serif text-xl font-medium text-white tabular drop-shadow-xs">{project.priceStarting}</span>
                     </div>
                   </div>
 
                   {/* Card Body */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-redhill-red text-xs font-semibold mb-1">
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-white">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 text-redhill-gold text-xs uppercase tracking-[0.14em] font-medium">
                         <MapPin className="w-3.5 h-3.5" />
                         <span>{project.location}</span>
                       </div>
 
-                      <h3 className="text-xl font-bold text-redhill-charcoal group-hover:text-amber-700 transition-colors leading-tight font-serif">
+                      <h3 className="text-2xl font-normal text-redhill-charcoal group-hover:text-redhill-gold transition-colors leading-tight font-serif">
                         {project.name}
                       </h3>
                       
-                      <p className="text-xs text-redhill-muted mt-1 font-medium">
-                        {project.configuration} • {project.carpetArea}
+                      <p className="text-xs text-redhill-muted font-light">
+                        {project.configuration} · {project.carpetArea}
                       </p>
 
-                      <p className="text-xs text-redhill-muted mt-3 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed font-light pt-1">
                         {project.description}
                       </p>
                     </div>
 
                     {/* Highlights Pills */}
-                    <div className="space-y-1.5 pt-2 border-t border-redhill-line">
+                    <div className="space-y-1.5 pt-3 border-t border-redhill-line">
                       {project.highlights.slice(0, 2).map((h, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs text-stone-700">
+                        <div key={i} className="flex items-center gap-2 text-xs text-stone-700 font-light">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0" />
                           <span className="truncate">{h}</span>
                         </div>
@@ -706,16 +699,16 @@ export default function ShowcaseExplore({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2 pt-2">
+                    <div className="grid grid-cols-2 gap-2.5 pt-2">
                       <button
                         onClick={() => {
                           setSelectedProject(project);
                           setActivePhotoIdx(0);
                         }}
-                        className="bg-redhill-sand/70 hover:bg-redhill-sand text-redhill-charcoal py-2.5 px-3 rounded-xl text-xs font-bold transition-all border border-redhill-line cursor-pointer flex items-center justify-center gap-1.5"
+                        className="btn-secondary py-2.5 px-3 text-xs uppercase tracking-[0.12em]"
                       >
-                        <Camera className="w-3.5 h-3.5 text-amber-700" />
-                        <span>View Overview</span>
+                        <Camera className="w-3.5 h-3.5 text-redhill-gold" />
+                        <span>Overview</span>
                       </button>
                       <button
                         onClick={() => {
@@ -723,14 +716,14 @@ export default function ShowcaseExplore({
                           setActivePhotoIdx(0);
                           setShowSiteVisitModal(true);
                         }}
-                        className="bg-redhill-red hover:bg-red-700 text-white py-2.5 px-3 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1 cursor-pointer"
+                        className="btn-primary py-2.5 px-3 text-xs uppercase tracking-[0.12em]"
                       >
                         <span>Book Visit</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </motion.article>
               ))}
             </div>
           )}
@@ -774,70 +767,67 @@ export default function ShowcaseExplore({
       {/* ======================================================== */}
       {/* 4. REDHILL LUXURY REFERRAL SPOTLIGHT (Desktop Banner)    */}
       {/* ======================================================== */}
-      <section id="referral-section" className="py-16 bg-white border-t border-redhill-line">
+      <section id="referral-section" className="py-16 sm:py-20 bg-white border-t border-redhill-line">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden bg-redhill-ivory border border-redhill-line p-8 sm:p-12 shadow-lg">
-            
-            {/* Ambient Lighting */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-redhill-red/5 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute bottom-0 left-10 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
-
+          <div className="relative rounded-xs overflow-hidden bg-redhill-ivory border border-redhill-line p-8 sm:p-12 shadow-sm">
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Left Column */}
               <div className="lg:col-span-7 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-redhill-red/10 text-redhill-red text-xs font-bold border border-redhill-red/20">
-                  <Gift className="w-3.5 h-3.5 text-amber-700" />
-                  Referral Rewards
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="w-6 h-px bg-redhill-gold" />
+                  <span className="eyebrow text-redhill-gold">
+                    Client Referral Privilege
+                  </span>
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-redhill-charcoal tracking-tight font-sans">
+                <h2 className="text-3xl sm:text-4xl font-serif font-normal text-redhill-charcoal tracking-tight">
                   {SHOWCASE_CONFIG.referral.headline}
                 </h2>
 
-                <p className="text-stone-700 text-sm sm:text-base leading-relaxed max-w-xl">
+                <p className="text-stone-700 text-sm sm:text-base leading-relaxed max-w-xl font-light">
                   {SHOWCASE_CONFIG.referral.subtitle}
                 </p>
 
                 {/* Steps Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
                   {SHOWCASE_CONFIG.referral.steps.map((st, i) => (
-                    <div key={i} className="bg-white rounded-xl p-3.5 border border-redhill-line">
-                      <span className="text-amber-700 font-black text-xs font-mono">{st.step}</span>
-                      <h4 className="text-xs font-bold text-redhill-charcoal mt-1">{st.title}</h4>
-                      <p className="text-[11px] text-redhill-muted mt-0.5 leading-snug">{st.desc}</p>
+                    <div key={i} className="bg-white rounded-xs p-4 border border-redhill-line">
+                      <span className="text-redhill-gold font-serif text-lg font-medium">{st.step}</span>
+                      <h4 className="text-xs uppercase tracking-[0.12em] font-medium text-redhill-charcoal mt-1">{st.title}</h4>
+                      <p className="text-[11px] text-redhill-muted mt-1 leading-relaxed font-light">{st.desc}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Right Column: Direct "Refer Here" Action Panel */}
-              <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-redhill-line space-y-4 shadow-md">
-                <div className="pb-2 border-b border-redhill-line">
-                  <span className="text-[10px] font-bold text-redhill-muted uppercase tracking-wider block">Direct Reward Tier</span>
-                  <span className="text-base font-black text-amber-700">₹50,000 – ₹3,00,000 INR</span>
+              <div className="lg:col-span-5 lux-card p-6 sm:p-8 space-y-4">
+                <div className="pb-3 border-b border-redhill-line">
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-redhill-gold font-medium block">Advisory Reward Tier</span>
+                  <span className="font-serif text-2xl font-normal text-redhill-charcoal mt-1 block">₹50,000 – ₹3,00,000 INR</span>
                 </div>
 
-                <p className="text-xs text-stone-700 leading-relaxed">
-                  Start introducing friends and associates in 3 simple steps. Our private wealth advisory handles everything from guided site walkthroughs to booking registration.
+                <p className="text-xs text-stone-600 leading-relaxed font-light">
+                  Introduce acquaintances and business associates in three seamless stages. Our private relationship desk coordinates private previews, architectural walk-throughs, and priority booking allocations.
                 </p>
 
                 {/* Primary CTA Button */}
-                <div className="space-y-2.5 pt-1">
+                <div className="space-y-2.5 pt-2">
                   <button
                     onClick={handleStartReferral}
-                    className="w-full bg-redhill-red hover:bg-redhill-crimson text-white font-extrabold py-4 px-6 rounded-2xl text-sm flex items-center justify-center gap-2.5 transition-all shadow-lg cursor-pointer hover:scale-[1.01] group"
+                    className="btn-primary w-full py-3.5 text-xs uppercase tracking-[0.14em]"
                   >
-                    <Gift className="w-5 h-5 text-white group-hover:rotate-12 transition-transform" />
-                    <span>Refer Here (Start Referral)</span>
-                    <ChevronRight className="w-4 h-4 text-white/80 group-hover:translate-x-1 transition-transform" />
+                    <Gift className="w-4 h-4 text-redhill-gold-soft" />
+                    <span>Initiate Client Referral</span>
+                    <ChevronRight className="w-4 h-4" />
                   </button>
 
                   <button
                     onClick={() => setShowTermsModal(true)}
-                    className="w-full bg-redhill-sand/70 hover:bg-redhill-sand text-stone-700 hover:text-redhill-charcoal font-bold py-3 px-4 rounded-xl text-xs transition-colors cursor-pointer border border-redhill-line flex items-center justify-center gap-2"
+                    className="btn-secondary w-full py-3 text-xs uppercase tracking-[0.12em]"
                   >
-                    <FileText className="w-3.5 h-3.5 text-amber-700" />
-                    <span>Referral Program Terms & Guidelines</span>
+                    <FileText className="w-3.5 h-3.5 text-redhill-gold" />
+                    <span>Program Terms &amp; Guidelines</span>
                   </button>
                 </div>
               </div>
@@ -850,17 +840,19 @@ export default function ShowcaseExplore({
       {/* ======================================================== */}
       {/* 5. UPCOMING EVENTS & CONCLAVES                           */}
       {/* ======================================================== */}
-      <section id="events-section" className="py-16 bg-redhill-ivory border-t border-redhill-line">
+      <section id="events-section" className="py-16 sm:py-20 bg-redhill-ivory border-t border-redhill-line">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-redhill-line">
             <div>
-              <div className="flex items-center gap-2 text-redhill-red font-bold uppercase tracking-[0.2em] text-xs mb-2">
-                <span className="w-6 h-[2px] bg-redhill-red" />
-                Exclusive Events
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="w-6 h-px bg-redhill-gold" />
+                <span className="eyebrow text-redhill-gold">
+                  Private Gatherings · By Invitation
+                </span>
               </div>
-              <h2 className="text-3xl font-extrabold text-redhill-charcoal tracking-tight">
-                Upcoming Investor Events & Project Walkthroughs
+              <h2 className="text-3xl font-serif font-normal text-redhill-charcoal tracking-tight">
+                Upcoming Investor Events &amp; Project Walkthroughs
               </h2>
             </div>
           </div>
@@ -869,25 +861,25 @@ export default function ShowcaseExplore({
             {SHOWCASE_CONFIG.events.map((evt) => (
               <div 
                 key={evt.id}
-                className="bg-white rounded-2xl p-6 border border-redhill-line hover:border-amber-500/30 transition-all flex flex-col justify-between space-y-4 shadow-xl"
+                className="lux-card lux-card-hover p-6 sm:p-7 flex flex-col justify-between space-y-5"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black uppercase tracking-wider bg-amber-400/10 text-amber-700 px-3 py-1 rounded-full border border-amber-400/20">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.2em] bg-redhill-sand text-redhill-charcoal px-2.5 py-1 rounded-xs border border-redhill-line">
                       {evt.tag}
                     </span>
-                    <span className="text-xs text-redhill-muted flex items-center gap-1 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-redhill-red" />
+                    <span className="text-xs text-redhill-muted flex items-center gap-1.5 font-light">
+                      <Clock className="w-3.5 h-3.5 text-redhill-gold" />
                       {evt.date}
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold text-redhill-charcoal font-serif">{evt.title}</h3>
+                  <h3 className="text-xl sm:text-2xl font-serif font-normal text-redhill-charcoal">{evt.title}</h3>
                   
-                  <p className="text-xs text-redhill-muted leading-relaxed">{evt.desc}</p>
+                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">{evt.desc}</p>
 
-                  <div className="flex items-center gap-2 text-xs text-stone-700 pt-2">
-                    <MapPin className="w-4 h-4 text-redhill-red" />
+                  <div className="flex items-center gap-2 text-xs text-redhill-charcoal pt-1">
+                    <MapPin className="w-4 h-4 text-redhill-gold" />
                     <span>{evt.location}</span>
                   </div>
                 </div>
@@ -895,10 +887,10 @@ export default function ShowcaseExplore({
                 <div className="pt-4 border-t border-redhill-line">
                   <button
                     onClick={() => alert(`RSVP registered for "${evt.title}". Our concierge will send your digital invite badge to ${user.email}.`)}
-                    className="w-full bg-redhill-sand/70 hover:bg-redhill-red hover:text-white text-redhill-charcoal py-3 rounded-xl text-xs font-bold transition-all border border-redhill-line hover:border-redhill-red flex items-center justify-center gap-2 cursor-pointer"
+                    className="btn-secondary w-full py-3 text-xs uppercase tracking-[0.14em]"
                   >
-                    <Calendar className="w-4 h-4" />
-                    Reserve Complimentary Seat
+                    <Calendar className="w-4 h-4 text-redhill-gold" />
+                    <span>Reserve Guest Admission</span>
                   </button>
                 </div>
               </div>
@@ -943,15 +935,16 @@ export default function ShowcaseExplore({
           const currentPhoto = currentGallery[activePhotoIdx] || currentGallery[0];
 
           return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                initial={{ opacity: 0, scale: 0.96, y: 16 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto border border-redhill-line shadow-2xl text-redhill-charcoal relative custom-scrollbar"
+                exit={{ opacity: 0, scale: 0.96, y: 16 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="bg-white rounded-[4px] max-w-4xl w-full max-h-[92vh] overflow-y-auto border border-redhill-line shadow-2xl text-redhill-charcoal relative custom-scrollbar"
               >
                 {/* Modal Banner & Interactive Demo Photo Carousel */}
-                <div className="relative h-80 sm:h-96 w-full overflow-hidden bg-black/60 group">
+                <div className="relative h-80 sm:h-96 w-full overflow-hidden bg-redhill-ink group">
                   <motion.img 
                     key={currentPhoto.url}
                     initial={{ opacity: 0.7, scale: 1.02 }}
@@ -961,31 +954,31 @@ export default function ShowcaseExplore({
                     alt={currentPhoto.title} 
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/40" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/30" />
 
                   {/* Top-Left Tag & Badges */}
                   <div className="absolute top-4 left-5 flex items-center gap-2 z-10">
-                    <span className="bg-amber-400 text-gray-950 font-black text-xs px-3 py-1 rounded-full shadow-lg">
+                    <span className="bg-white/95 text-redhill-charcoal font-medium text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded-xs shadow-xs border border-stone-200/80">
                       {selectedProject.badge}
                     </span>
-                    <span className="bg-black/70 backdrop-blur text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20 flex items-center gap-1.5 shadow">
-                      <Camera className="w-3.5 h-3.5 text-amber-700" />
+                    <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium uppercase tracking-[0.16em] px-2.5 py-1 rounded-xs border border-white/20 flex items-center gap-1.5 shadow-xs">
+                      <Camera className="w-3 h-3 text-redhill-gold-soft" />
                       {currentPhoto.tag}
                     </span>
                   </div>
 
                   {/* Top-Center Photo Counter */}
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-xs font-mono font-bold text-gray-200 border border-white/20 shadow z-10">
-                    {activePhotoIdx + 1} / {currentGallery.length} Demo Pics
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-xs px-3 py-1 rounded-xs text-[11px] font-mono font-medium text-white/90 border border-white/20 shadow-xs z-10">
+                    {activePhotoIdx + 1} / {currentGallery.length}
                   </div>
 
                   {/* Close Modal Button */}
                   <button
                     onClick={() => setSelectedProject(null)}
-                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/70 hover:bg-redhill-red text-white flex items-center justify-center transition-colors cursor-pointer border border-white/20 z-10 shadow-lg"
+                    className="absolute top-4 right-4 w-9 h-9 rounded-xs bg-black/60 hover:bg-redhill-charcoal text-white flex items-center justify-center transition-colors cursor-pointer border border-white/20 z-10 shadow-xs"
                     title="Close preview"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
 
                   {/* Previous / Next Arrow Controls */}
@@ -996,7 +989,7 @@ export default function ShowcaseExplore({
                           e.stopPropagation();
                           setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : currentGallery.length - 1));
                         }}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-redhill-red text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer shadow-xl hover:scale-110 z-10"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xs bg-black/60 hover:bg-redhill-charcoal text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer shadow-md z-10"
                         title="Previous Photo"
                       >
                         <ChevronLeft className="w-5 h-5" />
@@ -1006,7 +999,7 @@ export default function ShowcaseExplore({
                           e.stopPropagation();
                           setActivePhotoIdx((prev) => (prev < currentGallery.length - 1 ? prev + 1 : 0));
                         }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-redhill-red text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer shadow-xl hover:scale-110 z-10"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xs bg-black/60 hover:bg-redhill-charcoal text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer shadow-md z-10"
                         title="Next Photo"
                       >
                         <ChevronRight className="w-5 h-5" />
@@ -1016,39 +1009,32 @@ export default function ShowcaseExplore({
 
                   {/* Bottom Info Banner on Image */}
                   <div className="absolute bottom-4 left-6 right-6 z-10">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-bold text-white bg-black/60 px-2.5 py-0.5 rounded border border-white/20">
-                        {currentPhoto.title}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl sm:text-3xl font-bold text-white">{selectedProject.name}</h3>
-                    <p className="text-xs sm:text-sm text-white/80 flex items-center gap-1.5 mt-0.5">
-                      <MapPin className="w-4 h-4 text-redhill-red" />
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-redhill-gold-soft font-medium mb-1">
                       {selectedProject.location}
                     </p>
+                    <h3 className="text-2xl sm:text-3xl font-serif font-normal text-white">{selectedProject.name}</h3>
                   </div>
                 </div>
 
                 {/* Interactive Clickable Thumbnail Strip */}
                 {currentGallery.length > 1 && (
                   <div className="bg-redhill-ivory px-6 py-3 border-b border-redhill-line flex items-center gap-2.5 overflow-x-auto">
-                    <span className="text-[10px] font-bold text-redhill-muted uppercase tracking-wider flex-shrink-0 flex items-center gap-1">
-                      <ImageIcon className="w-3.5 h-3.5 text-amber-700" />
-                      Demo Gallery:
+                    <span className="text-[10px] font-medium text-redhill-muted uppercase tracking-[0.18em] flex-shrink-0 flex items-center gap-1">
+                      <ImageIcon className="w-3.5 h-3.5 text-redhill-gold" />
+                      Gallery:
                     </span>
                     {currentGallery.map((item, pIdx) => (
                       <button
                         key={pIdx}
                         onClick={() => setActivePhotoIdx(pIdx)}
-                        className={`relative rounded-xl overflow-hidden flex-shrink-0 h-14 w-20 border transition-all cursor-pointer ${
+                        className={`relative rounded-xs overflow-hidden flex-shrink-0 h-14 w-20 border transition-all cursor-pointer ${
                           activePhotoIdx === pIdx 
-                            ? 'border-redhill-red ring-2 ring-redhill-red shadow-lg  scale-105' 
+                            ? 'border-redhill-charcoal ring-1 ring-redhill-charcoal' 
                             : 'border-redhill-line opacity-60 hover:opacity-100 hover:border-redhill-stone'
                         }`}
                       >
                         <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-redhill-ivory" />
-                        <span className="absolute bottom-0.5 left-1 text-[8px] font-bold text-white bg-black/60 px-1 rounded truncate max-w-[90%]">
+                        <span className="absolute bottom-0.5 left-1 text-[8px] font-medium uppercase tracking-wider text-white bg-black/70 px-1 rounded-xs truncate max-w-[90%]">
                           {item.tag}
                         </span>
                       </button>
@@ -1061,73 +1047,37 @@ export default function ShowcaseExplore({
                   
                   {/* Specs Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-redhill-sand/70 p-3.5 rounded-xl border border-redhill-line">
-                      <span className="text-[10px] text-redhill-muted uppercase font-bold block">Pricing</span>
-                      <span className="text-sm font-black text-amber-700">{selectedProject.priceStarting}</span>
+                    <div className="bg-redhill-ivory p-3.5 rounded-xs border border-redhill-line">
+                      <span className="text-[10px] text-redhill-muted uppercase tracking-[0.14em] block">Valuation</span>
+                      <span className="font-serif text-base font-medium text-redhill-charcoal mt-0.5 block">{selectedProject.priceStarting}</span>
                     </div>
-                    <div className="bg-redhill-sand/70 p-3.5 rounded-xl border border-redhill-line">
-                      <span className="text-[10px] text-redhill-muted uppercase font-bold block">Configuration</span>
-                      <span className="text-sm font-bold text-redhill-charcoal">{selectedProject.configuration}</span>
+                    <div className="bg-redhill-ivory p-3.5 rounded-xs border border-redhill-line">
+                      <span className="text-[10px] text-redhill-muted uppercase tracking-[0.14em] block">Configuration</span>
+                      <span className="text-xs font-medium text-redhill-charcoal mt-1 block">{selectedProject.configuration}</span>
                     </div>
-                    <div className="bg-redhill-sand/70 p-3.5 rounded-xl border border-redhill-line">
-                      <span className="text-[10px] text-redhill-muted uppercase font-bold block">Carpet Area</span>
-                      <span className="text-sm font-bold text-redhill-charcoal">{selectedProject.carpetArea}</span>
+                    <div className="bg-redhill-ivory p-3.5 rounded-xs border border-redhill-line">
+                      <span className="text-[10px] text-redhill-muted uppercase tracking-[0.14em] block">Allotted Area</span>
+                      <span className="text-xs font-medium text-redhill-charcoal mt-1 block">{selectedProject.carpetArea}</span>
                     </div>
-                    <div className="bg-redhill-sand/70 p-3.5 rounded-xl border border-redhill-line">
-                      <span className="text-[10px] text-redhill-muted uppercase font-bold block">Possession</span>
-                      <span className="text-sm font-bold text-emerald-700">{selectedProject.possessionDate}</span>
+                    <div className="bg-redhill-ivory p-3.5 rounded-xs border border-redhill-line">
+                      <span className="text-[10px] text-redhill-muted uppercase tracking-[0.14em] block">Possession</span>
+                      <span className="text-xs font-medium text-emerald-800 mt-1 block">{selectedProject.possessionDate}</span>
                     </div>
                   </div>
 
                   {/* Description */}
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider font-bold text-redhill-muted mb-2">Project Overview</h4>
-                    <p className="text-sm text-stone-700 leading-relaxed">{selectedProject.description}</p>
+                    <h4 className="text-[11px] uppercase tracking-[0.18em] font-medium text-redhill-muted mb-2">Project Overview</h4>
+                    <p className="text-sm text-stone-700 leading-relaxed font-light">{selectedProject.description}</p>
                   </div>
-
-                  {/* Demo Visual Showcase Grid */}
-                  {currentGallery.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs uppercase tracking-wider font-bold text-amber-700 flex items-center gap-1.5">
-                          <Camera className="w-4 h-4 text-amber-700" />
-                          Demo Visual Showcase & Amenities
-                        </h4>
-                        <span className="text-[11px] text-redhill-muted">Click any photo to inspect</span>
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {currentGallery.map((photo, gIdx) => (
-                          <div 
-                            key={gIdx}
-                            onClick={() => setActivePhotoIdx(gIdx)}
-                            className={`group relative rounded-xl overflow-hidden border cursor-pointer aspect-video transition-all duration-300 ${
-                              activePhotoIdx === gIdx ? 'border-redhill-red ring-2 ring-redhill-red/50 shadow-lg' : 'border-redhill-line hover:border-redhill-stone hover:scale-[1.02]'
-                            }`}
-                          >
-                            <img src={photo.url} alt={photo.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                            <div className="absolute top-2 left-2">
-                              <span className="text-[9px] font-black uppercase tracking-wider bg-black/70 backdrop-blur px-2 py-0.5 rounded text-amber-300 border border-white/10">
-                                {photo.tag}
-                              </span>
-                            </div>
-                            <div className="absolute bottom-2 left-2 right-2">
-                              <p className="text-[11px] font-bold text-white truncate">{photo.title}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Highlights */}
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider font-bold text-redhill-muted mb-3">Signature Amenities & Highlights</h4>
+                    <h4 className="text-[11px] uppercase tracking-[0.18em] font-medium text-redhill-muted mb-3">Signature Architectural Features</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {selectedProject.highlights.map((hl, i) => (
-                        <div key={i} className="flex items-center gap-2.5 bg-[#FBF9F5] p-3 rounded-xl border border-redhill-line text-xs text-redhill-charcoal">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+                        <div key={i} className="flex items-center gap-2.5 bg-redhill-ivory p-3 rounded-xs border border-redhill-line text-xs text-redhill-charcoal font-light">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0" />
                           <span>{hl}</span>
                         </div>
                       ))}
@@ -1135,10 +1085,10 @@ export default function ShowcaseExplore({
                   </div>
 
                 {/* Enquiry & Site Visit Form */}
-                <form onSubmit={handleSendEnquiry} className="pt-4 border-t border-redhill-line space-y-4">
-                  <h4 className="text-sm font-bold text-redhill-charcoal flex items-center gap-2">
-                    <Car className="w-4 h-4 text-amber-700" />
-                    Book Site Visit / Request Detailed Floor Plans
+                <form onSubmit={handleSendEnquiry} className="pt-5 border-t border-redhill-line space-y-4">
+                  <h4 className="text-sm font-medium text-redhill-charcoal flex items-center gap-2 font-serif text-lg">
+                    <Car className="w-4 h-4 text-redhill-gold" />
+                    Book Private Site Tour / Request Dossier
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1147,14 +1097,14 @@ export default function ShowcaseExplore({
                       value={enquiryPhone}
                       onChange={(e) => setEnquiryPhone(e.target.value)}
                       placeholder="Your Mobile (+91 ...)"
-                      className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal focus:ring-2 focus:ring-redhill-red/30 outline-none"
+                      className="field text-xs"
                       required
                     />
                     <input 
                       type="date" 
                       value={siteVisitDate}
                       onChange={(e) => setSiteVisitDate(e.target.value)}
-                      className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal focus:ring-2 focus:ring-redhill-red/30 outline-none"
+                      className="field text-xs"
                     />
                   </div>
 
@@ -1163,12 +1113,12 @@ export default function ShowcaseExplore({
                     value={enquiryMessage}
                     onChange={(e) => setEnquiryMessage(e.target.value)}
                     placeholder="Specific questions or custom requirements?"
-                    className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal focus:ring-2 focus:ring-redhill-red/30 outline-none"
+                    className="field text-xs"
                   />
 
                   {showEnquirySuccess && (
-                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-xl text-xs font-bold flex items-center gap-2">
-                      <Check className="w-4 h-4" /> Thank you! Your request has been submitted. Our team will contact you shortly.
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xs text-xs font-medium flex items-center gap-2">
+                      <Check className="w-4 h-4" /> Thank you. Your inquiry has been submitted to the Redhill concierge.
                     </div>
                   )}
 
@@ -1176,15 +1126,15 @@ export default function ShowcaseExplore({
                     <button
                       type="submit"
                       disabled={submittingEnquiry}
-                      className="flex-1 bg-redhill-red hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg  cursor-pointer disabled:opacity-60"
+                      className="btn-primary flex-1 py-3 text-xs uppercase tracking-[0.14em]"
                     >
-                      <Send className="w-4 h-4" />
-                      {submittingEnquiry ? 'Sending...' : 'Schedule Site Tour'}
+                      <Send className="w-3.5 h-3.5" />
+                      {submittingEnquiry ? 'Submitting...' : 'Schedule Site Tour'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setSelectedProject(null)}
-                      className="bg-redhill-sand/70 hover:bg-redhill-sand text-redhill-charcoal font-bold py-3.5 px-6 rounded-xl text-xs transition-colors cursor-pointer"
+                      className="btn-secondary py-3 px-6 text-xs uppercase tracking-[0.14em]"
                     >
                       Close
                     </button>
@@ -1205,48 +1155,49 @@ export default function ShowcaseExplore({
         {showSiteVisitModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-redhill-line text-redhill-charcoal relative shadow-2xl space-y-5"
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-white rounded-[4px] max-w-md w-full p-6 sm:p-8 border border-redhill-line text-redhill-charcoal relative shadow-2xl space-y-5"
             >
               <button
                 onClick={() => setShowSiteVisitModal(false)}
-                className="absolute top-4 right-4 text-redhill-muted hover:text-redhill-charcoal transition-colors"
+                className="absolute top-4 right-4 text-redhill-muted hover:text-redhill-charcoal transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="space-y-2 text-center">
-                <div className="w-12 h-12 bg-redhill-red/20 text-redhill-red rounded-2xl flex items-center justify-center mx-auto">
-                  <Car className="w-6 h-6" />
+              <div className="space-y-1.5 text-center">
+                <div className="w-10 h-10 bg-redhill-sand border border-redhill-line rounded-xs flex items-center justify-center mx-auto text-redhill-charcoal">
+                  <Car className="w-5 h-5 text-redhill-gold" />
                 </div>
-                <h3 className="text-xl font-bold text-redhill-charcoal">Book Property Visit</h3>
-                <p className="text-xs text-redhill-muted">
+                <h3 className="text-xl font-normal text-redhill-charcoal font-serif">Book Property Walkthrough</h3>
+                <p className="text-xs text-redhill-muted font-light">
                   Enjoy complimentary pickup and guided preview across our Bangalore flagship properties.
                 </p>
               </div>
 
               <form onSubmit={handleSendEnquiry} className="space-y-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-redhill-muted block mb-1">Contact Phone</label>
+                  <label className="field-label mb-1">Contact Phone</label>
                   <input 
                     type="tel"
                     value={enquiryPhone}
                     onChange={(e) => setEnquiryPhone(e.target.value)}
                     placeholder="+91 98765 43210"
-                    className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
+                    className="field text-xs"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-redhill-muted block mb-1">Preferred Date</label>
+                  <label className="field-label mb-1">Preferred Date</label>
                   <input 
                     type="date"
                     value={siteVisitDate}
                     onChange={(e) => setSiteVisitDate(e.target.value)}
-                    className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
+                    className="field text-xs"
                   />
                 </div>
 
@@ -1259,10 +1210,10 @@ export default function ShowcaseExplore({
                 <button
                   type="submit"
                   disabled={submittingEnquiry}
-                  className="w-full bg-redhill-red hover:bg-red-700 text-white font-bold py-3.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg  cursor-pointer disabled:opacity-60"
+                  className="btn-primary w-full py-3.5 text-xs uppercase tracking-[0.14em]"
                 >
-                  <Send className="w-4 h-4" />
-                  {submittingEnquiry ? 'Submitting...' : 'Confirm Visit Booking'}
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{submittingEnquiry ? 'Submitting...' : 'Confirm Appointment'}</span>
                 </button>
               </form>
             </motion.div>
@@ -1568,7 +1519,7 @@ export default function ShowcaseExplore({
                             value={refereeName}
                             onChange={(e) => setRefereeName(e.target.value)}
                             placeholder="e.g. Rajesh Malhotra"
-                            className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
+                            className="field text-xs"
                             required
                           />
                         </div>
@@ -1582,7 +1533,7 @@ export default function ShowcaseExplore({
                             value={refereePhone}
                             onChange={(e) => setRefereePhone(e.target.value)}
                             placeholder="+91 98765 43210"
-                            className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
+                            className="field text-xs"
                             required
                           />
                         </div>
@@ -1598,7 +1549,7 @@ export default function ShowcaseExplore({
                             value={refereeEmail}
                             onChange={(e) => setRefereeEmail(e.target.value)}
                             placeholder="rajesh@example.com"
-                            className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
+                            className="field text-xs"
                           />
                         </div>
 
@@ -1611,7 +1562,7 @@ export default function ShowcaseExplore({
                             value={refereeCity}
                             onChange={(e) => setRefereeCity(e.target.value)}
                             placeholder="Bangalore, Mumbai, NRI..."
-                            className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
+                            className="field text-xs"
                           />
                         </div>
                       </div>
@@ -1661,7 +1612,7 @@ export default function ShowcaseExplore({
                           value={refereeNotes}
                           onChange={(e) => setRefereeNotes(e.target.value)}
                           placeholder="e.g. Looking for a 3 BHK duplex facing pool; flexible timeline"
-                          className="w-full text-xs p-3.5 rounded-xl bg-redhill-sand/70 border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
+                          className="field text-xs"
                         />
                       </div>
 

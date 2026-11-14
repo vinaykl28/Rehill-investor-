@@ -91,19 +91,19 @@ export default function InteractiveMap({
   const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(queryTarget)}&t=${mapType}&z=14&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <div className={`relative rounded-3xl overflow-hidden bg-white border border-redhill-line shadow-2xl transition-all duration-300 ${
-      isFullscreen ? 'fixed inset-4 z-50 rounded-2xl' : 'w-full'
+    <div className={`relative rounded-[4px] overflow-hidden bg-white border border-redhill-line shadow-lg transition-all duration-300 ${
+      isFullscreen ? 'fixed inset-4 z-50 rounded-[4px]' : 'w-full'
     }`}>
       {/* Top Header Controls Bar */}
-      <div className="p-4 sm:p-5 border-b border-redhill-line bg-redhill-sand-deep backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 border-b border-redhill-line bg-white flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-redhill-red/10 border border-redhill-red/20 flex items-center justify-center text-redhill-red">
-            <MapPin className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xs bg-redhill-sand border border-redhill-line flex items-center justify-center text-redhill-charcoal">
+            <MapPin className="w-4 h-4 text-redhill-gold" />
           </div>
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-redhill-charcoal font-serif flex items-center gap-2">
+            <h3 className="text-lg sm:text-xl font-normal text-redhill-charcoal font-serif flex items-center gap-2">
               <span>Google Maps Location</span>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 font-sans">
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-800 font-medium px-2 py-0.5 rounded-xs border border-emerald-500/20 font-sans uppercase tracking-[0.14em]">
                 Live GPS
               </span>
             </h3>
@@ -113,12 +113,12 @@ export default function InteractiveMap({
 
         {/* Map View & Layer Toggle (Standard Roadmap vs Satellite) */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <div className="flex bg-redhill-ivory p-1 rounded-xl border border-redhill-line text-xs font-bold">
+          <div className="flex bg-redhill-sand p-1 rounded-xs border border-redhill-line text-xs font-medium">
             <button
               onClick={() => setMapType('m')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xs transition-all flex items-center gap-1.5 cursor-pointer uppercase tracking-[0.12em] text-[11px] ${
                 mapType === 'm'
-                  ? 'bg-redhill-red text-white shadow-md'
+                  ? 'bg-redhill-charcoal text-white shadow-xs'
                   : 'text-redhill-muted hover:text-redhill-charcoal'
               }`}
             >
@@ -127,9 +127,9 @@ export default function InteractiveMap({
             </button>
             <button
               onClick={() => setMapType('k')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xs transition-all flex items-center gap-1.5 cursor-pointer uppercase tracking-[0.12em] text-[11px] ${
                 mapType === 'k'
-                  ? 'bg-redhill-red text-white shadow-md'
+                  ? 'bg-redhill-charcoal text-white shadow-xs'
                   : 'text-redhill-muted hover:text-redhill-charcoal'
               }`}
             >
@@ -142,16 +142,16 @@ export default function InteractiveMap({
             href={selectedProject.googleMapsUrl}
             target="_blank"
             rel="noreferrer"
-            className="px-3.5 py-2 bg-redhill-sand/70 hover:bg-redhill-sand text-redhill-charcoal rounded-xl text-xs font-bold border border-redhill-line transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 bg-white hover:bg-redhill-sand text-redhill-charcoal rounded-xs text-xs uppercase tracking-[0.12em] font-medium border border-redhill-line transition-all flex items-center gap-1.5 cursor-pointer"
             title="Open in Google Maps App"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-amber-700" />
-            <span className="hidden sm:inline">Open in Google Maps</span>
+            <ExternalLink className="w-3.5 h-3.5 text-redhill-gold" />
+            <span className="hidden sm:inline">Open in Maps</span>
           </a>
 
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 bg-redhill-sand/70 hover:bg-redhill-sand text-stone-700 hover:text-redhill-charcoal rounded-xl border border-redhill-line transition-colors cursor-pointer"
+            className="p-2 bg-white hover:bg-redhill-sand text-redhill-charcoal rounded-xs border border-redhill-line transition-colors cursor-pointer"
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? <X className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -161,20 +161,20 @@ export default function InteractiveMap({
 
       {/* Project Selector Pills Bar */}
       <div className="px-4 sm:px-6 py-3 bg-redhill-ivory border-b border-redhill-line flex items-center gap-2 overflow-x-auto custom-scrollbar">
-        <span className="text-xs text-redhill-muted font-bold uppercase tracking-wider shrink-0 mr-1">Select Project:</span>
+        <span className="text-[11px] text-redhill-muted uppercase tracking-[0.18em] font-medium shrink-0 mr-1">Select Project:</span>
         {projects.map(p => {
           const isSelected = selectedProject.id === p.id;
           return (
             <button
               key={p.id}
               onClick={() => setSelectedProject(p)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xs text-xs uppercase tracking-[0.12em] font-medium transition-all border shrink-0 flex items-center gap-2 cursor-pointer ${
                 isSelected
-                  ? 'bg-redhill-red text-white border-redhill-red shadow-lg shadow-redhill-red/25'
-                  : 'bg-[#FBF9F5] text-stone-700 border-redhill-line hover:bg-redhill-sand hover:text-redhill-charcoal'
+                  ? 'bg-redhill-charcoal text-white border-redhill-charcoal'
+                  : 'bg-white text-stone-700 border-redhill-line hover:border-redhill-stone hover:text-redhill-charcoal'
               }`}
             >
-              <MapPin className={`w-3.5 h-3.5 ${isSelected ? 'text-redhill-charcoal' : 'text-amber-700'}`} />
+              <MapPin className={`w-3.5 h-3.5 ${isSelected ? 'text-redhill-gold-soft' : 'text-redhill-gold'}`} />
               <span>{p.name}</span>
             </button>
           );
@@ -194,18 +194,18 @@ export default function InteractiveMap({
         />
 
         {/* Floating Google Maps Style Location Card (Left / Bottom Overlay) */}
-        <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:w-[380px] bg-redhill-sand-deep backdrop-blur-2xl rounded-2xl p-5 border border-redhill-line shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-20">
+        <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:w-[380px] bg-white/95 backdrop-blur-md rounded-[4px] p-5 border border-redhill-line shadow-xl z-20">
           <div className="flex items-start justify-between gap-3 pb-3 border-b border-redhill-line">
             <div>
-              <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+              <span className="text-[10px] font-medium text-redhill-gold uppercase tracking-[0.18em] bg-redhill-sand px-2 py-0.5 rounded-xs border border-redhill-line">
                 {selectedProject.location.split(',')[0]}
               </span>
-              <h4 className="text-base font-bold text-redhill-charcoal font-serif mt-1">{selectedProject.name}</h4>
+              <h4 className="text-lg font-medium text-redhill-charcoal font-serif mt-1.5">{selectedProject.name}</h4>
               <p className="text-xs text-redhill-muted mt-0.5 line-clamp-2">{selectedProject.address}</p>
             </div>
             <button
               onClick={handleCopyCoordinates}
-              className="p-2 text-redhill-muted hover:text-redhill-charcoal hover:bg-redhill-sand rounded-lg transition-colors shrink-0"
+              className="p-2 text-redhill-muted hover:text-redhill-charcoal hover:bg-redhill-sand rounded-xs transition-colors shrink-0"
               title="Copy GPS coordinates"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-700" /> : <Copy className="w-4 h-4" />}
@@ -222,16 +222,16 @@ export default function InteractiveMap({
             ))}
           </div>
 
-          {/* Action CTAs */}
+          {/* Action Row */}
           <div className="grid grid-cols-2 gap-2 pt-3">
             <a
               href={selectedProject.googleMapsUrl}
               target="_blank"
               rel="noreferrer"
-              className="bg-redhill-sand/70 hover:bg-redhill-sand text-redhill-charcoal py-2.5 px-3 rounded-xl text-xs font-bold transition-all border border-redhill-line flex items-center justify-center gap-1.5 cursor-pointer"
+              className="btn-secondary py-2.5 px-3 text-xs uppercase tracking-[0.12em]"
             >
-              <Navigation className="w-3.5 h-3.5 text-cyan-700" />
-              <span>Get Directions</span>
+              <Navigation className="w-3.5 h-3.5 text-redhill-gold" />
+              <span>Directions</span>
             </a>
 
             <button
@@ -241,7 +241,7 @@ export default function InteractiveMap({
                   window.open(selectedProject.googleMapsUrl, '_blank');
                 }
               }}
-              className="bg-redhill-red hover:bg-red-700 text-white py-2.5 px-3 rounded-xl text-xs font-bold transition-all shadow-md shadow-redhill-red/25 flex items-center justify-center gap-1.5 cursor-pointer"
+              className="btn-primary py-2.5 px-3 text-xs uppercase tracking-[0.12em]"
             >
               <Car className="w-3.5 h-3.5" />
               <span>Visit Site</span>

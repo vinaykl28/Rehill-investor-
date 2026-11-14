@@ -886,9 +886,9 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
                       <div className="p-6 flex-1 flex flex-col justify-between space-y-5">
                         <div className="space-y-5">
                           <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div className="p-3.5 rounded-md bg-redhill-ivory border border-redhill-line">
+                            <div className="p-3.5 rounded-xs bg-redhill-ivory border border-redhill-line">
                               <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted mb-1 flex items-center gap-1">
-                                <IndianRupee className="w-3 h-3 text-redhill-red" />
+                                <IndianRupee className="w-3 h-3 text-redhill-gold" />
                                 Invested Capital
                               </p>
                               <p className="font-serif text-lg text-redhill-charcoal font-medium tabular">
@@ -896,7 +896,7 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
                               </p>
                             </div>
 
-                            <div className="p-3.5 rounded-md bg-redhill-ivory border border-redhill-line">
+                            <div className="p-3.5 rounded-xs bg-redhill-ivory border border-redhill-line">
                               <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted mb-1 flex items-center gap-1">
                                 <Maximize className="w-3 h-3 text-redhill-gold" />
                                 Allotted Area
@@ -906,9 +906,9 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
                               </p>
                             </div>
 
-                            <div className="p-3.5 rounded-md bg-redhill-ivory border border-redhill-line">
+                            <div className="p-3.5 rounded-xs bg-redhill-ivory border border-redhill-line">
                               <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted mb-1">Entry Rate</p>
-                              <p className="font-serif text-sm text-redhill-charcoal font-medium tabular">
+                              <p className="font-serif text-base text-redhill-charcoal font-medium tabular">
                                 {project.price_at_investment ? `₹${formatNumber(project.price_at_investment)}/sqft` : 'N/A'}
                               </p>
                               {project.investment_date && (
@@ -919,9 +919,9 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
                               )}
                             </div>
 
-                            <div className="p-3.5 rounded-md bg-redhill-ivory border border-redhill-line">
+                            <div className="p-3.5 rounded-xs bg-redhill-ivory border border-redhill-line">
                               <p className="text-[10px] uppercase tracking-[0.16em] text-emerald-700 mb-1">Market Rate</p>
-                              <p className="font-serif text-sm text-emerald-800 font-semibold tabular">
+                              <p className="font-serif text-base text-emerald-800 font-medium tabular">
                                 {project.market_price_per_sqft ? `₹${formatNumber(project.market_price_per_sqft)}/sqft` : 'N/A'}
                               </p>
                               <p className="text-[10px] text-redhill-muted mt-1 flex items-center gap-1">
@@ -933,7 +933,7 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
 
                           {/* Current plot valuation & return */}
                           {marketValue > 0 && (
-                            <div className="p-4 bg-redhill-ink text-white rounded-md space-y-2">
+                            <div className="p-4 bg-redhill-ink text-white rounded-xs space-y-2">
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/65">Current Holding Value</span>
                                 <span className="font-serif text-lg text-redhill-gold-soft font-medium tabular">

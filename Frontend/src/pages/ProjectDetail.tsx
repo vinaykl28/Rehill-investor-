@@ -353,40 +353,40 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3">
+                <div className="bg-white border border-redhill-line rounded-xs p-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted mb-1.5">Status</p>
                   <StatusChip status={project.status} />
                 </div>
-                <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3">
+                <div className="bg-white border border-redhill-line rounded-xs p-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted mb-1">Investment</p>
-                  <p className="font-serif text-sm text-redhill-charcoal tabular">
+                  <p className="font-serif text-base text-redhill-charcoal tabular">
                     {project.investment_amount ? formatCurrency(project.investment_amount) : (project.contribution || 'N/A')}
                   </p>
                 </div>
-                <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3">
+                <div className="bg-white border border-redhill-line rounded-xs p-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted mb-1">Allotted Area</p>
-                  <p className="font-serif text-sm text-redhill-charcoal tabular">
+                  <p className="font-serif text-base text-redhill-charcoal tabular">
                     {project.allotted_sqft ? `${project.allotted_sqft.toLocaleString('en-IN')} sqft` : 'N/A'}
                   </p>
                 </div>
-                <div className="bg-[#FBF9F5] border border-redhill-line rounded-md p-3">
+                <div className="bg-white border border-redhill-line rounded-xs p-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted mb-1">Buy Rate</p>
-                  <p className="font-serif text-sm text-redhill-charcoal tabular">
+                  <p className="font-serif text-base text-redhill-charcoal tabular">
                     {project.price_at_investment ? `₹${project.price_at_investment.toLocaleString('en-IN')}/sqft` : 'N/A'}
                   </p>
                 </div>
               </div>
 
               {project.market_price_per_sqft && project.allotted_sqft ? (
-                <div className="p-4 bg-emerald-500/[0.06] border border-emerald-500/20 rounded-md space-y-2">
+                <div className="p-4 bg-redhill-ink text-white rounded-xs space-y-2.5">
                   <div className="flex justify-between items-center text-xs">
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-emerald-700 font-semibold mb-0.5">Current Rate</p>
-                      <p className="font-serif text-base text-emerald-700 tabular">₹{project.market_price_per_sqft.toLocaleString('en-IN')}/sqft</p>
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-white/60 mb-0.5">Prevailing Rate</p>
+                      <p className="font-serif text-base text-redhill-gold-soft tabular">₹{project.market_price_per_sqft.toLocaleString('en-IN')}/sqft</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-emerald-700 font-semibold mb-0.5">Current Value</p>
-                      <p className="font-serif text-base text-emerald-700 tabular">{formatCurrency(project.allotted_sqft * project.market_price_per_sqft)}</p>
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-white/60 mb-0.5">Current Value</p>
+                      <p className="font-serif text-base text-redhill-gold-soft tabular">{formatCurrency(project.allotted_sqft * project.market_price_per_sqft)}</p>
                     </div>
                   </div>
                   
@@ -394,9 +394,9 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                     const gain = (project.allotted_sqft * project.market_price_per_sqft) - project.investment_amount;
                     const gainPct = ((gain / project.investment_amount) * 100).toFixed(1);
                     return (
-                      <div className="flex justify-between items-center pt-2 border-t border-emerald-500/20 text-xs">
-                        <span className="text-emerald-700">Net Capital Change</span>
-                        <span className={`font-serif font-medium tabular ${gain >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                      <div className="flex justify-between items-center pt-2.5 border-t border-white/15 text-xs">
+                        <span className="text-white/70">Net Capital Change</span>
+                        <span className={`font-serif font-medium tabular ${gain >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {gain >= 0 ? '+' : ''}{formatCurrency(gain)}
                           <span className="ml-1 text-[11px] font-mono">
                             ({gain >= 0 ? '+' : ''}{gainPct}%)
@@ -427,21 +427,21 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
-                  "flex items-center gap-2 py-4 border-b-2 transition-all font-medium text-xs sm:text-[13px] tracking-[0.04em] cursor-pointer whitespace-nowrap shrink-0",
+                  "flex items-center gap-2 py-4 border-b-2 transition-all text-xs uppercase tracking-[0.12em] cursor-pointer whitespace-nowrap shrink-0",
                   activeTab === tab.id
-                    ? "border-redhill-red text-redhill-red font-semibold"
-                    : "border-transparent text-redhill-muted hover:text-redhill-charcoal"
+                    ? "border-redhill-charcoal text-redhill-charcoal font-medium"
+                    : "border-transparent text-redhill-muted hover:text-redhill-charcoal font-normal"
                 )}
               >
-                <tab.icon className={cn("w-3.5 h-3.5", activeTab === tab.id ? "text-redhill-red" : "text-redhill-muted")} />
+                <tab.icon className={cn("w-3.5 h-3.5", activeTab === tab.id ? "text-redhill-gold" : "text-redhill-muted")} />
                 <span className="hidden sm:inline">{tab.labelFull}</span>
                 <span className="sm:hidden">{tab.label}</span>
                 {tab.count > 0 && (
                   <span className={cn(
-                    "ml-1 px-1.5 py-0.5 rounded text-[10px] tabular font-medium",
+                    "ml-1 px-1.5 py-0.2 rounded-xs text-[10px] tabular font-medium",
                     activeTab === tab.id
-                      ? "bg-red-50 text-redhill-red border border-redhill-red/20"
-                      : "bg-redhill-sand/70 text-redhill-muted"
+                      ? "bg-redhill-sand text-redhill-charcoal border border-redhill-stone"
+                      : "bg-redhill-ivory text-redhill-muted border border-redhill-line"
                   )}>
                     {tab.count}
                   </span>
