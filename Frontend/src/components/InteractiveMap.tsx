@@ -194,18 +194,18 @@ export default function InteractiveMap({
         />
 
         {/* Floating Google Maps Style Location Card (Left / Bottom Overlay) */}
-        <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:w-[380px] bg-white/95 backdrop-blur-md rounded-[4px] p-5 border border-redhill-line shadow-xl z-20">
-          <div className="flex items-start justify-between gap-3 pb-3 border-b border-redhill-line">
+        <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-auto sm:w-[380px] bg-white/95 backdrop-blur-md rounded-xs p-4 sm:p-5 border border-redhill-line shadow-xl z-20">
+          <div className="flex items-start justify-between gap-3 pb-2.5 sm:pb-3 border-b border-redhill-line">
             <div>
-              <span className="text-[10px] font-medium text-redhill-gold uppercase tracking-[0.18em] bg-redhill-sand px-2 py-0.5 rounded-xs border border-redhill-line">
+              <span className="text-[9px] sm:text-[10px] font-semibold text-redhill-gold uppercase tracking-[0.18em] bg-redhill-sand px-2 py-0.5 rounded-xs border border-redhill-line">
                 {selectedProject.location.split(',')[0]}
               </span>
-              <h4 className="text-lg font-medium text-redhill-charcoal font-serif mt-1.5">{selectedProject.name}</h4>
-              <p className="text-xs text-redhill-muted mt-0.5 line-clamp-2">{selectedProject.address}</p>
+              <h4 className="text-base sm:text-lg font-medium text-redhill-charcoal font-serif mt-1">{selectedProject.name}</h4>
+              <p className="text-[11px] sm:text-xs text-redhill-muted mt-0.5 line-clamp-1 sm:line-clamp-2">{selectedProject.address}</p>
             </div>
             <button
               onClick={handleCopyCoordinates}
-              className="p-2 text-redhill-muted hover:text-redhill-charcoal hover:bg-redhill-sand rounded-xs transition-colors shrink-0"
+              className="p-1.5 sm:p-2 text-redhill-muted hover:text-redhill-charcoal hover:bg-redhill-sand rounded-xs transition-colors shrink-0 cursor-pointer"
               title="Copy GPS coordinates"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-700" /> : <Copy className="w-4 h-4" />}
@@ -213,7 +213,7 @@ export default function InteractiveMap({
           </div>
 
           {/* Key Proximity Highlights */}
-          <div className="space-y-1.5 py-3 border-b border-redhill-line">
+          <div className="hidden sm:block space-y-1.5 py-3 border-b border-redhill-line">
             {selectedProject.proximityHighlights.map((item, idx) => (
               <div key={idx} className="flex items-center gap-2 text-xs text-stone-700">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
@@ -223,12 +223,12 @@ export default function InteractiveMap({
           </div>
 
           {/* Action Row */}
-          <div className="grid grid-cols-2 gap-2 pt-3">
+          <div className="grid grid-cols-2 gap-2 pt-2.5 sm:pt-3">
             <a
               href={selectedProject.googleMapsUrl}
               target="_blank"
               rel="noreferrer"
-              className="btn-secondary py-2.5 px-3 text-xs uppercase tracking-[0.12em]"
+              className="btn-secondary py-2 sm:py-2.5 px-2.5 sm:px-3 text-[11px] sm:text-xs uppercase tracking-[0.12em] justify-center"
             >
               <Navigation className="w-3.5 h-3.5 text-redhill-gold" />
               <span>Directions</span>
@@ -241,7 +241,7 @@ export default function InteractiveMap({
                   window.open(selectedProject.googleMapsUrl, '_blank');
                 }
               }}
-              className="btn-primary py-2.5 px-3 text-xs uppercase tracking-[0.12em]"
+              className="btn-primary py-2 sm:py-2.5 px-2.5 sm:px-3 text-[11px] sm:text-xs uppercase tracking-[0.12em] justify-center"
             >
               <Car className="w-3.5 h-3.5" />
               <span>Visit Site</span>

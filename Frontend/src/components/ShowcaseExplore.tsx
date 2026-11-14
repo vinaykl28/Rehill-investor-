@@ -342,7 +342,7 @@ export default function ShowcaseExplore({
       {/* 1. DESKTOP STICKY TOP NAVIGATION BAR                     */}
       {/* ======================================================== */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-redhill-line">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
           
           {/* Brand Logo */}
           <div className="flex items-center gap-8">

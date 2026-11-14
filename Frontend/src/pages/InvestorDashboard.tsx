@@ -342,7 +342,7 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
         {/* 01 — INVESTMENT OVERVIEW KPI STRIP                             */}
         {/* ============================================================== */}
         <section aria-label="Investment Overview">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {[
               {
                 label: 'Total Invested Capital',
@@ -384,21 +384,23 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
               <Reveal
                 key={stat.label}
                 delay={idx * 0.04}
-                className={`p-5 sm:p-6 rounded-lg border flex flex-col justify-between min-h-[144px] ${
+                className={`p-4 sm:p-6 rounded-xs border flex flex-col justify-between min-h-[124px] sm:min-h-[144px] ${
+                  idx === 4 ? 'col-span-2 sm:col-span-1' : ''
+                } ${
                   stat.accent
-                    ? 'bg-redhill-ink text-white border-redhill-ink'
+                    ? 'bg-redhill-ink text-white border-redhill-ink shadow-md'
                     : 'lux-card'
                 }`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`eyebrow ${stat.accent ? 'text-redhill-gold-soft' : 'text-redhill-muted'}`}>
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <span className={`text-[10px] sm:text-[11px] uppercase tracking-[0.16em] sm:tracking-[0.22em] font-medium ${stat.accent ? 'text-redhill-gold-soft' : 'text-redhill-muted'}`}>
                     {stat.label}
                   </span>
-                  <stat.icon className={`w-4 h-4 ${stat.accent ? 'text-redhill-gold-soft' : 'text-redhill-gold'}`} />
+                  <stat.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${stat.accent ? 'text-redhill-gold-soft' : 'text-redhill-gold'}`} />
                 </div>
                 <div>
                   <p
-                    className={`font-serif text-2xl sm:text-[1.65rem] tracking-tight tabular ${
+                    className={`font-serif text-lg sm:text-[1.65rem] tracking-tight tabular font-normal ${
                       stat.accent
                         ? 'text-white'
                         : 'positive' in stat
@@ -410,7 +412,7 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
                   >
                     {stat.value}
                   </p>
-                  <p className={`text-[11px] mt-1 ${stat.accent ? 'text-white/65' : 'text-redhill-muted'}`}>
+                  <p className={`text-[10px] sm:text-[11px] mt-0.5 sm:mt-1 truncate ${stat.accent ? 'text-white/65' : 'text-redhill-muted'}`}>
                     {stat.hint}
                   </p>
                 </div>

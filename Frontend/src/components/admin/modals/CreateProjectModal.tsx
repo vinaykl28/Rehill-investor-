@@ -68,85 +68,119 @@ export default function CreateProjectModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white border border-redhill-line rounded-2xl w-full max-w-lg p-8 shadow-2xl text-redhill-charcoal max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-redhill-charcoal font-serif flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-redhill-red" />
-            Create New Project
-          </h2>
-          <button onClick={onClose} className="text-redhill-muted hover:text-redhill-charcoal transition-colors cursor-pointer">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/65 backdrop-blur-xs transition-opacity" 
+        onClick={onClose} 
+      />
+
+      {/* Modal Dialog */}
+      <div className="relative bg-white border border-[#E2DDD5] rounded-xs w-full max-w-lg p-7 sm:p-9 shadow-2xl text-redhill-charcoal max-h-[92vh] overflow-y-auto">
+        <div className="flex items-start justify-between pb-5 border-b border-redhill-line mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="w-5 h-px bg-redhill-gold" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-redhill-gold">
+                Portfolio Development
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-normal text-redhill-charcoal font-serif tracking-tight">
+              Create New Development
+            </h2>
+          </div>
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="p-1.5 -mr-1.5 text-stone-400 hover:text-redhill-charcoal hover:bg-stone-100 rounded-xs transition-colors cursor-pointer"
+            aria-label="Close"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-bold text-redhill-muted mb-1">Project Name</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+              Development Name <span className="text-redhill-red">*</span>
+            </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FBF9F5] border border-redhill-line rounded-xl outline-none text-redhill-charcoal focus:bg-redhill-sand/70 focus:border-redhill-red/40 focus:ring-2 focus:ring-redhill-red/10 transition-all"
-              placeholder="e.g. Redhill Heights"
+              className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
+              placeholder="e.g. Redhill Sovereign Sky-Decks"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-redhill-muted mb-1">Location</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+              Location <span className="text-redhill-red">*</span>
+            </label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FBF9F5] border border-redhill-line rounded-xl outline-none text-redhill-charcoal focus:bg-redhill-sand/70 focus:border-redhill-red/40 focus:ring-2 focus:ring-redhill-red/10 transition-all"
-              placeholder="e.g. Bangalore, KA"
+              className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
+              placeholder="e.g. Indiranagar, Bengaluru"
               required
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-redhill-muted mb-1">Total Value</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+                Total Valuation <span className="text-redhill-red">*</span>
+              </label>
               <input
                 type="text"
                 value={totalValue}
                 onChange={(e) => setTotalValue(e.target.value)}
-                className="w-full px-4 py-3 bg-[#FBF9F5] border border-redhill-line rounded-xl outline-none text-redhill-charcoal focus:bg-redhill-sand/70 focus:border-redhill-red/40 focus:ring-2 focus:ring-redhill-red/10 transition-all"
-                placeholder="e.g. ₹150 Cr"
+                className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
+                placeholder="e.g. ₹185 Cr"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-redhill-muted mb-1">Initial Status</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-4 py-3 bg-[#FBF9F5] border border-redhill-line rounded-xl outline-none text-redhill-charcoal focus:bg-redhill-sand/70 focus:border-redhill-red/40 transition-all"
+                className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all cursor-pointer"
               >
-                <option value="Planning" className="bg-white">Planning</option>
-                <option value="Approval" className="bg-white">Approval</option>
-                <option value="Construction" className="bg-white">Construction</option>
-                <option value="Completed" className="bg-white">Completed</option>
+                <option value="Planning">Planning</option>
+                <option value="Approval">Approval</option>
+                <option value="Construction">Construction</option>
+                <option value="Completed">Completed</option>
               </select>
             </div>
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-bold text-redhill-muted">Cover Image</label>
-              <div className="flex bg-redhill-sand/70 p-0.5 rounded-lg border border-redhill-line">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700">
+                Architectural Cover Image
+              </label>
+              <div className="flex bg-stone-100 p-0.5 rounded-xs border border-stone-200">
                 <button
                   type="button"
                   onClick={() => setImageUploadType('url')}
-                  className={cn("px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 cursor-pointer transition-all", imageUploadType === 'url' ? "bg-redhill-red text-white" : "text-redhill-muted hover:text-redhill-charcoal")}
+                  className={cn(
+                    "px-2.5 py-1 rounded-xs text-[10px] font-semibold uppercase tracking-[0.12em] flex items-center gap-1 cursor-pointer transition-all",
+                    imageUploadType === 'url' ? "bg-white text-stone-900 shadow-xs" : "text-stone-500 hover:text-stone-900"
+                  )}
                 >
                   <LinkIcon className="w-3 h-3" /> URL
                 </button>
                 <button
                   type="button"
                   onClick={() => setImageUploadType('file')}
-                  className={cn("px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 cursor-pointer transition-all", imageUploadType === 'file' ? "bg-redhill-red text-white" : "text-redhill-muted hover:text-redhill-charcoal")}
+                  className={cn(
+                    "px-2.5 py-1 rounded-xs text-[10px] font-semibold uppercase tracking-[0.12em] flex items-center gap-1 cursor-pointer transition-all",
+                    imageUploadType === 'file' ? "bg-white text-stone-900 shadow-xs" : "text-stone-500 hover:text-stone-900"
+                  )}
                 >
                   <Upload className="w-3 h-3" /> Upload
                 </button>
@@ -158,13 +192,13 @@ export default function CreateProjectModal({
                 type="url"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full px-4 py-3 bg-[#FBF9F5] border border-redhill-line rounded-xl outline-none text-redhill-charcoal focus:bg-redhill-sand/70 focus:border-redhill-red/40 transition-all"
+                className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
                 placeholder="https://images.unsplash.com/..."
               />
             ) : (
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-redhill-line hover:border-redhill-red/40 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all bg-[#FBF9F5] hover:bg-[#FBF9F5]"
+                className="w-full border border-dashed border-[#D5CEC2] hover:border-stone-800 rounded-xs p-5 flex flex-col items-center justify-center cursor-pointer transition-all bg-stone-50/50 hover:bg-stone-50"
               >
                 <input 
                   type="file" 
@@ -173,39 +207,41 @@ export default function CreateProjectModal({
                   accept="image/*" 
                   className="hidden" 
                 />
-                <Upload className="w-6 h-6 text-redhill-muted mb-1" />
+                <Upload className="w-5 h-5 text-stone-500 mb-1" />
                 <p className="text-xs text-stone-700 font-medium">
-                  {imageFile ? imageFile.name : "Click to browse cover photo"}
+                  {imageFile ? imageFile.name : "Click to select architectural photo"}
                 </p>
               </div>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-redhill-muted mb-1">CCTV Stream URL (Optional)</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+              Live CCTV Stream URL (Optional)
+            </label>
             <input
               type="url"
               value={cctvUrl}
               onChange={(e) => setCctvUrl(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FBF9F5] border border-redhill-line rounded-xl outline-none text-redhill-charcoal focus:bg-redhill-sand/70 focus:border-redhill-red/40 transition-all"
-              placeholder="https://... live stream or video link"
+              className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
+              placeholder="https://... secure RTSP or HLS stream link"
             />
           </div>
 
-          <div className="flex gap-4 mt-6">
+          <div className="pt-4 flex items-center gap-3 border-t border-redhill-line">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-redhill-sand/70 hover:bg-redhill-sand border border-redhill-line rounded-xl font-bold transition-all text-stone-700 cursor-pointer"
+              className="flex-1 py-3 px-4 rounded-xs border border-[#D5CEC2] hover:border-stone-800 text-stone-700 hover:text-stone-900 bg-white text-xs font-semibold uppercase tracking-[0.14em] transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-3 bg-redhill-red hover:bg-red-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-redhill-red/25 cursor-pointer disabled:opacity-50"
+              className="flex-1 py-3 px-4 rounded-xs bg-redhill-charcoal hover:bg-redhill-red text-white text-xs font-semibold uppercase tracking-[0.14em] transition-all cursor-pointer disabled:opacity-50 shadow-md hover:shadow-lg"
             >
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? 'Creating...' : 'Create Development'}
             </button>
           </div>
         </form>

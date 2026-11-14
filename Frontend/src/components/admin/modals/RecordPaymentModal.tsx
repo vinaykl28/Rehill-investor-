@@ -53,107 +53,136 @@ export default function RecordPaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full border border-redhill-line overflow-hidden shadow-2xl">
-        <div className="p-6 border-b border-redhill-line flex items-center justify-between">
-          <h2 className="text-xl font-bold text-redhill-charcoal flex items-center gap-2">
-            <IndianRupee className="w-5 h-5 text-emerald-700" />
-            Record Payment / Invoice
-          </h2>
-          <button onClick={onClose} className="text-redhill-muted hover:text-redhill-charcoal transition-colors cursor-pointer">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/65 backdrop-blur-xs transition-opacity" 
+        onClick={onClose} 
+      />
+
+      {/* Modal Dialog */}
+      <div className="relative bg-white border border-[#E2DDD5] rounded-xs max-w-md w-full p-7 sm:p-9 shadow-2xl text-redhill-charcoal max-h-[92vh] overflow-y-auto">
+        <div className="flex items-start justify-between pb-5 border-b border-redhill-line mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="w-5 h-px bg-redhill-gold" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-redhill-gold">
+                Financial Ledger
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-normal text-redhill-charcoal font-serif tracking-tight">
+              Record Transaction
+            </h2>
+          </div>
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="p-1.5 -mr-1.5 text-stone-400 hover:text-redhill-charcoal hover:bg-stone-100 rounded-xs transition-colors cursor-pointer"
+            aria-label="Close"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-redhill-muted uppercase tracking-widest mb-1.5">Type</label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setPayType('invoice')}
-                className={cn(
-                  "flex-1 py-2 text-sm font-bold rounded-lg border transition-colors cursor-pointer",
-                  payType === 'invoice'
-                    ? "bg-amber-500/20 border-amber-500 text-amber-500"
-                    : "bg-redhill-sand/70 border-transparent text-redhill-muted"
-                )}
-              >
-                Invoice
-              </button>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+              Transaction Type
+            </label>
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setPayType('receipt')}
                 className={cn(
-                  "flex-1 py-2 text-sm font-bold rounded-lg border transition-colors cursor-pointer",
+                  "py-2.5 px-3 text-xs font-semibold uppercase tracking-[0.12em] rounded-xs border transition-all cursor-pointer text-center",
                   payType === 'receipt'
-                    ? "bg-emerald-500/20 border-emerald-500 text-emerald-500"
-                    : "bg-redhill-sand/70 border-transparent text-redhill-muted"
+                    ? "bg-[#191A1E] text-white border-[#191A1E]"
+                    : "bg-white text-stone-600 border-[#D5CEC2] hover:border-stone-800"
                 )}
               >
-                Receipt
+                Receipt (Credit)
+              </button>
+              <button
+                type="button"
+                onClick={() => setPayType('invoice')}
+                className={cn(
+                  "py-2.5 px-3 text-xs font-semibold uppercase tracking-[0.12em] rounded-xs border transition-all cursor-pointer text-center",
+                  payType === 'invoice'
+                    ? "bg-[#191A1E] text-white border-[#191A1E]"
+                    : "bg-white text-stone-600 border-[#D5CEC2] hover:border-stone-800"
+                )}
+              >
+                Invoice (Debit)
               </button>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-redhill-muted uppercase tracking-widest mb-1.5">Amount (₹)</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+                Amount (₹) <span className="text-redhill-red">*</span>
+              </label>
               <input
                 type="number"
                 required
                 value={payAmount}
                 onChange={e => setPayAmount(e.target.value)}
-                className="w-full bg-redhill-ivory border border-redhill-line rounded-xl px-4 py-2 text-redhill-charcoal outline-none focus:border-emerald-500/50"
-                placeholder="e.g. 50000"
+                className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all tabular-nums placeholder:text-stone-400"
+                placeholder="e.g. 500000"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-redhill-muted uppercase tracking-widest mb-1.5">Date</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+                Date <span className="text-redhill-red">*</span>
+              </label>
               <input
                 type="date"
                 required
                 value={payDate}
                 onChange={e => setPayDate(e.target.value)}
-                className="w-full bg-redhill-ivory border border-redhill-line rounded-xl px-4 py-2 text-redhill-charcoal outline-none focus:border-emerald-500/50"
+                className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all"
               />
             </div>
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-redhill-muted uppercase tracking-widest mb-1.5">Notes / Reference</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+              Reference / Notes
+            </label>
             <input
               type="text"
               value={payNotes}
               onChange={e => setPayNotes(e.target.value)}
-              className="w-full bg-redhill-ivory border border-redhill-line rounded-xl px-4 py-2 text-redhill-charcoal outline-none focus:border-emerald-500/50"
-              placeholder="e.g. NEFT Reference #12345"
+              className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
+              placeholder="e.g. RTGS UTR #9821829"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-redhill-muted uppercase tracking-widest mb-1.5">Attach Document (PDF/Image)</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+              Attachment (PDF / Image)
+            </label>
             <input
               type="file"
               onChange={e => setPayFile(e.target.files?.[0] || null)}
-              className="w-full text-xs text-redhill-muted file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/10 file:text-emerald-700 hover:file:bg-emerald-500/20"
+              className="w-full text-xs text-stone-600 file:mr-3 file:py-2 file:px-3 file:rounded-xs file:border file:border-[#D5CEC2] file:text-[11px] file:font-semibold file:uppercase file:tracking-[0.12em] file:bg-stone-50 file:text-stone-700 hover:file:bg-stone-100 cursor-pointer"
             />
           </div>
 
-          <div className="pt-2 flex gap-3">
+          <div className="pt-4 flex items-center gap-3 border-t border-redhill-line">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 bg-redhill-sand/70 hover:bg-redhill-sand text-stone-700 font-bold rounded-xl transition-all cursor-pointer"
+              className="flex-1 py-3 px-4 rounded-xs border border-[#D5CEC2] hover:border-stone-800 text-stone-700 hover:text-stone-900 bg-white text-xs font-semibold uppercase tracking-[0.14em] transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-50"
+              className="flex-1 py-3 px-4 rounded-xs bg-redhill-charcoal hover:bg-redhill-red text-white text-xs font-semibold uppercase tracking-[0.14em] transition-all cursor-pointer disabled:opacity-50 shadow-md hover:shadow-lg"
             >
-              {loading ? 'Saving...' : 'Record Transaction'}
+              {loading ? 'Recording...' : 'Record Transaction'}
             </button>
           </div>
         </form>

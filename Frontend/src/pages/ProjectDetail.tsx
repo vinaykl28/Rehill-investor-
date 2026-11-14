@@ -311,26 +311,26 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
                 );
               })()}
 
-              <div className="bg-[#FBF9F5] border border-redhill-line rounded-lg grid grid-cols-3 divide-x divide-redhill-line">
-                <div className="px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Milestones</p>
-                  <p className="font-serif text-base sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5">
+              <div className="bg-[#FAF8F5] border border-redhill-line rounded-xs grid grid-cols-3 divide-x divide-redhill-line">
+                <div className="px-2.5 sm:px-4 py-2.5 sm:py-3">
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-redhill-muted truncate">Milestones</p>
+                  <p className="font-serif text-sm sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5 truncate">
                     {milestones.filter(m => m.status === 'completed').length}/{milestones.length}
-                    <span className="text-[11px] font-sans font-normal text-redhill-muted ml-1">Done</span>
+                    <span className="text-[10px] sm:text-[11px] font-sans font-normal text-redhill-muted ml-1">Done</span>
                   </p>
                 </div>
-                <div className="px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Approvals &amp; Docs</p>
-                  <p className="font-serif text-base sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5">
+                <div className="px-2.5 sm:px-4 py-2.5 sm:py-3">
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-redhill-muted truncate">Approvals</p>
+                  <p className="font-serif text-sm sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5 truncate">
                     {docMilestones.length + approvalMilestones.length}
-                    <span className="text-[11px] font-sans font-normal text-redhill-muted ml-1">Filed</span>
+                    <span className="text-[10px] sm:text-[11px] font-sans font-normal text-redhill-muted ml-1">Filed</span>
                   </p>
                 </div>
-                <div className="px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-redhill-muted">Ledger Entries</p>
-                  <p className="font-serif text-base sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5">
+                <div className="px-2.5 sm:px-4 py-2.5 sm:py-3">
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-redhill-muted truncate">Ledger</p>
+                  <p className="font-serif text-sm sm:text-lg font-medium text-redhill-charcoal tabular mt-0.5 truncate">
                     {ledgerEntries.length}
-                    <span className="text-[11px] font-sans font-normal text-redhill-muted ml-1">Audited</span>
+                    <span className="text-[10px] sm:text-[11px] font-sans font-normal text-redhill-muted ml-1">Audited</span>
                   </p>
                 </div>
               </div>

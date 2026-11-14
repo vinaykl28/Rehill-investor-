@@ -61,6 +61,9 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
@@ -90,7 +93,15 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--color-redhill-muted); }
 
   /* Native form controls default to the light palette */
-  input, select, textarea { color-scheme: light; }
+  input, select, textarea {
+    color-scheme: light;
+    font-size: 16px; /* Prevents iOS Safari auto-zoom on mobile */
+  }
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: 14px;
+    }
+  }
   select option { color: var(--color-redhill-charcoal); background: #fff; }
 }
 

@@ -64,7 +64,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {/* Toast Container */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+      <div className="fixed bottom-5 inset-x-4 sm:inset-x-auto sm:right-6 sm:bottom-6 z-[100] flex flex-col gap-2.5 pointer-events-none items-center sm:items-end">
         <AnimatePresence mode="popLayout">
           {toasts.map(toast => {
             const config = variantConfig[toast.variant];
@@ -73,11 +73,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <motion.div
                 key={toast.id}
                 layout
-                initial={{ opacity: 0, x: 80, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 80, scale: 0.95 }}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className={`pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-xl border-l-4 ${config.border} bg-redhill-sand-deep backdrop-blur-xl border border-redhill-line shadow-[0_10px_40px_rgba(0,0,0,0.4)] min-w-[320px] max-w-[420px]`}
+                className={`pointer-events-auto flex items-center gap-3 px-4 sm:px-5 py-3 rounded-xs border-l-4 ${config.border} bg-white border border-[#E2DDD5] shadow-xl w-full sm:w-auto min-w-0 sm:min-w-[320px] max-w-[420px]`}
               >
                 <div className={`w-8 h-8 rounded-lg ${config.bg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-4 h-4 ${config.iconColor}`} />
