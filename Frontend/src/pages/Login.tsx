@@ -905,35 +905,37 @@ export default function Login({ onLogin }: LoginProps) {
                 reduceMotion
                   ? { scale: 1, opacity: 1 }
                   : {
-                      scale: [1.0, 1.03, 1.01, 1.035, 1.0],
-                      x: ['0%', '-0.8%', '0.6%', '-0.4%', '0%'],
-                      y: ['0%', '-0.5%', '-0.8%', '-0.2%', '0%'],
+                      scale: [1.0, 1.025, 1.01, 1.02, 1.0],
+                      x: ['0%', '-0.5%', '0.4%', '-0.2%', '0%'],
+                      y: ['0%', '-0.3%', '-0.5%', '-0.1%', '0%'],
                     }
               }
               transition={
                 reduceMotion
                   ? { duration: 0.6 }
                   : {
-                      duration: 28,
+                      duration: 26,
                       repeat: Infinity,
                       ease: 'easeInOut',
                     }
               }
               src={HERO_IMAGE}
               alt="Redhill contemporary biophilic boutique residential community in Bengaluru"
-              className="w-full h-full object-cover object-[center_50%] select-none pointer-events-none"
+              className="w-full h-full object-cover object-[58%_36%] sm:object-[center_50%] select-none pointer-events-none"
               style={{
                 imageRendering: 'auto',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'translateZ(0)',
+                willChange: 'transform',
+                transformOrigin: '58% 36%',
               }}
             />
           )}
         </motion.div>
 
-        {/* High-Clarity Architectural Scrim - preserves 8K sharpness, vibrant twilight pool & lush greenery */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#0A0B0E]/82 via-[#0A0B0E]/15 to-black/20 pointer-events-none" />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#0A0B0E]/65 via-transparent to-transparent pointer-events-none" />
+        {/* High-Clarity Bodhi Architectural Scrim - preserves 8K sharpness, radiant twilight sky & glowing pool */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#07080A]/82 via-[#07080A]/20 to-black/25 pointer-events-none" />
+        <div className="hidden sm:block absolute inset-0 z-10 bg-gradient-to-r from-[#07080A]/60 via-transparent to-transparent pointer-events-none" />
 
         {/* Top Header Spacer */}
         <div className="h-16 sm:h-20 shrink-0" aria-hidden="true" />
