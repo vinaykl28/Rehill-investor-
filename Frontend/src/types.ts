@@ -7,6 +7,7 @@ export interface User {
   role: Role;
   phone?: string;
   login_id?: string;
+  has_investments?: boolean;
   token?: string;
 }
 

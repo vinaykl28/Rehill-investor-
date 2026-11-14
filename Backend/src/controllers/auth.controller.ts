@@ -72,6 +72,12 @@ export const login = async (req: AuthRequest, res: Response) => {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 
+  const invRow: any = await db.get(
+    'SELECT COUNT(*)::int as count FROM investor_projects WHERE user_id = ?',
+    user.id
+  );
+  const hasInvestments = Number(invRow?.count || 0) > 0;
+
   res.json({
     id: user.id,
     email: user.email,
@@ -79,6 +85,7 @@ export const login = async (req: AuthRequest, res: Response) => {
     name: user.name,
     phone: user.phone || '',
     login_id: user.login_id || '',
+    has_investments: hasInvestments,
     token
   });
 };
@@ -130,7 +137,8 @@ export const signup = async (req: AuthRequest, res: Response) => {
       name: cleanName,
       role: 'investor',
       phone: cleanPhone,
-      login_id: login_id
+      login_id: login_id,
+      has_investments: false
     };
 
     const token = jwt.sign(
@@ -170,6 +178,11 @@ export const getMe = async (req: AuthRequest, res: Response) => {
   if (!dbUser) {
     return res.status(401).json({ error: 'User not found' });
   }
+  const invRow: any = await db.get(
+    'SELECT COUNT(*)::int as count FROM investor_projects WHERE user_id = ?',
+    dbUser.id
+  );
+  dbUser.has_investments = Number(invRow?.count || 0) > 0;
   res.json(dbUser);
 };
 
