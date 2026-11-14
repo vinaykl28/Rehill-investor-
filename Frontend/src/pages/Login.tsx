@@ -37,13 +37,10 @@ const HERO_VIDEO = import.meta.env.VITE_HERO_VIDEO_URL || '';
 const HERO_IMAGE =
   import.meta.env.VITE_HERO_POSTER_URL ||
   '/assets/projects/hero-highrise.jpg';
-const PHILOSOPHY_IMAGE = '/assets/projects/emerald-gardens.jpg';
 const EXPERIENCE_IMAGE = '/assets/projects/pinnacle-heights.jpg';
 const ACCESS_EDITORIAL_IMAGE = '/assets/projects/signature-towers.jpg';
 
 const NAV_LINKS = [
-  { id: 'philosophy', label: 'Philosophy' },
-  { id: 'lifestyle', label: 'Lifestyle & Sustainability' },
   { id: 'experience', label: 'Investor Experience' },
   { id: 'access', label: 'Investor Access' },
   { id: 'contact', label: 'Contact Us' },
@@ -941,10 +938,10 @@ export default function Login({ onLogin }: LoginProps) {
             <motion.div {...rise(0.3)} className="flex flex-wrap items-center gap-3.5 pt-2">
               <button
                 type="button"
-                onClick={() => scrollToSection('philosophy')}
+                onClick={() => scrollToSection('experience')}
                 className="btn-primary py-3.5 px-6 text-xs uppercase tracking-[0.14em]"
               >
-                Explore Philosophy
+                Investor Experience
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
@@ -961,160 +958,7 @@ export default function Login({ onLogin }: LoginProps) {
       </section>
 
       {/* ================================================================ */}
-      {/* 01 — ARCHITECTURAL PHILOSOPHY & SPATIAL DESIGN                   */}
-      {/* ================================================================ */}
-      <section id="philosophy" className="py-16 sm:py-24 lg:py-28 bg-redhill-ivory border-b border-redhill-line">
-        <div className="page-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-          <div className="lg:col-span-6 space-y-6">
-            <Reveal>
-              <p className="eyebrow text-redhill-gold mb-3 flex items-center gap-3">
-                <span className="w-8 h-px bg-redhill-red" />01 — Architectural Philosophy
-              </p>
-              <h2 className="display text-[clamp(1.85rem,3.2vw,3rem)] text-redhill-charcoal font-semibold leading-[1.12]">
-                Spaces that breathe, rooted in light, stone and living greenery.
-              </h2>
-              <p className="mt-4 text-redhill-muted text-sm sm:text-base lg:text-lg leading-relaxed">
-                Across thoughtfully proportioned 2-acre, 4-acre and 5-acre neighbourhoods in Bengaluru, Redhill designs contemporary 12+ storey residential communities where architecture steps back to let nature lead.
-              </p>
-              <p className="mt-3 text-redhill-muted text-sm sm:text-base leading-relaxed">
-                Every residence is planned as a corner-oriented home with deep cantilevered sit-out balconies, cross-ventilated living rooms, warm sandstone and timber louvers, and expansive views over vehicle-free landscaped courtyards.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.1}>
-              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-redhill-line">
-                <div>
-                  <p className="font-serif text-2xl sm:text-3xl text-redhill-charcoal font-semibold tabular">2–5 Acres</p>
-                  <p className="text-xs text-redhill-muted mt-1">Low-density community footprints</p>
-                </div>
-                <div className="border-l border-redhill-line pl-4">
-                  <p className="font-serif text-2xl sm:text-3xl text-redhill-charcoal font-semibold tabular">12+ Floors</p>
-                  <p className="text-xs text-redhill-muted mt-1">Boutique high-rise elevations</p>
-                </div>
-                <div className="border-l border-redhill-line pl-4">
-                  <p className="font-serif text-2xl sm:text-3xl text-[#3E5641] font-semibold tabular">65%+ Open</p>
-                  <p className="text-xs text-redhill-muted mt-1">Botanical courtyard &amp; tree cover</p>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-
-          <Reveal className="lg:col-span-6">
-            <div className="grid grid-cols-12 gap-4 items-end">
-              <div className="col-span-7 relative aspect-[4/5] rounded-md overflow-hidden border border-redhill-line bg-redhill-sand">
-                <img
-                  src={PHILOSOPHY_IMAGE}
-                  alt="Redhill botanical courtyard and contemporary 12-storey residential facade"
-                  loading="lazy"
-                  className="w-full h-full object-cover img-zoom"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <span className="absolute bottom-4 left-4 right-4 text-[11px] uppercase tracking-[0.16em] text-white/90">
-                  Botanical Central Greens · Vehicle-Free Podium
-                </span>
-              </div>
-              <div className="col-span-5 space-y-4">
-                <div className="relative aspect-[4/5] rounded-md overflow-hidden border border-redhill-line bg-redhill-sand">
-                  <img
-                    src={ACCESS_EDITORIAL_IMAGE}
-                    alt="Deep planted sit-out balconies and warm architectural louvers"
-                    loading="lazy"
-                    className="w-full h-full object-cover img-zoom"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <span className="absolute bottom-3 left-3 right-3 text-[10px] uppercase tracking-[0.16em] text-white/90">
-                    Planted Sit-Out Balconies
-                  </span>
-                </div>
-                <div className="p-4 bg-white border border-redhill-line rounded-md">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-[#3E5641] font-semibold">Biophilic Craft</p>
-                  <p className="font-serif text-sm text-redhill-charcoal mt-1 leading-snug">
-                    Natural daylight, cross-breeze orientation and tactile materials that age with grace.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* 02 — LIFESTYLE, AMENITIES & BIOPHILIC SUSTAINABILITY             */}
-      {/* ================================================================ */}
-      <section id="lifestyle" className="py-16 sm:py-24 bg-white border-b border-redhill-line">
-        <div className="page-container space-y-12">
-          <Reveal className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-redhill-line">
-            <div className="max-w-2xl">
-              <p className="eyebrow text-[#3E5641] mb-3 flex items-center gap-3">
-                <span className="w-8 h-px bg-[#3E5641]" />02 — Lifestyle, Amenities &amp; Sustainability
-              </p>
-              <h2 className="display text-[clamp(1.75rem,3vw,2.75rem)] text-redhill-charcoal font-semibold">
-                Designed around how families actually live, gather and unwind.
-              </h2>
-            </div>
-            <p className="text-sm text-redhill-muted max-w-md leading-relaxed">
-              Every Redhill development balances enduring residential comfort with responsible ecological stewardship—keeping maintenance practical and long-term asset value resilient.
-            </p>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                num: '01',
-                tag: 'Outdoor Living',
-                title: 'Deep Planted Balconies',
-                desc: 'Wide sit-out decks with integrated irrigation planters that extend your living room into a private elevated garden.',
-              },
-              {
-                num: '02',
-                tag: 'Sanctuary Grounds',
-                title: 'Vehicle-Free Courtyards',
-                desc: 'All vehicular movement is routed below ground, leaving the central courtyard calm for walking trails, shaded pergolas and children’s play.',
-              },
-              {
-                num: '03',
-                tag: 'Resident Wellbeing',
-                title: 'Clubhouse & Lap Pool',
-                desc: 'Intimate resident lounges, co-working libraries, fitness studios and temperature-controlled lap pools scaled for community privacy.',
-              },
-              {
-                num: '04',
-                tag: 'Sustainability',
-                title: 'Water & Solar Stewardship',
-                desc: 'Rainwater aquifer recharge, rooftop solar for common lighting, EV-ready parking bays and passive thermal facade shading.',
-              },
-            ].map((pillar, idx) => (
-              <Reveal
-                key={pillar.num}
-                delay={idx * 0.06}
-                className="p-6 rounded-md bg-redhill-ivory border border-redhill-line flex flex-col justify-between space-y-6"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs border-b border-redhill-line pb-3">
-                    <span className="font-mono text-redhill-gold font-semibold">{pillar.num}</span>
-                    <span className="text-[10px] uppercase tracking-[0.16em] text-[#3E5641] font-semibold">
-                      {pillar.tag}
-                    </span>
-                  </div>
-                  <h3 className="font-serif text-xl text-redhill-charcoal font-semibold pt-1">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-sm text-redhill-muted leading-relaxed">
-                    {pillar.desc}
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-redhill-line flex items-center justify-between text-[11px] text-redhill-charcoal font-medium">
-                  <span>Redhill Standard Specification</span>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#3E5641]" />
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* 03 — THE INVESTOR EXPERIENCE (Intentional dark architectural band)*/}
+      {/* 01 — THE INVESTOR EXPERIENCE (Intentional dark architectural band)*/}
       {/* ================================================================ */}
       <section id="experience" className="band-dark py-16 sm:py-24 lg:py-28">
         <div className="page-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -1138,7 +982,7 @@ export default function Login({ onLogin }: LoginProps) {
           <div className="lg:col-span-7">
             <Reveal>
               <p className="eyebrow text-redhill-gold-soft mb-4 flex items-center gap-3">
-                <span className="w-8 h-px bg-redhill-gold-soft" />03 — The Investor Experience
+                <span className="w-8 h-px bg-redhill-gold-soft" />01 — The Investor Experience
               </p>
               <h2 className="display text-[clamp(1.75rem,3.2vw,3rem)] text-white max-w-2xl">
                 Every square foot, milestone and rupee — accounted for in real time.
@@ -1197,7 +1041,7 @@ export default function Login({ onLogin }: LoginProps) {
               <div className="relative z-10 space-y-5 my-auto py-8">
                 <p className="eyebrow text-redhill-gold-soft flex items-center gap-3">
                   <span className="w-8 h-px bg-redhill-gold-soft" />
-                  04 — Private Investor Portal
+                  02 — Private Investor Portal
                 </p>
                 <h2 className="display text-[clamp(1.65rem,2.8vw,2.5rem)] text-white font-semibold leading-tight">
                   Contemporary residential communities, transparently managed.
@@ -1247,7 +1091,7 @@ export default function Login({ onLogin }: LoginProps) {
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
           <div className="bg-white border border-redhill-line rounded-lg p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-1.5 max-w-xl">
-              <p className="eyebrow text-redhill-gold">05 — Contact Us</p>
+              <p className="eyebrow text-redhill-gold">03 — Contact Us</p>
               <h2 className="font-serif text-2xl sm:text-3xl text-redhill-charcoal font-normal tracking-tight">
                 Speak with the Redhill Bengaluru Desk
               </h2>
