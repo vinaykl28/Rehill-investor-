@@ -884,8 +884,8 @@ export default function Login({ onLogin }: LoginProps) {
       >
         {/* Architectural Photograph / Video Backdrop with cinematic movement */}
         <motion.div
-          style={{ y: heroParallax, scale: heroScale, opacity: heroOpacity }}
-          className="absolute -inset-y-16 -inset-x-8 z-0"
+          style={{ y: heroParallax, opacity: heroOpacity }}
+          className="absolute inset-0 z-0 overflow-hidden"
         >
           {HERO_VIDEO && !reduceMotion ? (
             <video
@@ -900,28 +900,33 @@ export default function Login({ onLogin }: LoginProps) {
             />
           ) : (
             <motion.img
-              initial={{ scale: 1.12, opacity: 0.85 }}
+              initial={{ scale: 1.0, opacity: 1 }}
               animate={
                 reduceMotion
                   ? { scale: 1, opacity: 1 }
                   : {
-                      scale: [1.04, 1.1, 1.06, 1.12, 1.04],
-                      x: ['0%', '-1.2%', '1%', '-0.6%', '0%'],
-                      y: ['0%', '-0.8%', '-1.4%', '-0.3%', '0%'],
+                      scale: [1.0, 1.03, 1.01, 1.035, 1.0],
+                      x: ['0%', '-0.8%', '0.6%', '-0.4%', '0%'],
+                      y: ['0%', '-0.5%', '-0.8%', '-0.2%', '0%'],
                     }
               }
               transition={
                 reduceMotion
                   ? { duration: 0.6 }
                   : {
-                      duration: 26,
+                      duration: 28,
                       repeat: Infinity,
                       ease: 'easeInOut',
                     }
               }
               src={HERO_IMAGE}
               alt="Redhill contemporary biophilic boutique residential community in Bengaluru"
-              className="w-full h-full object-cover object-[center_50%] select-none"
+              className="w-full h-full object-cover object-[center_50%] select-none pointer-events-none"
+              style={{
+                imageRendering: 'auto',
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'translateZ(0)',
+              }}
             />
           )}
         </motion.div>
