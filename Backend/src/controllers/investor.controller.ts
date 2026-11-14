@@ -3,28 +3,28 @@ import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 import { getNotificationLogs } from '../services/notification.service.js';
 
-export const getProjects = (req: AuthRequest, res: Response) => {
+export const getProjects = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
 
-  const projects = db.prepare(`
+  const projects = await db.all(`
     SELECT p.*, ip.contribution, ip.investment_amount, ip.allotted_sqft, ip.market_price_per_sqft, ip.price_at_investment, ip.investment_date 
     FROM projects p 
     JOIN investor_projects ip ON p.id = ip.project_id 
     WHERE ip.user_id = ?
-  `).all(req.user.id);
+  `, req.user.id);
   res.json(projects);
 };
 
-export const getProjectById = (req: AuthRequest, res: Response) => {
+export const getProjectById = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
     const isStaff = ['admin', 'super_admin', 'senior_admin', 'site_manager', 'financial_officer', 'marketing_manager', 'support_agent'].includes(req.user.role);
-    const access: any = db.prepare('SELECT * FROM investor_projects WHERE user_id = ? AND project_id = ?').get(req.user.id, req.params.id);
+    const access: any = await db.get('SELECT * FROM investor_projects WHERE user_id = ? AND project_id = ?', req.user.id, req.params.id);
 
     if (!access && !isStaff) return res.status(403).json({ error: 'Access denied' });
 
-    const project: any = db.prepare('SELECT * FROM projects WHERE id = ?').get(req.params.id);
+    const project: any = await db.get('SELECT * FROM projects WHERE id = ?', req.params.id);
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     if (access && project) {
@@ -36,12 +36,12 @@ export const getProjectById = (req: AuthRequest, res: Response) => {
       project.investment_date = access.investment_date;
     }
 
-    const milestones = db.prepare('SELECT * FROM milestones WHERE project_id = ? ORDER BY id ASC').all(req.params.id);
-    const updates = db.prepare('SELECT * FROM progress_updates WHERE project_id = ? ORDER BY date DESC, id DESC').all(req.params.id);
-    const announcements = db.prepare('SELECT * FROM announcements WHERE project_id = ? ORDER BY date DESC, id DESC').all(req.params.id);
+    const milestones = await db.all('SELECT * FROM milestones WHERE project_id = ? ORDER BY id ASC', req.params.id);
+    const updates = await db.all('SELECT * FROM progress_updates WHERE project_id = ? ORDER BY date DESC, id DESC', req.params.id);
+    const announcements = await db.all('SELECT * FROM announcements WHERE project_id = ? ORDER BY date DESC, id DESC', req.params.id);
     const queries = isStaff
-      ? db.prepare('SELECT * FROM queries WHERE project_id = ? ORDER BY created_at ASC').all(req.params.id)
-      : db.prepare('SELECT * FROM queries WHERE user_id = ? AND project_id = ? ORDER BY created_at ASC').all(req.user.id, req.params.id);
+      ? await db.all('SELECT * FROM queries WHERE project_id = ? ORDER BY created_at ASC', req.params.id)
+      : await db.all('SELECT * FROM queries WHERE user_id = ? AND project_id = ? ORDER BY created_at ASC', req.user.id, req.params.id);
 
     res.json({ project, milestones, updates, announcements, queries });
   } catch (e: any) {
@@ -49,24 +49,24 @@ export const getProjectById = (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getNewProjects = (req: AuthRequest, res: Response) => {
+export const getNewProjects = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
-    const newProjects = db.prepare(`
+    const newProjects = await db.all(`
       SELECT p.* FROM projects p 
       WHERE p.id NOT IN (
         SELECT ip.project_id FROM investor_projects ip WHERE ip.user_id = ?
       )
       ORDER BY p.created_at DESC
-    `).all(req.user.id);
+    `, req.user.id);
     res.json(newProjects);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 };
 
-export const getPayments = (req: AuthRequest, res: Response) => {
+export const getPayments = async (req: AuthRequest, res: Response) => {
   try {
     const { projectId } = req.params;
     const userId = req.user?.id;
@@ -74,15 +74,15 @@ export const getPayments = (req: AuthRequest, res: Response) => {
 
     const isStaff = ['admin', 'super_admin', 'senior_admin', 'site_manager', 'financial_officer', 'marketing_manager', 'support_agent'].includes(req.user.role);
     const payments = isStaff
-      ? db.prepare('SELECT * FROM payments WHERE project_id = ? ORDER BY date DESC').all(projectId)
-      : db.prepare('SELECT * FROM payments WHERE project_id = ? AND user_id = ? ORDER BY date DESC').all(projectId, userId);
+      ? await db.all('SELECT * FROM payments WHERE project_id = ? ORDER BY date DESC', projectId)
+      : await db.all('SELECT * FROM payments WHERE project_id = ? AND user_id = ? ORDER BY date DESC', projectId, userId);
     res.json(payments);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 };
 
-export const getInvestorLedger = (req: AuthRequest, res: Response) => {
+export const getInvestorLedger = async (req: AuthRequest, res: Response) => {
   try {
     const { projectId } = req.params;
     const userId = req.user?.id;
@@ -90,23 +90,22 @@ export const getInvestorLedger = (req: AuthRequest, res: Response) => {
 
     const isStaff = ['admin', 'super_admin', 'senior_admin', 'site_manager', 'financial_officer', 'marketing_manager', 'support_agent'].includes(req.user.role);
     const entries = isStaff
-      ? db.prepare('SELECT * FROM ledger WHERE project_id = ? ORDER BY transaction_date DESC').all(projectId)
-      : db.prepare('SELECT * FROM ledger WHERE project_id = ? AND user_id = ? ORDER BY transaction_date DESC').all(projectId, userId);
+      ? await db.all('SELECT * FROM ledger WHERE project_id = ? ORDER BY transaction_date DESC', projectId)
+      : await db.all('SELECT * FROM ledger WHERE project_id = ? AND user_id = ? ORDER BY transaction_date DESC', projectId, userId);
     res.json(entries);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 };
 
-export const getNotifications = (req: AuthRequest, res: Response) => {
+export const getNotifications = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const notifications = getNotificationLogs({ userId });
+    const notifications = await getNotificationLogs({ userId });
     res.json(notifications);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 };
-

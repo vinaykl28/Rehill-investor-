@@ -25,15 +25,15 @@ export interface MilestoneNotificationResult {
 /**
  * Recalculate and update the overall project completion percentage based on its milestones
  */
-export const recalculateProjectProgress = (projectId: number): number => {
+export const recalculateProjectProgress = async (projectId: number): Promise<number> => {
   try {
-    const milestones = db.prepare('SELECT completion_percentage FROM milestones WHERE project_id = ?').all(projectId) as { completion_percentage: number }[];
+    const milestones = await db.all('SELECT completion_percentage FROM milestones WHERE project_id = ?', projectId);
     if (!milestones || milestones.length === 0) return 0;
 
-    const totalPct = milestones.reduce((sum, m) => sum + (m.completion_percentage || 0), 0);
+    const totalPct = milestones.reduce((sum: number, m: any) => sum + (m.completion_percentage || 0), 0);
     const avgPct = Math.round(totalPct / milestones.length);
 
-    db.prepare('UPDATE projects SET completion_percentage = ? WHERE id = ?').run(avgPct, projectId);
+    await db.run('UPDATE projects SET completion_percentage = ? WHERE id = ?', avgPct, projectId);
     return avgPct;
   } catch (err) {
     console.error('Error recalculating project progress:', err);
@@ -44,14 +44,14 @@ export const recalculateProjectProgress = (projectId: number): number => {
 /**
  * Fetch all investors assigned to a specific project
  */
-export const getProjectInvestors = (projectId: number): ProjectInvestor[] => {
+export const getProjectInvestors = async (projectId: number): Promise<ProjectInvestor[]> => {
   try {
-    const investors = db.prepare(`
+    const investors = await db.all(`
       SELECT u.id, u.name, u.email, u.phone, ip.contribution, ip.allotted_sqft
       FROM users u
       JOIN investor_projects ip ON ip.user_id = u.id
       WHERE ip.project_id = ? AND u.role = 'investor'
-    `).all(projectId) as ProjectInvestor[];
+    `, projectId) as ProjectInvestor[];
 
     return investors;
   } catch (err) {
@@ -71,12 +71,12 @@ export const sendMilestoneCompletedNotification = async (
     completionDate?: string;
   }
 ): Promise<MilestoneNotificationResult> => {
-  const milestone: any = db.prepare(`
+  const milestone: any = await db.get(`
     SELECT m.*, p.name as project_name, p.location as project_location, p.image_url as project_image_url
     FROM milestones m
     JOIN projects p ON p.id = m.project_id
     WHERE m.id = ?
-  `).get(milestoneId);
+  `, milestoneId);
 
   if (!milestone) {
     throw new Error(`Milestone with ID ${milestoneId} not found`);
@@ -94,7 +94,7 @@ export const sendMilestoneCompletedNotification = async (
   const notes = options?.customNotes || milestone.notes || undefined;
 
   // 1. Query ONLY the investors invested in this project
-  const investors = getProjectInvestors(projectId);
+  const investors = await getProjectInvestors(projectId);
 
   const notifiedRecipients: { id: number; name: string; email: string }[] = [];
 
@@ -124,11 +124,11 @@ export const sendMilestoneCompletedNotification = async (
 
       // 3. Log notification in database for audit and transparency
       try {
-        db.prepare(`
+        await db.run(`
           INSERT INTO notifications (
             project_id, milestone_id, user_id, recipient_email, recipient_name, subject, type, content_html, status
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
+        `,
           projectId,
           milestoneId,
           investor.id,
@@ -159,17 +159,17 @@ export const sendMilestoneCompletedNotification = async (
       ? `We have completed the ${milestoneName} (${milestoneCategory}) milestone for ${projectName}. Notes: ${notes}`
       : `We are pleased to announce that the ${milestoneName} (${milestoneCategory}) milestone for ${projectName} has been successfully completed.`;
 
-    db.prepare(`
+    await db.run(`
       INSERT INTO announcements (project_id, title, content)
       VALUES (?, ?, ?)
-    `).run(projectId, announcementTitle, announcementContent);
+    `, projectId, announcementTitle, announcementContent);
     announcementCreated = true;
   } catch (annErr) {
     console.error('Error creating announcement:', annErr);
   }
 
   // 5. Recalculate project progress
-  recalculateProjectProgress(projectId);
+  await recalculateProjectProgress(projectId);
 
   return {
     success: true,
@@ -187,7 +187,7 @@ export const sendMilestoneCompletedNotification = async (
 /**
  * Retrieve notification logs with optional project/milestone filters
  */
-export const getNotificationLogs = (filters?: { projectId?: number; milestoneId?: number; userId?: number }) => {
+export const getNotificationLogs = async (filters?: { projectId?: number; milestoneId?: number; userId?: number }) => {
   let query = `
     SELECT 
       n.*,
@@ -221,5 +221,5 @@ export const getNotificationLogs = (filters?: { projectId?: number; milestoneId?
 
   query += ` ORDER BY n.created_at DESC`;
 
-  return db.prepare(query).all(...params);
+  return await db.all(query, ...params);
 };

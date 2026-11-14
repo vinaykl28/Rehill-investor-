@@ -13,26 +13,26 @@ import {
 const VALID_STAFF_ROLES = ['super_admin', 'senior_admin', 'admin', 'site_manager', 'financial_officer', 'marketing_manager', 'support_agent'];
 
 // Manage Admins
-export const getAdmins = (req: AuthRequest, res: Response) => {
+export const getAdmins = async (req: AuthRequest, res: Response) => {
   if (req.user?.role !== 'super_admin' && req.user?.role !== 'senior_admin') return res.status(403).json({ error: 'Admin management access required' });
-  const admins = db.prepare("SELECT id, email, name, role FROM users WHERE role != 'investor' ORDER BY id ASC").all();
+  const admins = await db.all("SELECT id, email, name, role FROM users WHERE role != 'investor' ORDER BY id ASC");
   res.json(admins);
 };
 
-export const createAdmin = (req: AuthRequest, res: Response) => {
+export const createAdmin = async (req: AuthRequest, res: Response) => {
   if (req.user?.role !== 'super_admin' && req.user?.role !== 'senior_admin') return res.status(403).json({ error: 'Admin management access required' });
   const { email, password, name, role } = req.body;
   if (!VALID_STAFF_ROLES.includes(role)) return res.status(400).json({ error: 'Invalid role' });
   const hashedPassword = bcrypt.hashSync(password, 10);
   try {
-    const result = db.prepare('INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)').run(email, hashedPassword, name, role);
+    const result = await db.run('INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)', email, hashedPassword, name, role);
     res.json({ id: result.lastInsertRowid, email, name, role });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }
 };
 
-export const updateAdmin = (req: AuthRequest, res: Response) => {
+export const updateAdmin = async (req: AuthRequest, res: Response) => {
   if (req.user?.role !== 'super_admin' && req.user?.role !== 'senior_admin') return res.status(403).json({ error: 'Admin management access required' });
   const { id } = req.params;
   const { name, email, role, password } = req.body;
@@ -44,22 +44,22 @@ export const updateAdmin = (req: AuthRequest, res: Response) => {
   try {
     if (password) {
       const hashedPassword = bcrypt.hashSync(password, 10);
-      db.prepare(`
+      await db.run(`
         UPDATE users
         SET name = COALESCE(?, name),
             email = COALESCE(?, email),
             role = COALESCE(?, role),
             password = ?
         WHERE id = ? AND role != 'investor'
-      `).run(name || null, email || null, role || null, hashedPassword, id);
+      `, name || null, email || null, role || null, hashedPassword, id);
     } else {
-      db.prepare(`
+      await db.run(`
         UPDATE users
         SET name = COALESCE(?, name),
             email = COALESCE(?, email),
             role = COALESCE(?, role)
         WHERE id = ? AND role != 'investor'
-      `).run(name || null, email || null, role || null, id);
+      `, name || null, email || null, role || null, id);
     }
     res.json({ message: 'Admin updated successfully' });
   } catch (e: any) {
@@ -67,14 +67,14 @@ export const updateAdmin = (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteAdmin = (req: AuthRequest, res: Response) => {
+export const deleteAdmin = async (req: AuthRequest, res: Response) => {
   if (req.user?.role !== 'super_admin') return res.status(403).json({ error: 'Super Admin required to delete staff' });
   const { id } = req.params;
   if (Number(id) === req.user?.id) {
     return res.status(400).json({ error: 'Cannot delete your own account' });
   }
   try {
-    db.prepare("DELETE FROM users WHERE id = ? AND role != 'investor'").run(id);
+    await db.run("DELETE FROM users WHERE id = ? AND role != 'investor'", id);
     res.json({ message: 'Admin deleted successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -82,18 +82,19 @@ export const deleteAdmin = (req: AuthRequest, res: Response) => {
 };
 
 // Manage Investors
-export const getInvestors = (_req: AuthRequest, res: Response) => {
-  const investors = db.prepare('SELECT id, email, name, phone, login_id FROM users WHERE role = ?').all('investor');
+export const getInvestors = async (_req: AuthRequest, res: Response) => {
+  const investors = await db.all('SELECT id, email, name, phone, login_id FROM users WHERE role = ?', 'investor');
   res.json(investors);
 };
 
-export const createInvestor = (req: AuthRequest, res: Response) => {
+export const createInvestor = async (req: AuthRequest, res: Response) => {
   const { email, password, name, phone } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10);
   const login_id = (name.substring(0, 2).toLowerCase() + phone.replace(/\D/g, '').slice(-3));
 
   try {
-    const result = db.prepare('INSERT INTO users (email, password, name, role, phone, login_id) VALUES (?, ?, ?, ?, ?, ?)').run(
+    const result = await db.run(
+      'INSERT INTO users (email, password, name, role, phone, login_id) VALUES (?, ?, ?, ?, ?, ?)',
       email, hashedPassword, name, 'investor', phone, login_id
     );
     res.json({ id: result.lastInsertRowid, email, name, role: 'investor', login_id, phone });
@@ -102,14 +103,14 @@ export const createInvestor = (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteInvestor = (req: AuthRequest, res: Response) => {
+export const deleteInvestor = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   try {
-    db.prepare('DELETE FROM notifications WHERE user_id = ?').run(id);
-    db.prepare('DELETE FROM payments WHERE user_id = ?').run(id);
-    db.prepare('DELETE FROM investor_projects WHERE user_id = ?').run(id);
-    db.prepare('DELETE FROM queries WHERE user_id = ?').run(id);
-    db.prepare('DELETE FROM users WHERE id = ? AND role = ?').run(id, 'investor');
+    await db.run('DELETE FROM notifications WHERE user_id = ?', id);
+    await db.run('DELETE FROM payments WHERE user_id = ?', id);
+    await db.run('DELETE FROM investor_projects WHERE user_id = ?', id);
+    await db.run('DELETE FROM queries WHERE user_id = ?', id);
+    await db.run('DELETE FROM users WHERE id = ? AND role = ?', id, 'investor');
     res.json({ message: 'Investor deleted successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -117,24 +118,25 @@ export const deleteInvestor = (req: AuthRequest, res: Response) => {
 };
 
 // Manage Projects
-export const getProjects = (_req: AuthRequest, res: Response) => {
-  const projects = db.prepare('SELECT * FROM projects').all();
+export const getProjects = async (_req: AuthRequest, res: Response) => {
+  const projects = await db.all('SELECT * FROM projects');
   res.json(projects);
 };
 
-export const createProject = (req: AuthRequest, res: Response) => {
+export const createProject = async (req: AuthRequest, res: Response) => {
   const { name, location, total_value, status, image_url, cctv_url } = req.body;
-  const result = db.prepare('INSERT INTO projects (name, location, total_value, status, image_url, cctv_url) VALUES (?, ?, ?, ?, ?, ?)').run(
+  const result = await db.run(
+    'INSERT INTO projects (name, location, total_value, status, image_url, cctv_url) VALUES (?, ?, ?, ?, ?, ?)',
     name, location, total_value, status, image_url, cctv_url
   );
   res.json({ id: result.lastInsertRowid, name, location });
 };
 
-export const updateProject = (req: AuthRequest, res: Response) => {
+export const updateProject = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const { name, location, total_value, status, image_url, completion_percentage, cctv_url } = req.body;
   try {
-    db.prepare(`
+    await db.run(`
       UPDATE projects 
       SET name = COALESCE(?, name),
           location = COALESCE(?, location),
@@ -144,50 +146,51 @@ export const updateProject = (req: AuthRequest, res: Response) => {
           completion_percentage = COALESCE(?, completion_percentage),
           cctv_url = COALESCE(?, cctv_url)
       WHERE id = ?
-    `).run(name, location, total_value, status, image_url, completion_percentage, cctv_url, id);
+    `, name, location, total_value, status, image_url, completion_percentage, cctv_url, id);
     res.json({ message: 'Project updated successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }
 };
 
-export const deleteProject = (req: AuthRequest, res: Response) => {
+export const deleteProject = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   try {
-    db.prepare('DELETE FROM notifications WHERE project_id = ?').run(id);
-    db.prepare('DELETE FROM progress_updates WHERE project_id = ?').run(id);
-    db.prepare('DELETE FROM announcements WHERE project_id = ?').run(id);
-    db.prepare('DELETE FROM milestones WHERE project_id = ?').run(id);
-    db.prepare('DELETE FROM payments WHERE project_id = ?').run(id);
-    db.prepare('DELETE FROM investor_projects WHERE project_id = ?').run(id);
-    db.prepare('DELETE FROM queries WHERE project_id = ?').run(id);
-    db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+    await db.run('DELETE FROM notifications WHERE project_id = ?', id);
+    await db.run('DELETE FROM progress_updates WHERE project_id = ?', id);
+    await db.run('DELETE FROM announcements WHERE project_id = ?', id);
+    await db.run('DELETE FROM milestones WHERE project_id = ?', id);
+    await db.run('DELETE FROM payments WHERE project_id = ?', id);
+    await db.run('DELETE FROM investor_projects WHERE project_id = ?', id);
+    await db.run('DELETE FROM queries WHERE project_id = ?', id);
+    await db.run('DELETE FROM projects WHERE id = ?', id);
     res.json({ message: 'Project deleted successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }
 };
 
-export const updateCctv = (req: AuthRequest, res: Response) => {
+export const updateCctv = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const { cctv_url } = req.body;
-  db.prepare('UPDATE projects SET cctv_url = ? WHERE id = ?').run(cctv_url, id);
+  await db.run('UPDATE projects SET cctv_url = ? WHERE id = ?', cctv_url, id);
   res.json({ success: true });
 };
 
 // Assign Investor to Project
-export const assignInvestor = (req: AuthRequest, res: Response) => {
+export const assignInvestor = async (req: AuthRequest, res: Response) => {
   const { user_id, project_id, contribution, investment_amount, allotted_sqft, market_price_per_sqft, price_at_investment, investment_date } = req.body;
   try {
-    db.prepare('INSERT INTO investor_projects (user_id, project_id, contribution, investment_amount, allotted_sqft, market_price_per_sqft, price_at_investment, investment_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
+    await db.run(
+      'INSERT INTO investor_projects (user_id, project_id, contribution, investment_amount, allotted_sqft, market_price_per_sqft, price_at_investment, investment_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       user_id, project_id, contribution, investment_amount || 0, allotted_sqft || 0, market_price_per_sqft || 0, price_at_investment || 0, investment_date || null
     );
 
-    db.prepare(`
+    await db.run(`
       INSERT INTO ledger (
         user_id, project_id, transaction_type, investment_amount, contribution, allotted_sqft, price_at_investment, market_price_per_sqft, note, transaction_date
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `,
       user_id, project_id, 'initial_assignment', investment_amount || 0, contribution, allotted_sqft || 0, price_at_investment || market_price_per_sqft || 0, market_price_per_sqft || 0, 'Initial Investor Assignment', investment_date || new Date().toISOString().split('T')[0]
     );
 
@@ -197,11 +200,12 @@ export const assignInvestor = (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateAssignment = (req: AuthRequest, res: Response) => {
+export const updateAssignment = async (req: AuthRequest, res: Response) => {
   const { userId, projectId } = req.params;
   const { investment_amount, allotted_sqft, market_price_per_sqft, contribution, price_at_investment, investment_date } = req.body;
   try {
-    db.prepare('UPDATE investor_projects SET investment_amount = ?, allotted_sqft = ?, market_price_per_sqft = ?, contribution = ?, price_at_investment = ?, investment_date = ? WHERE user_id = ? AND project_id = ?').run(
+    await db.run(
+      'UPDATE investor_projects SET investment_amount = ?, allotted_sqft = ?, market_price_per_sqft = ?, contribution = ?, price_at_investment = ?, investment_date = ? WHERE user_id = ? AND project_id = ?',
       investment_amount, allotted_sqft, market_price_per_sqft, contribution, price_at_investment || 0, investment_date || null, userId, projectId
     );
     res.json({ message: 'Updated successfully' });
@@ -210,38 +214,38 @@ export const updateAssignment = (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAssignments = (_req: AuthRequest, res: Response) => {
-  const assignments = db.prepare(`
+export const getAssignments = async (_req: AuthRequest, res: Response) => {
+  const assignments = await db.all(`
     SELECT ip.*, u.name as investor_name, u.email as investor_email, p.name as project_name
     FROM investor_projects ip
     JOIN users u ON ip.user_id = u.id
     JOIN projects p ON ip.project_id = p.id
     ORDER BY u.name, p.name
-  `).all();
+  `);
   res.json(assignments);
 };
 
 // Ledger & Sub-investments
-export const getLedger = (_req: AuthRequest, res: Response) => {
+export const getLedger = async (_req: AuthRequest, res: Response) => {
   try {
-    const entries = db.prepare(`
+    const entries = await db.all(`
       SELECT l.*, u.name as investor_name, u.login_id as investor_login_id, p.name as project_name
       FROM ledger l
       JOIN users u ON l.user_id = u.id
       JOIN projects p ON l.project_id = p.id
       ORDER BY l.created_at DESC, l.id DESC
-    `).all();
+    `);
     res.json(entries);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 };
 
-export const addSubInvestment = (req: AuthRequest, res: Response) => {
+export const addSubInvestment = async (req: AuthRequest, res: Response) => {
   const { user_id, project_id, investment_amount, allotted_sqft, price_at_investment, market_price_per_sqft, note, transaction_date } = req.body;
 
   try {
-    const existing = db.prepare('SELECT * FROM investor_projects WHERE user_id = ? AND project_id = ?').get(user_id, project_id) as any;
+    const existing: any = await db.get('SELECT * FROM investor_projects WHERE user_id = ? AND project_id = ?', user_id, project_id);
     if (!existing) {
       return res.status(404).json({ error: 'Investor not assigned to this project' });
     }
@@ -250,19 +254,19 @@ export const addSubInvestment = (req: AuthRequest, res: Response) => {
     const newSqft = (existing.allotted_sqft || 0) + Number(allotted_sqft || 0);
     const newPrice = Number(market_price_per_sqft || price_at_investment || existing.market_price_per_sqft || 0);
 
-    db.prepare(`
+    await db.run(`
       UPDATE investor_projects
       SET investment_amount = ?,
           allotted_sqft = ?,
           market_price_per_sqft = ?
       WHERE user_id = ? AND project_id = ?
-    `).run(newAmount, newSqft, newPrice, user_id, project_id);
+    `, newAmount, newSqft, newPrice, user_id, project_id);
 
-    db.prepare(`
+    await db.run(`
       INSERT INTO ledger (
         user_id, project_id, transaction_type, investment_amount, contribution, allotted_sqft, price_at_investment, market_price_per_sqft, note, transaction_date
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `,
       user_id, project_id, 'sub_investment', investment_amount, existing.contribution || '', allotted_sqft, price_at_investment || newPrice, newPrice, note || 'Sub-investment capital infusion', transaction_date || new Date().toISOString().split('T')[0]
     );
 
@@ -273,16 +277,16 @@ export const addSubInvestment = (req: AuthRequest, res: Response) => {
 };
 
 // Manage Milestones & Project Investor Audience
-export const getMilestones = (req: AuthRequest, res: Response) => {
-  const milestones = db.prepare('SELECT * FROM milestones WHERE project_id = ? ORDER BY id ASC').all(req.params.id);
+export const getMilestones = async (req: AuthRequest, res: Response) => {
+  const milestones = await db.all('SELECT * FROM milestones WHERE project_id = ? ORDER BY id ASC', req.params.id);
   res.json(milestones);
 };
 
-export const getMilestonesWithInvestors = (req: AuthRequest, res: Response) => {
+export const getMilestonesWithInvestors = async (req: AuthRequest, res: Response) => {
   const projectId = parseInt(req.params.id, 10);
-  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
-  const milestones = db.prepare('SELECT * FROM milestones WHERE project_id = ? ORDER BY id ASC').all(projectId);
-  const investors = getProjectInvestors(projectId);
+  const project = await db.get('SELECT * FROM projects WHERE id = ?', projectId);
+  const milestones = await db.all('SELECT * FROM milestones WHERE project_id = ? ORDER BY id ASC', projectId);
+  const investors = await getProjectInvestors(projectId);
 
   res.json({
     project,
@@ -314,12 +318,12 @@ export const createMilestone = async (req: AuthRequest, res: Response) => {
     const finalPct = isCompleted ? 100 : completion_percentage;
     const finalActual = isCompleted ? (actual_completion || new Date().toISOString().split('T')[0]) : actual_completion;
 
-    const result = db.prepare(`
+    const result = await db.run(`
       INSERT INTO milestones (
         project_id, category, name, status, start_date, expected_completion, actual_completion, 
         completion_percentage, doc_url, target_days, current_day, notes, last_updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `).run(
+    `,
       project_id, category, name, finalStatus, start_date || null, expected_completion || null,
       finalActual || null, finalPct, doc_url || null, target_days || 0, current_day || 0, notes || null
     );
@@ -327,7 +331,6 @@ export const createMilestone = async (req: AuthRequest, res: Response) => {
     const milestoneId = Number(result.lastInsertRowid);
     let notificationResult = null;
 
-    // If created as completed, immediately notify the project's investors!
     if (isCompleted) {
       try {
         notificationResult = await sendMilestoneCompletedNotification(milestoneId, {
@@ -339,7 +342,7 @@ export const createMilestone = async (req: AuthRequest, res: Response) => {
         console.error('Error triggering milestone notification:', notifyErr);
       }
     } else {
-      recalculateProjectProgress(project_id);
+      await recalculateProjectProgress(project_id);
     }
 
     res.json({
@@ -369,17 +372,16 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
   } = req.body;
 
   try {
-    const prevMilestone: any = db.prepare('SELECT * FROM milestones WHERE id = ?').get(milestoneId);
+    const prevMilestone: any = await db.get('SELECT * FROM milestones WHERE id = ?', milestoneId);
     if (!prevMilestone) return res.status(404).json({ error: 'Milestone not found' });
 
     const isNowCompleted = status === 'completed' || completion_percentage >= 100;
-    const wasCompleted = prevMilestone.status === 'completed';
 
     const newStatus = isNowCompleted ? 'completed' : (status || prevMilestone.status);
     const newPct = isNowCompleted ? 100 : (completion_percentage !== undefined ? completion_percentage : prevMilestone.completion_percentage);
     const newActual = isNowCompleted ? (actual_completion || prevMilestone.actual_completion || new Date().toISOString().split('T')[0]) : (actual_completion || prevMilestone.actual_completion);
 
-    db.prepare(`
+    await db.run(`
       UPDATE milestones 
       SET name = COALESCE(?, name),
           category = COALESCE(?, category),
@@ -392,7 +394,7 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
           notes = COALESCE(?, notes),
           last_updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(
+    `,
       name || null,
       category || null,
       newStatus,
@@ -407,7 +409,6 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
 
     let notificationResult = null;
 
-    // Automatically trigger notification if status is completed OR explicitly requested
     if (newStatus === 'completed' || isNowCompleted || sendNotification) {
       try {
         notificationResult = await sendMilestoneCompletedNotification(milestoneId, {
@@ -419,7 +420,7 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
         console.error('Error dispatching automated milestone notification:', err);
       }
     } else {
-      recalculateProjectProgress(prevMilestone.project_id);
+      await recalculateProjectProgress(prevMilestone.project_id);
     }
 
     res.json({
@@ -432,24 +433,24 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteMilestone = (req: AuthRequest, res: Response) => {
+export const deleteMilestone = async (req: AuthRequest, res: Response) => {
   const milestoneId = parseInt(req.params.id, 10);
   try {
-    const milestone: any = db.prepare('SELECT project_id FROM milestones WHERE id = ?').get(milestoneId);
+    const milestone: any = await db.get('SELECT project_id FROM milestones WHERE id = ?', milestoneId);
     if (!milestone) return res.status(404).json({ error: 'Milestone not found' });
 
-    db.prepare('DELETE FROM notifications WHERE milestone_id = ?').run(milestoneId);
-    db.prepare('DELETE FROM progress_updates WHERE milestone_id = ?').run(milestoneId);
-    db.prepare('DELETE FROM milestones WHERE id = ?').run(milestoneId);
+    await db.run('DELETE FROM notifications WHERE milestone_id = ?', milestoneId);
+    await db.run('DELETE FROM progress_updates WHERE milestone_id = ?', milestoneId);
+    await db.run('DELETE FROM milestones WHERE id = ?', milestoneId);
 
-    recalculateProjectProgress(milestone.project_id);
+    await recalculateProjectProgress(milestone.project_id);
     res.json({ message: 'Milestone deleted successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }
 };
 
-// Log Daily Construction Progress (e.g., Day 1 to Day 25, work updates, milestone completion)
+// Log Daily Construction Progress
 export const logDailyProgress = async (req: AuthRequest, res: Response) => {
   const {
     milestone_id,
@@ -468,15 +469,14 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
 
     let milestone: any = null;
     if (milestone_id) {
-      milestone = db.prepare('SELECT * FROM milestones WHERE id = ?').get(milestone_id);
+      milestone = await db.get('SELECT * FROM milestones WHERE id = ?', milestone_id);
     }
 
-    // 1. Insert progress update entry
     if (media_url || work_notes) {
-      db.prepare(`
+      await db.run(`
         INSERT INTO progress_updates (project_id, type, url, caption, date, milestone_id, day_number)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(
+      `,
         project_id,
         media_type || 'photo',
         media_url || 'https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=2070',
@@ -489,14 +489,13 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
 
     let notificationResult = null;
 
-    // 2. If tied to a milestone, update its current day and progress
     if (milestone) {
       const willComplete = is_completed || completion_percentage >= 100;
       const targetPct = willComplete ? 100 : (completion_percentage !== undefined ? completion_percentage : milestone.completion_percentage);
       const targetStatus = willComplete ? 'completed' : (targetPct > 0 ? 'in_progress' : milestone.status);
       const actualCompletion = willComplete ? date : milestone.actual_completion;
 
-      db.prepare(`
+      await db.run(`
         UPDATE milestones
         SET current_day = COALESCE(?, current_day),
             completion_percentage = ?,
@@ -505,7 +504,7 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
             notes = COALESCE(?, notes),
             last_updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `).run(
+      `,
         day_number || null,
         targetPct,
         targetStatus,
@@ -514,7 +513,6 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
         milestone.id
       );
 
-      // 3. If completed, trigger automated email to ONLY the project's investors!
       if (willComplete && milestone.status !== 'completed') {
         try {
           notificationResult = await sendMilestoneCompletedNotification(milestone.id, {
@@ -526,10 +524,10 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
           console.error('Error dispatching automated milestone completion email:', err);
         }
       } else {
-        recalculateProjectProgress(project_id);
+        await recalculateProjectProgress(project_id);
       }
     } else {
-      recalculateProjectProgress(project_id);
+      await recalculateProjectProgress(project_id);
     }
 
     res.json({
@@ -542,7 +540,6 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Manually trigger or preview milestone completion notification
 export const manualNotifyMilestone = async (req: AuthRequest, res: Response) => {
   const milestoneId = parseInt(req.params.id, 10);
   const { customNotes, dayNumber } = req.body;
@@ -558,29 +555,28 @@ export const manualNotifyMilestone = async (req: AuthRequest, res: Response) => 
   }
 };
 
-// Get Notification Logs & Audit History
-export const getNotifications = (req: AuthRequest, res: Response) => {
+export const getNotifications = async (req: AuthRequest, res: Response) => {
   try {
     const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
     const milestoneId = req.query.milestoneId ? parseInt(req.query.milestoneId as string, 10) : undefined;
     const userId = req.query.userId ? parseInt(req.query.userId as string, 10) : undefined;
 
-    const logs = getNotificationLogs({ projectId, milestoneId, userId });
+    const logs = await getNotificationLogs({ projectId, milestoneId, userId });
     res.json(logs);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 };
 
-// Manage Updates (Photos/Videos)
-export const createUpdate = (req: AuthRequest, res: Response) => {
+export const createUpdate = async (req: AuthRequest, res: Response) => {
   const { project_id, type, url, caption, date, milestone_id } = req.body;
-  const result = db.prepare('INSERT INTO progress_updates (project_id, type, url, caption, date, milestone_id) VALUES (?, ?, ?, ?, ?, ?)').run(
+  const result = await db.run(
+    'INSERT INTO progress_updates (project_id, type, url, caption, date, milestone_id) VALUES (?, ?, ?, ?, ?, ?)',
     project_id, type, url, caption, date, milestone_id
   );
 
-  const project = db.prepare('SELECT name FROM projects WHERE id = ?').get(project_id) as any;
-  const investors = db.prepare(`SELECT u.email, u.name FROM users u JOIN investor_projects ip ON ip.user_id = u.id WHERE ip.project_id = ?`).all(project_id) as any[];
+  const project: any = await db.get('SELECT name FROM projects WHERE id = ?', project_id);
+  const investors: any[] = await db.all('SELECT u.email, u.name FROM users u JOIN investor_projects ip ON ip.user_id = u.id WHERE ip.project_id = ?', project_id);
   
   if (project && investors.length > 0) {
     const emails = investors.map(i => i.email);
@@ -594,7 +590,6 @@ export const createUpdate = (req: AuthRequest, res: Response) => {
   res.json({ id: result.lastInsertRowid });
 };
 
-// File Upload
 export const uploadFile = (req: AuthRequest, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
@@ -603,13 +598,12 @@ export const uploadFile = (req: AuthRequest, res: Response) => {
   res.json({ url: fileUrl, filename: req.file.originalname, mimetype: req.file.mimetype });
 };
 
-// Analytics
-export const getAnalytics = (_req: AuthRequest, res: Response) => {
+export const getAnalytics = async (_req: AuthRequest, res: Response) => {
   try {
-    const totalFunds = db.prepare('SELECT SUM(investment_amount) as total FROM investor_projects').get() as any;
-    const totalSqft = db.prepare('SELECT SUM(allotted_sqft) as total FROM investor_projects').get() as any;
-    const activeProjects = db.prepare('SELECT COUNT(*) as count FROM projects WHERE status IN ("active", "in_progress", "Construction")').get() as any;
-    const totalNotifications = db.prepare('SELECT COUNT(*) as count FROM notifications').get() as any;
+    const totalFunds: any = await db.get('SELECT SUM(investment_amount) as total FROM investor_projects');
+    const totalSqft: any = await db.get('SELECT SUM(allotted_sqft) as total FROM investor_projects');
+    const activeProjects: any = await db.get("SELECT COUNT(*) as count FROM projects WHERE status IN ('active', 'in_progress', 'Construction')");
+    const totalNotifications: any = await db.get('SELECT COUNT(*) as count FROM notifications');
 
     res.json({
       totalFundsRaised: totalFunds?.total || 0,
@@ -622,16 +616,16 @@ export const getAnalytics = (_req: AuthRequest, res: Response) => {
   }
 };
 
-// Payments
-export const getPayments = (req: AuthRequest, res: Response) => {
+export const getPayments = async (req: AuthRequest, res: Response) => {
   const { projectId, userId } = req.params;
-  const payments = db.prepare('SELECT * FROM payments WHERE project_id = ? AND user_id = ? ORDER BY date DESC').all(projectId, userId);
+  const payments = await db.all('SELECT * FROM payments WHERE project_id = ? AND user_id = ? ORDER BY date DESC', projectId, userId);
   res.json(payments);
 };
 
-export const addPayment = (req: AuthRequest, res: Response) => {
+export const addPayment = async (req: AuthRequest, res: Response) => {
   const { project_id, user_id, amount, date, type, status, description, file_url } = req.body;
-  const result = db.prepare('INSERT INTO payments (project_id, user_id, amount, date, type, status, description, file_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
+  const result = await db.run(
+    'INSERT INTO payments (project_id, user_id, amount, date, type, status, description, file_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     project_id, user_id, amount, date, type, status, description, file_url
   );
   res.json({ id: result.lastInsertRowid });

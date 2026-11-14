@@ -18,23 +18,24 @@ const maskEmail = (email: string): string => {
   return `${visibleStart}***${visibleEnd}@${domain}`;
 };
 
-const findUserByIdentifier = (rawIdentifier: string): any => {
+const findUserByIdentifier = async (rawIdentifier: string): Promise<any> => {
   const cleanIdentifier = rawIdentifier.trim().toLowerCase();
   if (!cleanIdentifier) return null;
 
   // 1. Try matching by email or login_id (case-insensitive & trimmed)
-  let user: any = db.prepare(
-    'SELECT * FROM users WHERE LOWER(TRIM(email)) = ? OR LOWER(TRIM(login_id)) = ?'
-  ).get(cleanIdentifier, cleanIdentifier);
+  let user: any = await db.get(
+    'SELECT * FROM users WHERE LOWER(TRIM(email)) = ? OR LOWER(TRIM(login_id)) = ?',
+    cleanIdentifier, cleanIdentifier
+  );
 
   // 2. If not found, try matching by phone number digits (last 10 digits)
   if (!user) {
     const digits = rawIdentifier.replace(/\D/g, '');
     if (digits.length >= 10) {
       const last10 = digits.slice(-10);
-      const allUsersWithPhone = db.prepare(
+      const allUsersWithPhone = await db.all(
         "SELECT * FROM users WHERE phone IS NOT NULL AND TRIM(phone) != ''"
-      ).all() as any[];
+      );
       user = allUsersWithPhone.find(u => (u.phone || '').replace(/\D/g, '').slice(-10) === last10);
     }
   }
@@ -42,7 +43,7 @@ const findUserByIdentifier = (rawIdentifier: string): any => {
   return user || null;
 };
 
-export const login = (req: AuthRequest, res: Response) => {
+export const login = async (req: AuthRequest, res: Response) => {
   const { email, password } = req.body;
   
   const rawIdentifier = (email || '').trim();
@@ -52,7 +53,7 @@ export const login = (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Please enter your email, Login ID, or phone number and password' });
   }
 
-  const user = findUserByIdentifier(rawIdentifier);
+  const user = await findUserByIdentifier(rawIdentifier);
 
   if (!user || !bcrypt.compareSync(rawPassword, user.password)) {
     return res.status(401).json({ error: 'Invalid email/ID or password. Please try again.' });
@@ -82,7 +83,7 @@ export const login = (req: AuthRequest, res: Response) => {
   });
 };
 
-export const signup = (req: AuthRequest, res: Response) => {
+export const signup = async (req: AuthRequest, res: Response) => {
   const { name, email, password, phone } = req.body;
 
   const cleanName = (name || '').trim();
@@ -104,7 +105,7 @@ export const signup = (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Password must be at least 4 characters long' });
   }
 
-  const existingUser = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+  const existingUser = await db.get('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?', cleanEmail);
   if (existingUser) {
     return res.status(400).json({ error: 'An account with this email already exists. Please log in.' });
   }
@@ -118,7 +119,8 @@ export const signup = (req: AuthRequest, res: Response) => {
   );
 
   try {
-    const result = db.prepare('INSERT INTO users (email, password, name, role, phone, login_id) VALUES (?, ?, ?, ?, ?, ?)').run(
+    const result = await db.run(
+      'INSERT INTO users (email, password, name, role, phone, login_id) VALUES (?, ?, ?, ?, ?, ?)',
       cleanEmail, hashedPassword, cleanName, 'investor', cleanPhone, login_id
     );
 
@@ -160,11 +162,11 @@ export const logout = (_req: AuthRequest, res: Response) => {
   res.json({ message: 'Logged out' });
 };
 
-export const getMe = (req: AuthRequest, res: Response) => {
+export const getMe = async (req: AuthRequest, res: Response) => {
   if (!req.user?.id) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  const dbUser: any = db.prepare('SELECT id, email, name, role, phone, login_id FROM users WHERE id = ?').get(req.user.id);
+  const dbUser: any = await db.get('SELECT id, email, name, role, phone, login_id FROM users WHERE id = ?', req.user.id);
   if (!dbUser) {
     return res.status(401).json({ error: 'User not found' });
   }
@@ -179,7 +181,7 @@ export const forgotPassword = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Please enter your registered email, Login ID, or phone number' });
   }
 
-  const user = findUserByIdentifier(rawIdentifier);
+  const user = await findUserByIdentifier(rawIdentifier);
 
   if (!user || !user.email) {
     return res.status(404).json({ error: 'No account found matching this identifier. Please verify and try again.' });
@@ -191,10 +193,11 @@ export const forgotPassword = async (req: AuthRequest, res: Response) => {
 
   try {
     // Invalidate previous active OTPs for this email
-    db.prepare('UPDATE password_resets SET used = 1 WHERE LOWER(TRIM(email)) = ? AND used = 0').run(user.email.toLowerCase().trim());
+    await db.run('UPDATE password_resets SET used = 1 WHERE LOWER(TRIM(email)) = ? AND used = 0', user.email.toLowerCase().trim());
 
     // Save new OTP
-    db.prepare('INSERT INTO password_resets (email, otp, expires_at, used) VALUES (?, ?, ?, 0)').run(
+    await db.run(
+      'INSERT INTO password_resets (email, otp, expires_at, used) VALUES (?, ?, ?, 0)',
       user.email.toLowerCase().trim(),
       otp,
       expiresAt
@@ -245,11 +248,11 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
   }
 
   // Find latest active OTP record
-  const resetRecord: any = db.prepare(`
+  const resetRecord: any = await db.get(`
     SELECT * FROM password_resets 
     WHERE LOWER(TRIM(email)) = ? AND otp = ? AND used = 0 
     ORDER BY id DESC LIMIT 1
-  `).get(cleanEmail, cleanOtp);
+  `, cleanEmail, cleanOtp);
 
   if (!resetRecord) {
     return res.status(400).json({ error: 'Invalid or already used verification code. Please request a new code.' });
@@ -261,17 +264,17 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
   }
 
   // Find user
-  const user: any = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+  const user: any = await db.get('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?', cleanEmail);
   if (!user) {
     return res.status(404).json({ error: 'User account not found' });
   }
 
   // Hash new password and update user
   const hashedPassword = bcrypt.hashSync(rawPassword, 10);
-  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, user.id);
+  await db.run('UPDATE users SET password = ? WHERE id = ?', hashedPassword, user.id);
 
   // Mark reset code as used
-  db.prepare('UPDATE password_resets SET used = 1 WHERE id = ?').run(resetRecord.id);
+  await db.run('UPDATE password_resets SET used = 1 WHERE id = ?', resetRecord.id);
 
   // Automatically sign in the user
   const token = jwt.sign(
@@ -298,5 +301,3 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
     token
   });
 };
-
-

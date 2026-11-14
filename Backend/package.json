@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-      "dev": "tsx watch src/server.ts",
-      "build": "tsc",
-      "start": "node dist/server.js"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "migrate:pg": "tsx src/scripts/migrate_sqlite_to_pg.ts"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
@@ -19,7 +20,8 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
-    "nodemailer": "^9.0.5"
+    "nodemailer": "^9.0.5",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -29,6 +31,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^22.14.0",
+    "@types/pg": "^8.23.1",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2"
   }

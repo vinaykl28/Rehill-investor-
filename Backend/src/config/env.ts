@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env file from Backend root or process working directory
+// Load .env and .env.local from Backend root or process working directory
 dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
 
 /**
  * Parses comma-separated origin strings into a cleaned array of origins.
@@ -58,7 +60,8 @@ export const config = {
   JWT_SECRET: process.env.JWT_SECRET || (isProd ? '' : 'redhill-infra-secret-key-dev-only'),
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
 
-  // Database & Storage Paths (Support Render Persistent Disks)
+  // Database & Storage Paths (Support Neon PostgreSQL & Render Disks)
+  DATABASE_URL: process.env.DATABASE_URL || '',
   DATABASE_PATH: process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve('database.sqlite'),
   UPLOADS_DIR: process.env.UPLOADS_DIR ? path.resolve(process.env.UPLOADS_DIR) : path.resolve('uploads'),
 

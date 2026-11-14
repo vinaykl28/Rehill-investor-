@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
 import config from './config/env.js';
+import { isPg, initPostgresTables } from './db.js';
 import { seedData } from './config/seed.js';
 import routes from './routes/index.js';
 
@@ -72,12 +73,18 @@ const healthCheckHandler = (_req: Request, res: Response) => {
 app.get('/health', healthCheckHandler);
 app.get('/api/health', healthCheckHandler);
 
-// Initialize Database Seed Data
-try {
-  seedData();
-} catch (err) {
-  console.error('Database seeding failed:', err);
+// Initialize Database Tables & Seed Data
+async function setupDatabase() {
+  try {
+    if (isPg) {
+      await initPostgresTables();
+    }
+    await seedData();
+  } catch (err) {
+    console.error('Database initialization/seeding failed:', err);
+  }
 }
+setupDatabase();
 
 // Root Health Check
 app.get('/', (_req, res) => {
