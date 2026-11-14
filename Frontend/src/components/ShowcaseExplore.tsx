@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Project } from '../types';
 import { 
   Calendar, 
@@ -47,6 +48,7 @@ import Logo from './Logo';
 import InteractiveMap, { MapProject } from './InteractiveMap';
 import { SHOWCASE_CONFIG, ShowcaseProject } from '../config/showcaseConfig';
 import { apiFetch } from '../api/client';
+import { getAssetUrl } from '../config/env';
 
 interface ShowcaseExploreProps {
   user: User;
@@ -63,12 +65,90 @@ export default function ShowcaseExplore({
   onNavigateToPortfolio,
   hasInvestments = false
 }: ShowcaseExploreProps) {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedProject, setSelectedProject] = useState<ShowcaseProject | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
   const [showSiteVisitModal, setShowSiteVisitModal] = useState(false);
   const [showEnquirySuccess, setShowEnquirySuccess] = useState(false);
   const [activeSection, setActiveSection] = useState<'projects' | 'referral' | 'events'>('projects');
+  const [fetchedDbProjects, setFetchedDbProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      apiFetch('/api/investor/projects').then(r => (r.ok ? r.json() : [])).catch(() => []),
+      apiFetch('/api/investor/new-projects').then(r => (r.ok ? r.json() : [])).catch(() => []),
+    ]).then(([assigned, open]) => {
+      if (!active) return;
+      const map = new Map<number, Project>();
+      if (Array.isArray(assigned)) assigned.forEach((p: Project) => map.set(p.id, p));
+      if (Array.isArray(open)) open.forEach((p: Project) => map.set(p.id, p));
+      setFetchedDbProjects(Array.from(map.values()));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const combinedDbProjects = useMemo(() => {
+    const map = new Map<number, Project>();
+    apiProjects.forEach(p => map.set(p.id, p));
+    fetchedDbProjects.forEach(p => map.set(p.id, p));
+    return Array.from(map.values());
+  }, [apiProjects, fetchedDbProjects]);
+
+  const allShowcaseProjects: ShowcaseProject[] = useMemo(() => {
+    return combinedDbProjects.map((p) => {
+      const imgUrl = getAssetUrl(p.image_url, p.id);
+      return {
+        id: String(p.id),
+        name: p.name,
+        category: 'highrise',
+        location: p.location,
+        badge: p.status === 'Completed' ? 'Exclusive Edition' : p.status === 'In Progress' ? 'Under Construction' : 'New Launch',
+        rating: '4.9/5',
+        image: imgUrl,
+        priceStarting: p.total_value || (p.market_price_per_sqft ? `₹${p.market_price_per_sqft.toLocaleString('en-IN')}/sqft` : 'On Request'),
+        configuration: 'Boutique Residential Community',
+        possessionDate: p.status || 'Active Development',
+        carpetArea: p.allotted_sqft ? `${p.allotted_sqft.toLocaleString('en-IN')} sq.ft.` : 'Custom Layouts',
+        statusText: p.status || 'Active Development',
+        description: `${p.name} in ${p.location} — RERA-registered residential development managed by Redhill Infrastructure (${p.completion_percentage || 0}% site completion).`,
+        highlights: [
+          `${p.location} · ${p.status || 'Active'}`,
+          `${p.completion_percentage || 0}% Recorded Construction Progress`,
+        ],
+        gallery: [
+          {
+            url: imgUrl,
+            title: `${p.name} — ${p.location}`,
+            tag: p.status || 'Overview',
+          },
+        ],
+      };
+    });
+  }, [combinedDbProjects]);
+
+  const mapProjects: MapProject[] = useMemo(() => {
+    return combinedDbProjects.map((p) => ({
+      id: p.id,
+      name: p.name,
+      location: p.location,
+      address: `${p.name}, ${p.location}`,
+      lat: 12.9716,
+      lng: 77.5946,
+      status: `${p.status || 'Active'} (${p.completion_percentage || 0}%)`,
+      completion: p.completion_percentage || 0,
+      value: p.total_value || undefined,
+      image: getAssetUrl(p.image_url, p.id),
+      proximityHighlights: [
+        { icon: 'location', label: p.location },
+        { icon: 'status', label: `Status: ${p.status || 'Planning'} (${p.completion_percentage || 0}%)` },
+      ],
+      googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.name} ${p.location}`)}`,
+    }));
+  }, [combinedDbProjects]);
 
   // Referral Hub Flow States
   const [isReferralHubOpen, setIsReferralHubOpen] = useState(false);
@@ -81,14 +161,14 @@ export default function ShowcaseExplore({
   const [refereePhone, setRefereePhone] = useState('');
   const [refereeEmail, setRefereeEmail] = useState('');
   const [refereeCity, setRefereeCity] = useState('');
-  const [refereeProject, setRefereeProject] = useState('Redhill Signature Towers');
+  const [refereeProject, setRefereeProject] = useState('Open to Any Luxury Project');
   const [refereeRelationship, setRefereeRelationship] = useState('Friend / Associate');
   const [refereeNotes, setRefereeNotes] = useState('');
   const [submittingReferral, setSubmittingReferral] = useState(false);
   const [referralRefCode, setReferralRefCode] = useState('');
 
   // General Enquiry States
-  const [enquiryPhone, setEnquiryPhone] = useState(user.phone || '');
+  const [enquiryPhone, setEnquiryPhone] = useState(user?.phone || '');
   const [enquiryMessage, setEnquiryMessage] = useState('');
   const [siteVisitDate, setSiteVisitDate] = useState('');
   const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
@@ -124,8 +204,8 @@ export default function ShowcaseExplore({
     setSubmittingReferral(true);
 
     try {
-      const matchingDbProject = apiProjects.find(p => p.name.toLowerCase().includes(refereeProject.toLowerCase()));
-      const projectId = matchingDbProject ? matchingDbProject.id : (apiProjects[0]?.id || 1);
+      const matchingDbProject = combinedDbProjects.find(p => p.name.toLowerCase().includes(refereeProject.toLowerCase()));
+      const projectId = matchingDbProject ? matchingDbProject.id : (combinedDbProjects[0]?.id || 1);
       const generatedCode = `REF-RDH-${Math.floor(100000 + Math.random() * 900000)}`;
       setReferralRefCode(generatedCode);
 
@@ -162,10 +242,10 @@ export default function ShowcaseExplore({
     setReferralStep('form');
   };
 
-  // Filter projects by category
+  // Filter projects by category (only Admin-created database projects)
   const filteredProjects = selectedCategory === 'all' 
-    ? SHOWCASE_CONFIG.featuredProjects 
-    : SHOWCASE_CONFIG.featuredProjects.filter(p => p.category === selectedCategory);
+    ? allShowcaseProjects 
+    : allShowcaseProjects.filter(p => p.category === selectedCategory);
 
   const handleSendEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,8 +253,8 @@ export default function ShowcaseExplore({
 
     try {
       const projectName = selectedProject?.name || 'Redhill Premier Development';
-      const matchingDbProject = apiProjects.find(p => p.name.toLowerCase().includes(projectName.toLowerCase()));
-      const projectId = matchingDbProject ? matchingDbProject.id : (apiProjects[0]?.id || 1);
+      const matchingDbProject = combinedDbProjects.find(p => p.name.toLowerCase().includes(projectName.toLowerCase()));
+      const projectId = matchingDbProject ? matchingDbProject.id : (combinedDbProjects[0]?.id || 1);
 
       await apiFetch('/api/queries', {
         method: 'POST',
@@ -300,16 +380,20 @@ export default function ShowcaseExplore({
 
           {/* User Profile & Actions */}
           <div className="flex items-center gap-4">
-            {/* If user has investments, allow switching back to portfolio */}
-            {hasInvestments && onNavigateToPortfolio && (
-              <button
-                onClick={onNavigateToPortfolio}
-                className="hidden sm:flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 px-4 py-2 rounded-xl border border-emerald-500/20 text-xs font-bold transition-all cursor-pointer"
-              >
-                <Building2 className="w-4 h-4" />
-                My Portfolio
-              </button>
-            )}
+            {/* Always allow switching back to portfolio dashboard */}
+            <button
+              onClick={() => {
+                if (onNavigateToPortfolio) {
+                  onNavigateToPortfolio();
+                } else {
+                  navigate('/dashboard');
+                }
+              }}
+              className="hidden sm:flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 px-4 py-2 rounded-xl border border-emerald-500/20 text-xs font-bold transition-all cursor-pointer"
+            >
+              <Building2 className="w-4 h-4" />
+              My Portfolio
+            </button>
 
             {/* User Pill */}
             <div className="flex items-center gap-3 bg-redhill-sand/70 hover:bg-redhill-sand px-3.5 py-1.5 rounded-full border border-redhill-line transition-all">
@@ -455,42 +539,43 @@ export default function ShowcaseExplore({
                 </div>
               </div>
 
-              {/* Dynamic Flagship Spotlight Card (Replaces the static 1850+ Cr stat) */}
-              <div 
-                onClick={() => setSelectedProject(SHOWCASE_CONFIG.featuredProjects[0])}
-                className="group relative bg-white rounded-2xl p-4 border border-amber-500/20 hover:border-amber-500/50 transition-all duration-300 shadow-xl cursor-pointer overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
-                
-                <div className="flex items-center gap-3.5 relative z-10">
-                  <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-redhill-line">
-                    <img 
-                      src={SHOWCASE_CONFIG.featuredProjects[0].image} 
-                      alt="Spotlight"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                    />
-                    <div className="absolute inset-0 bg-redhill-ivory" />
-                  </div>
+              {/* Dynamic Flagship Spotlight Card (Only shown when Admin has added projects) */}
+              {allShowcaseProjects.length > 0 && (
+                <div 
+                  onClick={() => setSelectedProject(allShowcaseProjects[0])}
+                  className="group relative bg-white rounded-2xl p-4 border border-amber-500/20 hover:border-amber-500/50 transition-all duration-300 shadow-xl cursor-pointer overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
                   
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className="text-[9px] font-black uppercase tracking-wider bg-amber-400 text-gray-950 px-2 py-0.5 rounded-md shadow-sm">
-                        🔥 Trending Launch
-                      </span>
+                  <div className="flex items-center gap-3.5 relative z-10">
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-redhill-line">
+                      <img 
+                        src={allShowcaseProjects[0].image} 
+                        alt="Spotlight"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
                     </div>
-                    <h4 className="text-sm font-bold text-redhill-charcoal truncate group-hover:text-amber-700 transition-colors">
-                      {SHOWCASE_CONFIG.featuredProjects[0].name}
-                    </h4>
-                    <p className="text-[11px] text-redhill-muted truncate">
-                      {SHOWCASE_CONFIG.featuredProjects[0].location}
-                    </p>
-                  </div>
+                    
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="text-[9px] font-black uppercase tracking-wider bg-amber-400 text-gray-950 px-2 py-0.5 rounded-md shadow-sm">
+                          Featured Development
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-redhill-charcoal truncate group-hover:text-amber-700 transition-colors">
+                        {allShowcaseProjects[0].name}
+                      </h4>
+                      <p className="text-[11px] text-redhill-muted truncate">
+                        {allShowcaseProjects[0].location}
+                      </p>
+                    </div>
 
-                  <div className="w-8 h-8 rounded-full bg-redhill-sand group-hover:bg-redhill-red flex items-center justify-center text-stone-700 group-hover:text-white transition-all flex-shrink-0">
-                    <ArrowUpRight className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-redhill-sand group-hover:bg-redhill-red flex items-center justify-center text-stone-700 group-hover:text-white transition-all flex-shrink-0">
+                      <ArrowUpRight className="w-4 h-4" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </motion.div>
 
           </div>
@@ -511,150 +596,144 @@ export default function ShowcaseExplore({
                 Contemporary Boutique High-Rise Portfolio
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-redhill-charcoal tracking-tight font-sans">
-                12+ Floor Residential Communities Across Bengaluru
+                Redhill Residential Developments
               </h2>
               <p className="text-redhill-muted text-sm mt-1 max-w-xl">
-                Explore thoughtfully designed residential communities across 2-acre, 4-acre, and 5-acre developments.
+                Explore active residential communities published by Redhill Infrastructure.
               </p>
             </div>
 
-            {/* Desktop Category Filter Pills with Dynamic Counts */}
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { id: 'all', label: 'All Developments', count: SHOWCASE_CONFIG.featuredProjects.length },
-                { id: 'highrise', label: 'Boutique High-Rise', count: SHOWCASE_CONFIG.featuredProjects.filter(p => p.category === 'highrise').length },
-                { id: 'villas', label: 'Sky Residences', count: SHOWCASE_CONFIG.featuredProjects.filter(p => p.category === 'villas').length },
-                { id: 'township', label: 'Courtyard Communities', count: SHOWCASE_CONFIG.featuredProjects.filter(p => p.category === 'township').length },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedCategory(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    selectedCategory === tab.id
-                      ? 'bg-redhill-red text-white shadow-lg  border border-redhill-red scale-105'
-                      : 'bg-redhill-sand/70 text-stone-700 hover:text-redhill-charcoal border border-redhill-line hover:bg-redhill-sand'
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
-                    selectedCategory === tab.id ? 'bg-redhill-ivory text-redhill-charcoal' : 'bg-redhill-sand text-redhill-muted'
-                  }`}>
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {allShowcaseProjects.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { id: 'all', label: 'All Developments', count: allShowcaseProjects.length },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedCategory(tab.id)}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      selectedCategory === tab.id
+                        ? 'bg-redhill-red text-white shadow-lg border border-redhill-red scale-105'
+                        : 'bg-redhill-sand/70 text-stone-700 hover:text-redhill-charcoal border border-redhill-line hover:bg-redhill-sand'
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                      selectedCategory === tab.id ? 'bg-redhill-ivory text-redhill-charcoal' : 'bg-redhill-sand text-redhill-muted'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Project Cards Grid (PC / Desktop 2-4 cols) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProjects.map((project, idx) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1, duration: 0.5 }}
-                className="group bg-white rounded-2xl overflow-hidden border border-redhill-line hover:border-redhill-red/60 transition-all duration-500 flex flex-col shadow-xl hover:shadow-2xl hover: hover:-translate-y-1.5"
-              >
-                {/* Project Image Container */}
-                <div className="relative h-60 overflow-hidden">
-                  <img 
-                    src={project.image} 
-                    alt={project.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-[0.92]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+          {/* Project Cards Grid or Empty State when no Admin projects exist */}
+          {filteredProjects.length === 0 ? (
+            <div className="rounded-xl border border-redhill-line bg-redhill-ivory p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-white border border-redhill-line flex items-center justify-center mx-auto text-redhill-gold">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-redhill-charcoal font-serif">
+                No Developments Published Yet
+              </h3>
+              <p className="text-xs sm:text-sm text-redhill-muted leading-relaxed">
+                New residential developments added by the Redhill administration will appear here automatically.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map((project, idx) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1, duration: 0.5 }}
+                  className="group bg-white rounded-2xl overflow-hidden border border-redhill-line hover:border-redhill-red/60 transition-all duration-500 flex flex-col shadow-xl hover:shadow-2xl hover:-translate-y-1.5"
+                >
+                  {/* Project Image Container */}
+                  <div className="relative h-60 overflow-hidden">
+                    <img 
+                      src={project.image} 
+                      alt={project.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-[0.92]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-                  {/* Top-Left Status Ribbon */}
-                  <div className="absolute top-3 left-3 bg-redhill-charcoal text-white font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                    <span>{project.badge}</span>
-                  </div>
-
-                  {/* Top-Right Star Rating */}
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 border border-white/20 text-white text-xs font-bold shadow-md">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-700" />
-                    <span>{project.rating}</span>
-                  </div>
-
-                  {/* 3D Walkthrough Floating Pill on Hover */}
-                  <div className="absolute top-12 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-teal-500/30 text-[10px] text-teal-300 font-bold flex items-center gap-1 shadow-lg">
-                    <Compass className="w-3 h-3 text-teal-700 animate-spin" style={{ animationDuration: '6s' }} />
-                    <span>3D Tour Ready</span>
-                  </div>
-
-                  {/* Price Tag Overlay */}
-                  <div className="absolute bottom-3 left-4">
-                    <span className="text-[10px] font-bold text-white/75 uppercase tracking-widest block">Starting from</span>
-                    <span className="text-lg font-black text-redhill-gold-soft drop-shadow">{project.priceStarting}</span>
-                  </div>
-
-                  {/* Demo Gallery Count Badge */}
-                  <div className="absolute bottom-3 right-3 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20 text-[10px] font-bold text-white flex items-center gap-1.5 shadow-lg group-hover:bg-redhill-red group-hover:text-white transition-all">
-                    <Camera className="w-3 h-3 text-redhill-gold-soft group-hover:text-white transition-colors" />
-                    <span>{project.gallery?.length || 6} Demo Pics</span>
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-redhill-red text-xs font-semibold mb-1">
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>{project.location}</span>
+                    {/* Top-Left Status Ribbon */}
+                    <div className="absolute top-3 left-3 bg-redhill-charcoal text-white font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      <span>{project.badge}</span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-redhill-charcoal group-hover:text-amber-700 transition-colors leading-tight font-serif">
-                      {project.name}
-                    </h3>
-                    
-                    <p className="text-xs text-redhill-muted mt-1 font-medium">
-                      {project.configuration} • {project.carpetArea}
-                    </p>
-
-                    <p className="text-xs text-redhill-muted mt-3 line-clamp-2 leading-relaxed">
-                      {project.description}
-                    </p>
+                    {/* Price / Value Overlay */}
+                    <div className="absolute bottom-3 left-4">
+                      <span className="text-[10px] font-bold text-white/75 uppercase tracking-widest block">Valuation / Rate</span>
+                      <span className="text-lg font-black text-redhill-gold-soft drop-shadow">{project.priceStarting}</span>
+                    </div>
                   </div>
 
-                  {/* Highlights Pills */}
-                  <div className="space-y-1.5 pt-2 border-t border-redhill-line">
-                    {project.highlights.slice(0, 2).map((h, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-stone-700">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0" />
-                        <span className="truncate">{h}</span>
+                  {/* Card Body */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-redhill-red text-xs font-semibold mb-1">
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span>{project.location}</span>
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2 pt-2">
-                    <button
-                      onClick={() => {
-                        setSelectedProject(project);
-                        setActivePhotoIdx(0);
-                      }}
-                      className="bg-redhill-sand/70 hover:bg-redhill-sand text-redhill-charcoal py-2.5 px-3 rounded-xl text-xs font-bold transition-all border border-redhill-line cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-amber-700" />
-                      <span>View Demo</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedProject(project);
-                        setActivePhotoIdx(0);
-                        setShowSiteVisitModal(true);
-                      }}
-                      className="bg-redhill-red hover:bg-red-700 text-white py-2.5 px-3 rounded-xl text-xs font-bold transition-all shadow-md  flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <span>Book Visit</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
+                      <h3 className="text-xl font-bold text-redhill-charcoal group-hover:text-amber-700 transition-colors leading-tight font-serif">
+                        {project.name}
+                      </h3>
+                      
+                      <p className="text-xs text-redhill-muted mt-1 font-medium">
+                        {project.configuration} • {project.carpetArea}
+                      </p>
+
+                      <p className="text-xs text-redhill-muted mt-3 line-clamp-2 leading-relaxed">
+                        {project.description}
+                      </p>
+                    </div>
+
+                    {/* Highlights Pills */}
+                    <div className="space-y-1.5 pt-2 border-t border-redhill-line">
+                      {project.highlights.slice(0, 2).map((h, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-stone-700">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0" />
+                          <span className="truncate">{h}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      <button
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setActivePhotoIdx(0);
+                        }}
+                        className="bg-redhill-sand/70 hover:bg-redhill-sand text-redhill-charcoal py-2.5 px-3 rounded-xl text-xs font-bold transition-all border border-redhill-line cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <Camera className="w-3.5 h-3.5 text-amber-700" />
+                        <span>View Overview</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setActivePhotoIdx(0);
+                          setShowSiteVisitModal(true);
+                        }}
+                        className="bg-redhill-red hover:bg-red-700 text-white py-2.5 px-3 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        <span>Book Visit</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
         </div>
       </section>
@@ -662,32 +741,35 @@ export default function ShowcaseExplore({
       {/* ======================================================== */}
       {/* 3.5 STRATEGIC INFRASTRUCTURE & LOCATION MATRIX MAP       */}
       {/* ======================================================== */}
-      <section id="infrastructure-map-section" className="py-16 bg-redhill-ivory border-t border-redhill-line">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-700 text-xs font-bold border border-amber-500/20">
-              <Compass className="w-3.5 h-3.5 text-amber-700" />
-              <span>Bengaluru Strategic Growth Corridors</span>
+      {mapProjects.length > 0 && (
+        <section id="infrastructure-map-section" className="py-16 bg-redhill-ivory border-t border-redhill-line">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-700 text-xs font-bold border border-amber-500/20">
+                <Compass className="w-3.5 h-3.5 text-amber-700" />
+                <span>Bengaluru Strategic Growth Corridors</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-redhill-charcoal font-serif tracking-tight">
+                Interactive Asset & Connectivity Map
+              </h2>
+              <p className="text-redhill-muted text-sm sm:text-base leading-relaxed">
+                Explore the prime geographical positioning of Redhill developments across Bengaluru's prime residential sectors.
+              </p>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-redhill-charcoal font-serif tracking-tight">
-              Interactive Asset & Connectivity Map
-            </h2>
-            <p className="text-redhill-muted text-sm sm:text-base leading-relaxed">
-              Explore the prime geographical positioning of Redhill developments across Bengaluru's prime residential sectors — with live transit times to Kempegowda Airport, Metro corridors, and IT SEZs.
-            </p>
-          </div>
 
-          <InteractiveMap
-            onBookSiteVisit={(mapProj) => {
-              const matchedShowcase = SHOWCASE_CONFIG.featuredProjects.find(p => p.id === mapProj.id || p.name.toLowerCase().includes(mapProj.name.toLowerCase()));
-              if (matchedShowcase) {
-                setSelectedProject(matchedShowcase);
-              }
-              setShowSiteVisitModal(true);
-            }}
-          />
-        </div>
-      </section>
+            <InteractiveMap
+              projects={mapProjects}
+              onBookSiteVisit={(mapProj) => {
+                const matchedShowcase = allShowcaseProjects.find(p => String(p.id) === String(mapProj.id) || p.name.toLowerCase().includes(mapProj.name.toLowerCase()));
+                if (matchedShowcase) {
+                  setSelectedProject(matchedShowcase);
+                }
+                setShowSiteVisitModal(true);
+              }}
+            />
+          </div>
+        </section>
+      )}
 
       {/* ======================================================== */}
       {/* 4. REDHILL LUXURY REFERRAL SPOTLIGHT (Desktop Banner)    */}
@@ -1544,10 +1626,11 @@ export default function ShowcaseExplore({
                             onChange={(e) => setRefereeProject(e.target.value)}
                             className="w-full text-xs p-3.5 rounded-xl bg-white border border-redhill-line text-redhill-charcoal outline-none focus:ring-2 focus:ring-redhill-red/30"
                           >
-                            <option value="Redhill Signature Towers">Redhill Signature Towers (Whitefield)</option>
-                            <option value="Redhill Emerald Gardens">Redhill Emerald Gardens (Sarjapur)</option>
-                            <option value="Redhill Pinnacle Heights">Redhill Pinnacle Heights (Airport Corridor)</option>
-                            <option value="Redhill Sovereign Estates">Redhill Sovereign Estates (Devanahalli)</option>
+                            {allShowcaseProjects.map((proj) => (
+                              <option key={proj.id} value={proj.name}>
+                                {proj.name} ({proj.location})
+                              </option>
+                            ))}
                             <option value="Open to Any Luxury Project">Open to Recommendations</option>
                           </select>
                         </div>

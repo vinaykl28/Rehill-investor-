@@ -36,128 +36,59 @@ export interface MapProject {
   googleMapsUrl: string;
 }
 
-export const BANGALORE_PROJECTS: MapProject[] = [
-  {
-    id: 1,
-    name: 'Redhill Signature Towers',
-    location: 'Whitefield, Bengaluru',
-    address: 'EPIP Zone, Near ITPL Main Road, Whitefield, Bengaluru, Karnataka 560066',
-    lat: 12.9850,
-    lng: 77.7315,
-    status: 'Under Construction (60%)',
-    completion: 60,
-    value: '₹450 Cr',
-    carpetArea: '5 Acres · G+15 Floors · 3 & 4 BHK Boutique Residences',
-    image: '/assets/projects/signature-towers.jpg',
-    proximityHighlights: [
-      { icon: 'metro', label: '3 mins to Hopefarm Metro' },
-      { icon: 'tech', label: '5 mins to ITPL Tech Park' },
-      { icon: 'airport', label: '45 mins to BLR Airport' }
-    ],
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=ITPL+Whitefield+Bengaluru'
-  },
-  {
-    id: 2,
-    name: 'Redhill Emerald Gardens',
-    location: 'Sarjapur Road, Bengaluru',
-    address: 'Sarjapur Main Road, Near Wipro Corporate Campus, Bengaluru, Karnataka 560035',
-    lat: 12.9081,
-    lng: 77.6872,
-    status: 'Active Development (25%)',
-    completion: 25,
-    value: '₹280 Cr',
-    carpetArea: '4 Acres · G+12 Floors · 2, 3 & 3.5 BHK Courtyard Apartments',
-    image: '/assets/projects/emerald-gardens.jpg',
-    proximityHighlights: [
-      { icon: 'tech', label: '4 mins to Wipro Corporate SEZ' },
-      { icon: 'metro', label: '10 mins to Outer Ring Road Metro' },
-      { icon: 'school', label: '5 mins to International Schools' }
-    ],
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Sarjapur+Road+Bengaluru'
-  },
-  {
-    id: 3,
-    name: 'Redhill Pinnacle Heights',
-    location: 'Hebbal, North Bengaluru',
-    address: 'Bellary Road, Near Hebbal Flyover & Manyata Tech Park, Bengaluru, Karnataka 560024',
-    lat: 13.0358,
-    lng: 77.5970,
-    status: 'Pre-Launch (10%)',
-    completion: 10,
-    value: '₹620 Cr',
-    carpetArea: '2 Acres · G+16 Floors · 3 & 4 BHK Sky Terrace Residences',
-    image: '/assets/projects/pinnacle-heights.jpg',
-    proximityHighlights: [
-      { icon: 'airport', label: '20 mins to Kempegowda Airport' },
-      { icon: 'tech', label: '6 mins to Manyata Tech Park' },
-      { icon: 'lake', label: 'Panoramic Hebbal Lake View' }
-    ],
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Hebbal+Flyover+Bengaluru'
-  },
-  {
-    id: 4,
-    name: 'Redhill Sovereign Estates',
-    location: 'Indiranagar Corridor, Bengaluru',
-    address: '100 Feet Road Corridor, Off Indiranagar, Bengaluru, Karnataka 560038',
-    lat: 12.9719,
-    lng: 77.6412,
-    status: 'Exclusive Edition (15%)',
-    completion: 15,
-    value: '₹540 Cr',
-    carpetArea: '2 Acres · G+12 Floors · 4 BHK Full-Floor Sky Residences',
-    image: '/assets/projects/sovereign-estates.jpg',
-    proximityHighlights: [
-      { icon: 'metro', label: '4 mins to Indiranagar Metro' },
-      { icon: 'tech', label: '8 mins to Embassy GolfLinks' },
-      { icon: 'highway', label: '15 mins to MG Road CBD' }
-    ],
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Indiranagar+100+Feet+Road+Bengaluru'
-  }
-];
+export const BANGALORE_PROJECTS: MapProject[] = [];
 
 interface InteractiveMapProps {
+  projects?: MapProject[];
   highlightProjectId?: number | string;
   onBookSiteVisit?: (project: MapProject) => void;
   standalone?: boolean;
 }
 
 export default function InteractiveMap({
+  projects = BANGALORE_PROJECTS,
   highlightProjectId,
   onBookSiteVisit,
   standalone = false
 }: InteractiveMapProps) {
   const { showToast } = useToast();
-  const [selectedProject, setSelectedProject] = useState<MapProject>(
-    BANGALORE_PROJECTS.find(p => p.id === Number(highlightProjectId)) || BANGALORE_PROJECTS[0]
+  const [selectedProject, setSelectedProject] = useState<MapProject | null>(
+    () => projects.find(p => String(p.id) === String(highlightProjectId)) || projects[0] || null
   );
   const [mapType, setMapType] = useState<'m' | 'k'>('m'); // 'm' = standard roadmap, 'k' = satellite
-  const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Update selected project if highlightProjectId prop changes
+  // Sync selectedProject when projects list or highlightProjectId changes
   useEffect(() => {
-    if (highlightProjectId) {
-      const match = BANGALORE_PROJECTS.find(p => p.id === Number(highlightProjectId));
-      if (match) setSelectedProject(match);
+    if (projects.length === 0) {
+      setSelectedProject(null);
+      return;
     }
-  }, [highlightProjectId]);
+    if (highlightProjectId) {
+      const match = projects.find(p => String(p.id) === String(highlightProjectId));
+      if (match) {
+        setSelectedProject(match);
+        return;
+      }
+    }
+    setSelectedProject(prev => (prev && projects.some(p => p.id === prev.id) ? prev : projects[0]));
+  }, [projects, highlightProjectId]);
 
-  const filteredProjects = BANGALORE_PROJECTS.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  if (!selectedProject || projects.length === 0) {
+    return null;
+  }
 
   const handleCopyCoordinates = () => {
-    navigator.clipboard.writeText(`${selectedProject.lat}, ${selectedProject.lng}`);
+    navigator.clipboard.writeText(selectedProject.address || selectedProject.location);
     setCopied(true);
-    showToast('GPS Coordinates copied to clipboard', 'info');
+    showToast('Location copied to clipboard', 'info');
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Google Maps Embed URL dynamically centered on selected project coordinates
-  const mapEmbedUrl = `https://maps.google.com/maps?q=${selectedProject.lat},${selectedProject.lng}&t=${mapType}&z=14&ie=UTF8&iwloc=&output=embed`;
+  // Google Maps Embed URL dynamically centered on selected project location or coordinates
+  const queryTarget = selectedProject.address || selectedProject.location || `${selectedProject.lat},${selectedProject.lng}`;
+  const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(queryTarget)}&t=${mapType}&z=14&ie=UTF8&iwloc=&output=embed`;
 
   return (
     <div className={`relative rounded-3xl overflow-hidden bg-white border border-redhill-line shadow-2xl transition-all duration-300 ${
@@ -231,7 +162,7 @@ export default function InteractiveMap({
       {/* Project Selector Pills Bar */}
       <div className="px-4 sm:px-6 py-3 bg-redhill-ivory border-b border-redhill-line flex items-center gap-2 overflow-x-auto custom-scrollbar">
         <span className="text-xs text-redhill-muted font-bold uppercase tracking-wider shrink-0 mr-1">Select Project:</span>
-        {BANGALORE_PROJECTS.map(p => {
+        {projects.map(p => {
           const isSelected = selectedProject.id === p.id;
           return (
             <button

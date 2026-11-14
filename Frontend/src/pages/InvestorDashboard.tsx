@@ -256,12 +256,12 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
     }
   };
 
-  if (!loading && (projects.length === 0 || viewMode === 'explore')) {
+  if (!loading && viewMode === 'explore') {
     return (
       <ShowcaseExplore
         user={user}
         onLogout={onLogout}
-        apiProjects={newProjects}
+        apiProjects={[...projects, ...newProjects]}
         hasInvestments={projects.length > 0}
         onNavigateToPortfolio={() => setViewMode('portfolio')}
       />
@@ -1055,6 +1055,107 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
             </div>
           </section>
         )}
+
+        {/* ============================================================== */}
+        {/* 03 — AUDITED CAPITAL LEDGER                                    */}
+        {/* ============================================================== */}
+        <section id="ledger">
+          <Reveal className="lux-card p-6 sm:p-8 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-redhill-line">
+              <div>
+                <p className="eyebrow text-redhill-gold mb-1">03 — Capital Statements</p>
+                <h2 className="font-serif text-2xl sm:text-3xl text-redhill-charcoal">
+                  Audited Capital Ledger
+                </h2>
+              </div>
+
+              {projects.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2.5 text-xs">
+                  <div className="inline-flex items-center gap-1.5 bg-redhill-ivory border border-redhill-line rounded-md px-3 py-1.5">
+                    <Filter className="w-3.5 h-3.5 text-redhill-gold" />
+                    <select
+                      aria-label="Filter ledger by development"
+                      value={ledgerProjectFilter}
+                      onChange={(e) => setLedgerProjectFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                      className="bg-transparent text-redhill-charcoal font-medium outline-none cursor-pointer"
+                    >
+                      <option value="all">All Developments</option>
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 bg-redhill-ivory border border-redhill-line rounded-md px-3 py-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-redhill-gold" />
+                    <select
+                      aria-label="Filter ledger by transaction type"
+                      value={ledgerTypeFilter}
+                      onChange={(e) => setLedgerTypeFilter(e.target.value)}
+                      className="bg-transparent text-redhill-charcoal font-medium outline-none cursor-pointer"
+                    >
+                      <option value="all">All Entry Types</option>
+                      <option value="initial_assignment">Initial Assignment</option>
+                      <option value="additional_investment">Additional Allocation</option>
+                      <option value="valuation_update">Valuation Update</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {allLedgerEntries.length === 0 ? (
+              <div className="py-8 text-center text-sm text-redhill-muted bg-redhill-ivory border border-redhill-line rounded-md">
+                No ledger entries recorded for the selected criteria.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="table-lux">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Development</th>
+                      <th>Transaction Type</th>
+                      <th>Allotted Area</th>
+                      <th>Entry Rate</th>
+                      <th>Market Rate</th>
+                      <th className="text-right">Capital Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allLedgerEntries.map((entry) => (
+                      <tr key={entry.id}>
+                        <td className="font-mono text-xs text-redhill-muted whitespace-nowrap">
+                          {formatDate(entry.transaction_date || entry.created_at)}
+                        </td>
+                        <td className="font-serif font-medium text-redhill-charcoal">
+                          {entry.project_name || `Asset #${entry.project_id}`}
+                        </td>
+                        <td>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-xs text-[10px] uppercase tracking-[0.14em] font-semibold bg-redhill-ivory border border-redhill-line text-redhill-charcoal">
+                            {(entry.transaction_type || 'allocation').replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td className="tabular font-medium text-redhill-charcoal">
+                          {entry.allotted_sqft ? `${formatNumber(entry.allotted_sqft)} sqft` : '—'}
+                        </td>
+                        <td className="tabular text-redhill-muted">
+                          {entry.price_at_investment ? `₹${formatNumber(entry.price_at_investment)}/sqft` : '—'}
+                        </td>
+                        <td className="tabular text-emerald-800 font-medium">
+                          {entry.market_price_per_sqft ? `₹${formatNumber(entry.market_price_per_sqft)}/sqft` : '—'}
+                        </td>
+                        <td className="text-right tabular font-serif font-semibold text-redhill-charcoal">
+                          {formatCurrency(entry.investment_amount || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Reveal>
+        </section>
 
         {/* ============================================================== */}
         {/* 04 — INVESTOR CONCIERGE & SUPPORT                              */}
