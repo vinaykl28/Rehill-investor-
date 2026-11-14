@@ -427,7 +427,7 @@ export default function ShowcaseExplore({
           <img 
             src={SHOWCASE_CONFIG.hero.backgroundImage} 
             alt="Redhill Architectural Horizon" 
-            className="w-full h-full object-cover brightness-[0.7] contrast-[1.05] scale-105 transition-transform duration-1000"
+            className="w-full h-full object-cover brightness-[0.72] contrast-[1.05] animate-ken-burns"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-redhill-ivory via-redhill-ivory/95 to-redhill-ivory/45" />
           <div className="absolute inset-0 bg-gradient-to-t from-redhill-ivory via-transparent to-redhill-ivory/30" />

@@ -37,13 +37,15 @@
   --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
 
-  --animate-ken-burns: ken-burns 30s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+  --animate-ken-burns: ken-burns 26s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
   --animate-fade-in: fade-in 1.2s var(--ease-cinematic) forwards;
   --animate-rise: rise 1s var(--ease-cinematic) both;
 
   @keyframes ken-burns {
-    0% { transform: scale(1.04) translate3d(0, 0, 0); }
-    100% { transform: scale(1.12) translate3d(-1.5%, -1%, 0); }
+    0% { transform: scale(1.05) translate3d(0%, 0%, 0); }
+    33% { transform: scale(1.11) translate3d(-1.4%, -0.8%, 0); }
+    66% { transform: scale(1.08) translate3d(1%, -1.4%, 0); }
+    100% { transform: scale(1.14) translate3d(-0.8%, -1%, 0); }
   }
   @keyframes fade-in {
     from { opacity: 0; }

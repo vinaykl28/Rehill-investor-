@@ -97,7 +97,11 @@ export default function Login({ onLogin }: LoginProps) {
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const { scrollY } = useScroll();
-  const heroParallax = useTransform(scrollY, [0, 800], [0, reduceMotion ? 0 : 48]);
+  const heroParallax = useTransform(scrollY, [0, 800], [0, reduceMotion ? 0 : 180]);
+  const heroScale = useTransform(scrollY, [0, 800], [1, reduceMotion ? 1 : 1.12]);
+  const heroOpacity = useTransform(scrollY, [0, 700], [1, 0.45]);
+  const heroContentY = useTransform(scrollY, [0, 600], [0, reduceMotion ? 0 : 80]);
+  const heroContentOpacity = useTransform(scrollY, [0, 480], [1, 0]);
 
   const completeLogin = (user: User) => {
     setEntering(true);
@@ -879,8 +883,11 @@ export default function Login({ onLogin }: LoginProps) {
         id="top"
         className="relative min-h-dvh flex flex-col justify-between overflow-hidden bg-redhill-ink text-white"
       >
-        {/* Architectural Photograph / Video Backdrop */}
-        <motion.div style={{ y: heroParallax }} className="absolute -inset-y-8 inset-x-0 z-0">
+        {/* Architectural Photograph / Video Backdrop with cinematic movement */}
+        <motion.div
+          style={{ y: heroParallax, scale: heroScale, opacity: heroOpacity }}
+          className="absolute -inset-y-16 -inset-x-8 z-0 will-change-transform"
+        >
           {HERO_VIDEO && !reduceMotion ? (
             <video
               className="w-full h-full object-cover object-center"
@@ -893,23 +900,45 @@ export default function Login({ onLogin }: LoginProps) {
               preload="metadata"
             />
           ) : (
-            <img
+            <motion.img
+              initial={{ scale: 1.14, opacity: 0.8 }}
+              animate={
+                reduceMotion
+                  ? { scale: 1, opacity: 1 }
+                  : {
+                      scale: [1.05, 1.12, 1.07, 1.14, 1.05],
+                      x: ['0%', '-1.4%', '1.2%', '-0.8%', '0%'],
+                      y: ['0%', '-1%', '-1.6%', '-0.4%', '0%'],
+                    }
+              }
+              transition={
+                reduceMotion
+                  ? { duration: 0.6 }
+                  : {
+                      duration: 26,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }
+              }
               src={HERO_IMAGE}
-              alt="Redhill contemporary 14-storey boutique residential community in Bengaluru"
-              className={`w-full h-full object-cover object-[center_35%] ${reduceMotion ? '' : 'animate-ken-burns'}`}
+              alt="Redhill contemporary biophilic boutique residential community in Bengaluru"
+              className="w-full h-full object-cover object-[center_50%] will-change-transform"
             />
           )}
         </motion.div>
 
-        {/* Subtle Dark Architectural Gradient for Legibility */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#141519]/92 via-[#141519]/45 to-[#141519]/35" />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#141519]/80 via-[#141519]/30 to-transparent" />
+        {/* Refined Architectural Vignette Scrim (Maintains rich twilight glow & greenery) */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#111215]/88 via-[#111215]/30 to-black/25 pointer-events-none" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#111215]/80 via-[#111215]/25 to-transparent pointer-events-none" />
 
         {/* Top Header Spacer */}
         <div className="h-16 sm:h-20 shrink-0" aria-hidden="true" />
 
-        {/* Hero Editorial Content (Optically centered in available viewport height) */}
-        <div className="relative z-20 page-container flex-1 flex items-center py-8 sm:py-12">
+        {/* Hero Editorial Content (Optically centered with scroll parallax depth) */}
+        <motion.div
+          style={{ y: heroContentY, opacity: heroContentOpacity }}
+          className="relative z-20 page-container flex-1 flex items-center py-8 sm:py-12"
+        >
           <div className="max-w-3xl space-y-6 sm:space-y-7">
             <motion.div {...rise(0.05)} className="flex items-center gap-3">
               <span className="w-8 sm:w-12 h-px bg-redhill-gold-soft/80 shrink-0" />
@@ -954,7 +983,18 @@ export default function Login({ onLogin }: LoginProps) {
               </button>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Bodhi-Inspired Scroll Indicator */}
+        <motion.div
+          style={{ opacity: heroContentOpacity }}
+          className="relative z-20 pb-7 flex flex-col items-center justify-center gap-2 pointer-events-none"
+        >
+          <span className="text-[10px] uppercase tracking-[0.24em] text-white/50 font-medium">
+            Scroll to Discover
+          </span>
+          <div className="w-px h-7 bg-gradient-to-b from-white/40 via-redhill-gold-soft to-transparent animate-pulse" />
+        </motion.div>
       </section>
 
       {/* ================================================================ */}
