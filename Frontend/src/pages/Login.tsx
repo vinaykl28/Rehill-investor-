@@ -910,9 +910,9 @@ export default function Login({ onLogin }: LoginProps) {
 
         {/* Hero Editorial Content (Optically centered in available viewport height) */}
         <div className="relative z-20 page-container flex-1 flex items-center py-8 sm:py-12">
-          <div className="max-w-3xl space-y-5 sm:space-y-6">
+          <div className="max-w-3xl space-y-6 sm:space-y-7">
             <motion.div {...rise(0.05)} className="flex items-center gap-3">
-              <span className="w-8 sm:w-10 h-px bg-redhill-gold-soft shrink-0" />
+              <span className="w-8 sm:w-12 h-px bg-redhill-gold-soft/80 shrink-0" />
               <span className="eyebrow text-redhill-gold-soft">
                 Redhill Infra Pvt Ltd · Contemporary Boutique High-Rise Living
               </span>
@@ -920,36 +920,36 @@ export default function Login({ onLogin }: LoginProps) {
 
             <motion.h1
               {...rise(0.14)}
-              className="display text-[clamp(2.15rem,4.5vw,4.15rem)] text-white font-semibold tracking-tight leading-[1.06]"
+              className="font-serif text-[clamp(2.4rem,5.2vw,4.8rem)] text-white font-normal tracking-tight leading-[1.04]"
             >
               Thoughtfully Designed.{' '}
-              <span className="block text-redhill-gold-soft mt-1.5">
+              <span className="block italic text-redhill-gold-soft font-light mt-1 sm:mt-2">
                 Built for Better Living.
               </span>
             </motion.h1>
 
             <motion.p
               {...rise(0.22)}
-              className="text-base sm:text-lg lg:text-xl text-white/85 leading-relaxed max-w-2xl font-normal"
+              className="text-base sm:text-lg lg:text-xl text-white/80 leading-relaxed max-w-2xl font-light"
             >
               Contemporary residential communities crafted for modern urban living across Bengaluru’s prime neighbourhoods.
             </motion.p>
 
-            <motion.div {...rise(0.3)} className="flex flex-wrap items-center gap-3.5 pt-2">
+            <motion.div {...rise(0.3)} className="flex flex-wrap items-center gap-4 pt-3">
               <button
                 type="button"
                 onClick={() => scrollToSection('experience')}
-                className="btn-primary py-3.5 px-6 text-xs uppercase tracking-[0.14em]"
+                className="btn-press inline-flex items-center gap-2 rounded-xs px-7 py-4 text-xs font-medium uppercase tracking-[0.16em] bg-white text-redhill-charcoal hover:bg-redhill-sand transition-all cursor-pointer shadow-lg hover:shadow-xl"
               >
                 Investor Experience
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-redhill-gold" />
               </button>
               <button
                 type="button"
                 onClick={scrollToAccessSection}
-                className="btn-press inline-flex items-center gap-2 rounded-md py-3.5 px-6 text-xs font-semibold uppercase tracking-[0.14em] bg-white/95 hover:bg-white text-redhill-charcoal transition-colors cursor-pointer"
+                className="btn-press inline-flex items-center gap-2 rounded-xs px-7 py-4 text-xs font-medium uppercase tracking-[0.16em] border border-white/30 text-white hover:border-white hover:bg-white/10 backdrop-blur-xs transition-all cursor-pointer"
               >
-                <Lock className="w-3.5 h-3.5 text-redhill-gold" />
+                <Lock className="w-3.5 h-3.5 text-redhill-gold-soft" />
                 Investor Access
               </button>
             </motion.div>
@@ -984,10 +984,10 @@ export default function Login({ onLogin }: LoginProps) {
               <p className="eyebrow text-redhill-gold-soft mb-4 flex items-center gap-3">
                 <span className="w-8 h-px bg-redhill-gold-soft" />01 — The Investor Experience
               </p>
-              <h2 className="display text-[clamp(1.75rem,3.2vw,3rem)] text-white max-w-2xl">
+              <h2 className="font-serif text-[clamp(1.9rem,3.4vw,3.25rem)] text-white font-normal leading-[1.12] max-w-2xl">
                 Every square foot, milestone and rupee — accounted for in real time.
               </h2>
-              <p className="mt-4 sm:mt-5 text-white/70 leading-relaxed text-sm sm:text-base lg:text-lg max-w-xl">
+              <p className="mt-4 sm:mt-5 text-white/70 leading-relaxed text-sm sm:text-base lg:text-lg max-w-xl font-light">
                 Designed as a private residential ownership and investment portal, Redhill gives you direct visibility into your allocated area, construction stages, project documents, and capital ledger.
               </p>
             </Reveal>
@@ -999,14 +999,14 @@ export default function Login({ onLogin }: LoginProps) {
                 { icon: Camera, title: 'Site Progress & Media', desc: 'Direct site camera feeds alongside dated progress photography and engineering dispatches.' },
                 { icon: MessageCircle, title: 'Executive Relationship Desk', desc: 'Project-specific communication thread with the Redhill Bengaluru team.' },
               ].map((item, i) => (
-                <Reveal as="li" key={item.title} delay={i * 0.06} className="py-5 sm:py-6 border-t border-white/15 flex gap-4">
-                  <span className="font-serif text-redhill-gold-soft text-lg tabular w-7 shrink-0">0{i + 1}</span>
+                <Reveal as="li" key={item.title} delay={i * 0.06} className="py-5 sm:py-6 border-t border-white/10 flex gap-4">
+                  <span className="font-serif text-redhill-gold-soft text-xl tabular w-7 shrink-0 font-light">0{i + 1}</span>
                   <div>
-                    <h3 className="text-white font-medium flex items-center gap-2 mb-1">
+                    <h3 className="text-white font-medium flex items-center gap-2 mb-1 text-sm tracking-wide">
                       <item.icon className="w-4 h-4 text-redhill-gold-soft shrink-0" />
                       {item.title}
                     </h3>
-                    <p className="text-sm text-white/65 leading-relaxed">{item.desc}</p>
+                    <p className="text-xs sm:text-sm text-white/60 leading-relaxed font-light">{item.desc}</p>
                   </div>
                 </Reveal>
               ))}
@@ -1043,10 +1043,10 @@ export default function Login({ onLogin }: LoginProps) {
                   <span className="w-8 h-px bg-redhill-gold-soft" />
                   02 — Private Investor Portal
                 </p>
-                <h2 className="display text-[clamp(1.65rem,2.8vw,2.5rem)] text-white font-semibold leading-tight">
+                <h2 className="font-serif text-[clamp(1.8rem,3vw,2.75rem)] text-white font-normal leading-[1.12]">
                   Contemporary residential communities, transparently managed.
                 </h2>
-                <p className="text-sm sm:text-base text-white/80 leading-relaxed max-w-md">
+                <p className="text-sm sm:text-base text-white/75 leading-relaxed max-w-md font-light">
                   Review your property allocations, allotted square footage, project milestones, documents, and capital ledger statements in one dedicated place.
                 </p>
               </div>

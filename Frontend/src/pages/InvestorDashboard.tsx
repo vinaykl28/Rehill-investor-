@@ -301,11 +301,11 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
 
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <div>
-                <h1 className="display text-3xl sm:text-4xl text-redhill-charcoal font-semibold">
+                <h1 className="font-serif text-3xl sm:text-4xl lg:text-[2.65rem] text-redhill-charcoal font-normal tracking-tight">
                   Welcome Back,{' '}
-                  <span className="text-redhill-gold">{(user?.name || 'Investor').split(' ')[0]}</span>
+                  <span className="italic text-redhill-gold font-light">{(user?.name || 'Investor').split(' ')[0]}</span>
                 </h1>
-                <p className="text-redhill-muted text-sm sm:text-base mt-2 max-w-xl">
+                <p className="text-redhill-muted text-sm sm:text-base mt-2 max-w-xl font-light">
                   Your investments. Your projects. Your journey.
                 </p>
               </div>
