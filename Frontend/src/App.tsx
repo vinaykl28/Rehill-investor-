@@ -87,17 +87,39 @@ export default function App() {
       <Routes>
         <Route 
           path="/" 
-          element={user ? <Navigate to={user.role === 'investor' ? '/dashboard' : '/admin'} /> : <Login onLogin={setUser} />} 
+          element={
+            user ? (
+              <Navigate to={user.role === 'investor' ? (user.has_investments === false ? '/explore' : '/dashboard') : '/admin'} replace />
+            ) : (
+              <Login onLogin={setUser} />
+            )
+          } 
         />
 
         <Route 
           path="/login" 
-          element={user ? <Navigate to={user.role === 'investor' ? '/dashboard' : '/admin'} /> : <Login onLogin={setUser} />} 
+          element={
+            user ? (
+              <Navigate to={user.role === 'investor' ? (user.has_investments === false ? '/explore' : '/dashboard') : '/admin'} replace />
+            ) : (
+              <Login onLogin={setUser} />
+            )
+          } 
         />
         
         <Route 
           path="/dashboard" 
-          element={user?.role === 'investor' ? <InvestorDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          element={
+            !user ? (
+              <Navigate to="/login" replace />
+            ) : user.role !== 'investor' ? (
+              <Navigate to="/admin" replace />
+            ) : user.has_investments === false ? (
+              <Navigate to="/explore" replace />
+            ) : (
+              <InvestorDashboard user={user} onLogout={handleLogout} />
+            )
+          } 
         />
         
         <Route 

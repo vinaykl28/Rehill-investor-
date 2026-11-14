@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { User, Project, Milestone, LedgerEntry } from '../types';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Navigate } from 'react-router-dom';
 import {
   MapPin, TrendingUp, ChevronRight,
   IndianRupee, Maximize, BarChart3, Wallet, LayoutDashboard, Calendar,
@@ -256,7 +256,34 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
     }
   };
 
-  if (!loading && viewMode === 'explore') {
+  // If projects are still loading, show skeleton placeholder
+  if (loading) {
+    return (
+      <Layout user={user} onLogout={onLogout}>
+        <div className="py-20 max-w-[1440px] mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2].map(i => (
+              <div key={i} className="lux-card overflow-hidden h-[460px]">
+                <Skeleton type="image" className="h-56" />
+                <div className="p-6 space-y-4">
+                  <Skeleton type="text" className="w-1/2" />
+                  <Skeleton type="text" className="w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // For a new user with 0 assigned projects, directly redirect to Explore New Launches
+  if (projects.length === 0) {
+    return <Navigate to="/explore" replace />;
+  }
+
+  // If toggled into explore mode by an active investor
+  if (viewMode === 'explore') {
     return (
       <ShowcaseExplore
         user={user}

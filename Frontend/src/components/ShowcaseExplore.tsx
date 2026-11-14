@@ -63,9 +63,18 @@ export default function ShowcaseExplore({
   onLogout,
   apiProjects = [],
   onNavigateToPortfolio,
-  hasInvestments = false
+  hasInvestments
 }: ShowcaseExploreProps) {
   const navigate = useNavigate();
+  const [assignedCount, setAssignedCount] = useState<number | null>(
+    typeof hasInvestments === 'boolean' ? (hasInvestments ? 1 : 0) : null
+  );
+
+  const effectiveHasInvestments = typeof hasInvestments === 'boolean'
+    ? hasInvestments
+    : (assignedCount !== null ? assignedCount > 0 : Boolean(user.has_investments));
+
+  const handleGoToPortfolio = onNavigateToPortfolio || (() => navigate('/dashboard'));
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedProject, setSelectedProject] = useState<ShowcaseProject | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
@@ -81,6 +90,9 @@ export default function ShowcaseExplore({
       apiFetch('/api/investor/new-projects').then(r => (r.ok ? r.json() : [])).catch(() => []),
     ]).then(([assigned, open]) => {
       if (!active) return;
+      if (Array.isArray(assigned)) {
+        setAssignedCount(assigned.length);
+      }
       const map = new Map<number, Project>();
       if (Array.isArray(assigned)) assigned.forEach((p: Project) => map.set(p.id, p));
       if (Array.isArray(open)) open.forEach((p: Project) => map.set(p.id, p));
@@ -380,20 +392,22 @@ export default function ShowcaseExplore({
 
           {/* User Profile & Actions */}
           <div className="flex items-center gap-4">
-            {/* Always allow switching back to portfolio dashboard */}
-            <button
-              onClick={() => {
-                if (onNavigateToPortfolio) {
-                  onNavigateToPortfolio();
-                } else {
-                  navigate('/dashboard');
-                }
-              }}
-              className="hidden sm:flex items-center gap-2 btn-secondary py-2 px-3.5 text-xs uppercase tracking-[0.14em]"
-            >
-              <Building2 className="w-4 h-4 text-redhill-gold" />
-              My Portfolio
-            </button>
+            {/* Show portfolio switch button only if user is an assigned investor */}
+            {effectiveHasInvestments && (
+              <button
+                onClick={() => {
+                  if (onNavigateToPortfolio) {
+                    onNavigateToPortfolio();
+                  } else {
+                    navigate('/dashboard');
+                  }
+                }}
+                className="hidden sm:flex items-center gap-2 btn-secondary py-2 px-3.5 text-xs uppercase tracking-[0.14em]"
+              >
+                <Building2 className="w-4 h-4 text-redhill-gold" />
+                My Portfolio
+              </button>
+            )}
 
             {/* User Pill */}
             <div className="flex items-center gap-3 bg-white px-3.5 py-1.5 rounded-full border border-redhill-line transition-all">
