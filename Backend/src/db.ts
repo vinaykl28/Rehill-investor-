@@ -375,9 +375,27 @@ export const db = {
     if (isPg && pgPool) {
       let pgSql = toPgSql(text);
       const isInsert = text.trim().toUpperCase().startsWith('INSERT');
-      if (isInsert && !pgSql.toUpperCase().includes('RETURNING')) {
-        pgSql += ' RETURNING id';
+      const hasReturning = pgSql.toUpperCase().includes('RETURNING');
+      const isTableWithoutId = /insert\s+into\s+investor_projects/i.test(text);
+
+      if (isInsert && !hasReturning) {
+        if (isTableWithoutId) {
+          const res = await pgPool.query(pgSql, flatParams);
+          return { changes: res.rowCount ?? 0 };
+        }
+        try {
+          const res = await pgPool.query(pgSql + ' RETURNING id', flatParams);
+          const id = res.rows[0]?.id;
+          return { lastInsertRowid: id, changes: res.rowCount ?? 0 };
+        } catch (err: any) {
+          if (err.message && err.message.includes('column "id" does not exist')) {
+            const res = await pgPool.query(pgSql, flatParams);
+            return { changes: res.rowCount ?? 0 };
+          }
+          throw err;
+        }
       }
+
       const res = await pgPool.query(pgSql, flatParams);
       const id = res.rows[0]?.id;
       return { lastInsertRowid: id, changes: res.rowCount ?? 0 };

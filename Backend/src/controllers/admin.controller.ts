@@ -181,10 +181,22 @@ export const updateCctv = async (req: AuthRequest, res: Response) => {
 export const assignInvestor = async (req: AuthRequest, res: Response) => {
   const { user_id, project_id, contribution, investment_amount, allotted_sqft, market_price_per_sqft, price_at_investment, investment_date } = req.body;
   try {
-    await db.run(
-      'INSERT INTO investor_projects (user_id, project_id, contribution, investment_amount, allotted_sqft, market_price_per_sqft, price_at_investment, investment_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      user_id, project_id, contribution, investment_amount || 0, allotted_sqft || 0, market_price_per_sqft || 0, price_at_investment || 0, investment_date || null
+    const existing: any = await db.get(
+      'SELECT * FROM investor_projects WHERE user_id = ? AND project_id = ?',
+      user_id, project_id
     );
+
+    if (existing) {
+      await db.run(
+        'UPDATE investor_projects SET contribution = ?, investment_amount = ?, allotted_sqft = ?, market_price_per_sqft = ?, price_at_investment = ?, investment_date = ? WHERE user_id = ? AND project_id = ?',
+        contribution, investment_amount || 0, allotted_sqft || 0, market_price_per_sqft || 0, price_at_investment || 0, investment_date || null, user_id, project_id
+      );
+    } else {
+      await db.run(
+        'INSERT INTO investor_projects (user_id, project_id, contribution, investment_amount, allotted_sqft, market_price_per_sqft, price_at_investment, investment_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        user_id, project_id, contribution, investment_amount || 0, allotted_sqft || 0, market_price_per_sqft || 0, price_at_investment || 0, investment_date || null
+      );
+    }
 
     await db.run(`
       INSERT INTO ledger (
