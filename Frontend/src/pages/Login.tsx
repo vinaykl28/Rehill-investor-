@@ -1076,59 +1076,83 @@ export default function Login({ onLogin }: LoginProps) {
       </section>
 
       {/* ================================================================ */}
-      {/* 01 — THE INVESTOR EXPERIENCE (Intentional dark architectural band)*/}
+      {/* 01 — THE INVESTOR EXPERIENCE (Swan Realty Bodhi Editorial Style) */}
       {/* ================================================================ */}
-      <section id="experience" className="band-dark py-16 sm:py-24 lg:py-28">
-        <div className="page-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-          <Reveal className="lg:col-span-5">
-            <div className="relative aspect-[16/10] sm:aspect-[4/5] rounded-xs overflow-hidden border border-white/10 shadow-xl">
-              <img
-                src={EXPERIENCE_IMAGE}
-                alt="Redhill 16-storey boutique high-rise residence at twilight in Bengaluru"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              <div className="absolute bottom-5 left-5 right-5 text-xs text-white/85 flex items-center justify-between border-t border-white/20 pt-3">
-                <span className="uppercase tracking-[0.18em]">Contemporary High-Rise Living</span>
-                <span className="text-redhill-gold-soft">12+ Storeys · Bengaluru</span>
-              </div>
-            </div>
-          </Reveal>
-
-          <div className="lg:col-span-7">
+      <section id="experience" className="relative bg-[#F7F0E8] text-[#304B36] py-20 sm:py-28 lg:py-36 overflow-hidden border-b border-[#E8E0D5]">
+        <div className="page-container relative">
+          
+          {/* Oversized Editorial Heading spanning across upper portion & visually overlapping */}
+          <div className="relative z-20 mb-8 sm:mb-12 lg:-mb-12 xl:-mb-16 pointer-events-none">
             <Reveal>
-              <p className="eyebrow text-redhill-gold-soft mb-4 flex items-center gap-3">
-                <span className="w-8 h-px bg-redhill-gold-soft" />01 — The Investor Experience
-              </p>
-              <h2 className="font-serif text-[clamp(1.9rem,3.4vw,3.25rem)] text-white font-normal leading-[1.12] max-w-2xl">
-                Every square foot, milestone and rupee — accounted for in real time.
+              <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3 pointer-events-auto">
+                <span className="w-6 sm:w-10 h-px bg-[#304B36]/40" />
+                <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-[#304B36]/75 font-semibold">
+                  01 — Portfolio Transparency
+                </span>
+              </div>
+              <h2 className="font-serif text-[clamp(2.35rem,7.2vw,6.5rem)] font-light text-[#304B36] tracking-[0.03em] sm:tracking-[0.05em] leading-[0.94] uppercase select-none drop-shadow-xs">
+                The Investor Experience
               </h2>
-              <p className="mt-4 sm:mt-5 text-white/70 leading-relaxed text-sm sm:text-base lg:text-lg max-w-xl font-light">
-                Designed as a private residential ownership and investment portal, Redhill gives you direct visibility into your allocated area, construction stages, project documents, and capital ledger.
-              </p>
+            </Reveal>
+          </div>
+
+          {/* Two-Column Bodhi Layout: 50-55% Image (Left) + Editorial Content (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-20 items-start pt-2 lg:pt-0">
+            
+            {/* Left Column: Architectural Photography (Occupying ~55% content width on desktop) */}
+            <Reveal className="lg:col-span-7 xl:col-span-7 relative z-10">
+              <div className="relative aspect-[4/5] sm:aspect-[16/11] lg:aspect-[4/5] rounded-xs overflow-hidden border border-[#304B36]/15 shadow-[0_24px_60px_-24px_rgba(48,75,54,0.18)] group bg-[#EDE4D8]">
+                <img
+                  src={EXPERIENCE_IMAGE}
+                  alt="Redhill contemporary boutique residential high-rise architecture in Bengaluru"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1F3124]/80 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-5 sm:bottom-6 left-5 sm:left-6 right-5 sm:right-6 text-xs text-white/95 flex items-center justify-between border-t border-white/20 pt-3 sm:pt-3.5 backdrop-blur-xs">
+                  <span className="uppercase tracking-[0.2em] font-medium text-[10px] sm:text-[11px]">Boutique High-Rise Living</span>
+                  <span className="text-white/80 font-light text-[10px] sm:text-[11px]">12+ Storeys · Bengaluru</span>
+                </div>
+              </div>
             </Reveal>
 
-            <ol className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 gap-x-8 lg:gap-x-10">
-              {[
-                { icon: Activity, title: 'Stage-by-Stage Milestones', desc: 'Documentation, statutory approvals and construction progress tracked with recorded dates.' },
-                { icon: BookOpen, title: 'Audited Capital Ledger', desc: 'Initial assignments, additional allocations and allotted square footage recorded with buy rates.' },
-                { icon: Camera, title: 'Site Progress & Media', desc: 'Direct site camera feeds alongside dated progress photography and engineering dispatches.' },
-                { icon: MessageCircle, title: 'Executive Relationship Desk', desc: 'Project-specific communication thread with the Redhill Bengaluru team.' },
-              ].map((item, i) => (
-                <Reveal as="li" key={item.title} delay={i * 0.06} className="py-5 sm:py-6 border-t border-white/10 flex gap-4">
-                  <span className="font-serif text-redhill-gold-soft text-xl tabular w-7 shrink-0 font-light">0{i + 1}</span>
-                  <div>
-                    <h3 className="text-white font-medium flex items-center gap-2 mb-1 text-sm tracking-wide">
-                      <item.icon className="w-4 h-4 text-redhill-gold-soft shrink-0" />
-                      {item.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-white/60 leading-relaxed font-light">{item.desc}</p>
-                  </div>
-                </Reveal>
-              ))}
-            </ol>
+            {/* Right Column: Investor Experience Description & Feature Breakdown (~45% width) */}
+            <div className="lg:col-span-5 xl:col-span-5 relative z-20 space-y-7 sm:space-y-9 lg:pt-20 xl:pt-24">
+              <Reveal>
+                <h3 className="font-serif text-[clamp(1.75rem,2.7vw,2.65rem)] text-[#304B36] font-normal leading-[1.14] tracking-tight">
+                  Every square foot, milestone and rupee — accounted for in real time.
+                </h3>
+                <p className="mt-4 sm:mt-5 text-[#304B36]/80 leading-relaxed text-sm sm:text-base lg:text-[16px] font-light">
+                  Designed as a private residential ownership and investment portal, Redhill gives you direct visibility into your allocated area, construction stages, project documents, and capital ledger.
+                </p>
+              </Reveal>
+
+              <ol className="divide-y divide-[#304B36]/12 border-y border-[#304B36]/15">
+                {[
+                  { icon: Activity, title: 'Stage-by-Stage Milestones', desc: 'Documentation, statutory approvals and construction progress tracked with recorded dates.' },
+                  { icon: BookOpen, title: 'Audited Capital Ledger', desc: 'Initial assignments, additional allocations and allotted square footage recorded with buy rates.' },
+                  { icon: Camera, title: 'Site Progress & Media', desc: 'Direct site camera feeds alongside dated progress photography and engineering dispatches.' },
+                  { icon: MessageCircle, title: 'Executive Relationship Desk', desc: 'Project-specific communication thread with the Redhill Bengaluru team.' },
+                ].map((item, i) => (
+                  <Reveal as="li" key={item.title} delay={i * 0.05} className="py-4 sm:py-5 flex gap-3.5 sm:gap-4 items-start group">
+                    <span className="font-serif text-[#304B36]/45 group-hover:text-[#304B36] transition-colors text-base sm:text-lg tabular w-6 shrink-0 font-light pt-0.5">
+                      0{i + 1}
+                    </span>
+                    <div className="flex-1">
+                      <h4 className="text-[#304B36] font-medium flex items-center gap-2 mb-1 text-sm tracking-wide">
+                        <item.icon className="w-4 h-4 text-[#304B36]/80 shrink-0" />
+                        {item.title}
+                      </h4>
+                      <p className="text-xs sm:text-[13px] text-[#304B36]/75 leading-relaxed font-light">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </Reveal>
+                ))}
+              </ol>
+            </div>
+
           </div>
         </div>
       </section>
