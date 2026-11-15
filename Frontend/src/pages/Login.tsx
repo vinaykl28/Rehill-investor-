@@ -899,36 +899,20 @@ export default function Login({ onLogin }: LoginProps) {
               preload="metadata"
             />
           ) : (
-            <motion.div
-              initial={{ scale: 1.0 }}
-              animate={
-                reduceMotion
-                  ? { scale: 1.0 }
-                  : { scale: [1.0, 1.025, 1.0] }
-              }
-              transition={
-                reduceMotion
-                  ? { duration: 0.6 }
-                  : {
-                      duration: 22,
-                      repeat: Infinity,
-                      repeatType: 'reverse',
-                      ease: 'easeInOut',
-                    }
-              }
+            <div
               className="w-full h-full"
               style={{
+                imageRendering: 'auto',
                 WebkitBackfaceVisibility: 'hidden',
-                transform: 'translateZ(0)',
               }}
             >
               <picture className="w-full h-full block">
-                <source media="(max-width: 640px)" type="image/avif" srcSet="/assets/projects/hero-biophilic-mobile.avif" />
-                <source media="(max-width: 640px)" type="image/webp" srcSet="/assets/projects/hero-biophilic-mobile.webp" />
-                <source media="(max-width: 640px)" srcSet="/assets/projects/hero-biophilic-mobile.jpg" />
-                <source media="(max-width: 1280px)" type="image/avif" srcSet="/assets/projects/hero-biophilic-tablet.avif" />
-                <source media="(max-width: 1280px)" type="image/webp" srcSet="/assets/projects/hero-biophilic-tablet.webp" />
-                <source media="(max-width: 1280px)" srcSet="/assets/projects/hero-biophilic-tablet.jpg" />
+                {/* Dedicated High-Resolution Mobile Portrait Master (1440x2560) */}
+                <source media="(max-width: 767px)" type="image/avif" srcSet="/assets/projects/hero-biophilic-mobile.avif" />
+                <source media="(max-width: 767px)" type="image/webp" srcSet="/assets/projects/hero-biophilic-mobile.webp" />
+                <source media="(max-width: 767px)" srcSet="/assets/projects/hero-biophilic-mobile.jpg" />
+
+                {/* High-Resolution Desktop Master (3840x2160) for Retina and High-DPI screens */}
                 <source type="image/avif" srcSet="/assets/projects/hero-biophilic-desktop.avif" />
                 <source type="image/webp" srcSet="/assets/projects/hero-biophilic-desktop.webp" />
                 <img
@@ -937,20 +921,20 @@ export default function Login({ onLogin }: LoginProps) {
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="w-full h-full object-cover object-[54%_center] sm:object-[64%_center] select-none pointer-events-none"
+                  className="w-full h-full object-cover object-center md:object-[64%_center] select-none pointer-events-none"
                   style={{
                     imageRendering: 'auto',
                     WebkitBackfaceVisibility: 'hidden',
                   }}
                 />
               </picture>
-            </motion.div>
+            </div>
           )}
         </motion.div>
 
         {/* Ambient Architectural Scrim (Subtle, non-intrusive gradient preserving natural photography clarity) */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-transparent to-black/25 pointer-events-none" />
-        <div className="hidden md:block absolute inset-0 z-10 bg-gradient-to-r from-black/45 via-black/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />
+        <div className="hidden md:block absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
 
         {/* Top Header Spacer */}
         <div className="h-16 sm:h-20 shrink-0" aria-hidden="true" />
