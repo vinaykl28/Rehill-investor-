@@ -921,7 +921,7 @@ export default function Login({ onLogin }: LoginProps) {
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="w-full h-full object-cover object-center md:object-[64%_center] select-none pointer-events-none"
+                  className="w-full h-full object-cover object-center md:object-[68%_center] select-none pointer-events-none"
                   style={{
                     imageRendering: 'auto',
                     WebkitBackfaceVisibility: 'hidden',
