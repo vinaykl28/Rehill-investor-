@@ -119,7 +119,10 @@ export default function Login({ onLogin }: LoginProps) {
   }, [resendTimer]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 32);
+    const onScroll = () => {
+      const threshold = window.innerWidth < 768 ? 480 : 32;
+      setScrolled(window.scrollY > threshold);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -709,7 +712,7 @@ export default function Login({ onLogin }: LoginProps) {
         className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 border-b ${
           scrolled
             ? 'bg-white/95 backdrop-blur-md border-redhill-line shadow-[0_8px_30px_-18px_rgba(29,30,34,0.18)]'
-            : 'bg-gradient-to-b from-black/65 via-black/30 to-transparent border-white/10'
+            : 'bg-redhill-ink border-white/5 md:bg-gradient-to-b md:from-black/65 md:via-black/30 md:to-transparent md:border-white/10'
         }`}
       >
         <div className="page-container h-16 sm:h-20 grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
@@ -876,130 +879,200 @@ export default function Login({ onLogin }: LoginProps) {
       </AnimatePresence>
 
       {/* ================================================================ */}
-      {/* CINEMATIC FULL-VIEWPORT ARCHITECTURAL HERO (100% Dynamic VH)      */}
+      {/* CINEMATIC ARCHITECTURAL HERO                                      */}
+      {/* Mobile: Stacked dark header -> 190px photo -> solid dark panel   */}
+      {/* Desktop: Full-viewport cinematic backdrop                         */}
       {/* ================================================================ */}
       <section
         id="top"
-        className="relative min-h-dvh flex flex-col justify-between overflow-hidden bg-redhill-ink text-white"
+        className="relative bg-redhill-ink text-white"
       >
-        {/* Architectural Photograph / Video Backdrop with cinematic movement */}
-        <motion.div
-          style={{ y: heroParallax, opacity: heroOpacity }}
-          className="absolute inset-0 z-0 overflow-hidden"
-        >
-          {HERO_VIDEO && !reduceMotion ? (
-            <video
-              className="w-full h-full object-cover object-center"
-              src={HERO_VIDEO}
-              poster="/assets/projects/hero-biophilic-desktop.jpg"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-            />
-          ) : (
-            <div
-              className="w-full h-full"
-              style={{
-                imageRendering: 'auto',
-                WebkitBackfaceVisibility: 'hidden',
-              }}
-            >
-              <picture className="w-full h-full block">
-                {/* Dedicated High-Resolution Mobile Portrait Master (1440x2560) */}
-                <source media="(max-width: 767px)" type="image/avif" srcSet="/assets/projects/hero-biophilic-mobile.avif" />
-                <source media="(max-width: 767px)" type="image/webp" srcSet="/assets/projects/hero-biophilic-mobile.webp" />
-                <source media="(max-width: 767px)" srcSet="/assets/projects/hero-biophilic-mobile.jpg" />
+        {/* ============================================================ */}
+        {/* MOBILE STACKED HERO (< md)                                    */}
+        {/* Solid dark header -> 190px photo -> solid dark panel          */}
+        {/* ============================================================ */}
+        <div className="md:hidden flex flex-col">
+          {/* Top Header Spacer (Matches fixed header height) */}
+          <div className="h-16 shrink-0 bg-redhill-ink" aria-hidden="true" />
 
-                {/* High-Resolution Desktop Master (3840x2160) for Retina and High-DPI screens */}
-                <source type="image/avif" srcSet="/assets/projects/hero-biophilic-desktop.avif" />
-                <source type="image/webp" srcSet="/assets/projects/hero-biophilic-desktop.webp" />
-                <img
-                  src="/assets/projects/hero-biophilic-desktop.jpg"
-                  alt="Redhill contemporary biophilic boutique residential community in Bengaluru"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  className="w-full h-full object-cover object-center md:object-[68%_center] select-none pointer-events-none"
-                  style={{
-                    imageRendering: 'auto',
-                    WebkitBackfaceVisibility: 'hidden',
-                  }}
-                />
-              </picture>
-            </div>
-          )}
-        </motion.div>
+          {/* Standalone Building Photo at about 190px tall (No text overlay) */}
+          <div className="w-full h-[190px] relative overflow-hidden bg-black shrink-0">
+            <picture className="w-full h-full block">
+              <source type="image/avif" srcSet="/assets/projects/hero-biophilic-mobile.avif" />
+              <source type="image/webp" srcSet="/assets/projects/hero-biophilic-mobile.webp" />
+              <img
+                src="/assets/projects/hero-biophilic-mobile.jpg"
+                alt="Redhill contemporary boutique residential community in Bengaluru"
+                className="w-full h-full object-cover object-center select-none"
+                style={{
+                  imageRendering: 'auto',
+                  WebkitBackfaceVisibility: 'hidden',
+                }}
+              />
+            </picture>
+          </div>
 
-        {/* Ambient Architectural Scrim (Subtle, non-intrusive gradient preserving natural photography clarity) */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />
-        <div className="hidden md:block absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
+          {/* Solid Dark Panel with Eyebrow, Heading, Paragraph and Buttons */}
+          <div className="bg-redhill-ink px-5 sm:px-6 pt-6 pb-9 flex flex-col space-y-4">
+            {/* Eyebrow */}
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-redhill-gold-soft leading-tight">
+              Redhill Infra · Boutique High-Rise Living
+            </p>
 
-        {/* Top Header Spacer */}
-        <div className="h-16 sm:h-20 shrink-0" aria-hidden="true" />
-
-        {/* Hero Editorial Content (Optically centered with scroll parallax depth) */}
-        <motion.div
-          style={{ y: heroContentY, opacity: heroContentOpacity }}
-          className="relative z-20 page-container flex-1 flex items-center py-6 sm:py-12"
-        >
-          <div className="max-w-3xl space-y-5 sm:space-y-7 w-full">
-            <motion.div {...rise(0.05)} className="flex items-center gap-2.5 sm:gap-3">
-              <span className="w-6 sm:w-12 h-px bg-redhill-gold-soft/80 shrink-0" />
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.24em] text-redhill-gold-soft leading-tight">
-                Redhill Infra · Boutique High-Rise Living
-              </span>
-            </motion.div>
-
-            <motion.h1
-              {...rise(0.14)}
-              className="font-serif text-[clamp(2.15rem,7.2vw,4.8rem)] text-white font-normal tracking-tight leading-[1.08] sm:leading-[1.04] drop-shadow-[0_3px_18px_rgba(0,0,0,0.85)]"
-            >
+            {/* Heading */}
+            <h1 className="font-serif text-[2.1rem] sm:text-[2.4rem] font-normal tracking-tight leading-[1.1] text-white">
               Thoughtfully Designed.{' '}
-              <span className="block italic text-redhill-gold-soft font-light mt-1 sm:mt-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
+              <span className="block italic text-redhill-gold-soft font-light mt-1">
                 Built for Better Living.
               </span>
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              {...rise(0.22)}
-              className="text-sm sm:text-base lg:text-lg text-white/90 leading-relaxed max-w-xl font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
-            >
+            {/* Paragraph with high contrast */}
+            <p className="text-sm text-[#e0e0e0] leading-relaxed font-light">
               Contemporary residential communities crafted for modern urban living across Bengaluru’s prime neighbourhoods.
-            </motion.p>
+            </p>
 
-            <motion.div {...rise(0.3)} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2 sm:pt-3 w-full sm:w-auto">
+            {/* Full-width action buttons (48px tall) */}
+            <div className="flex flex-col gap-3 pt-2 w-full">
               <button
                 type="button"
                 onClick={() => scrollToSection('experience')}
-                className="btn-press inline-flex items-center justify-center gap-2 rounded-xs px-6 sm:px-7 py-3.5 sm:py-4 text-xs font-semibold uppercase tracking-[0.16em] bg-white text-redhill-charcoal hover:bg-redhill-sand transition-all cursor-pointer shadow-lg active:scale-98"
+                className="w-full h-[48px] rounded-xs inline-flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] bg-white text-redhill-charcoal hover:bg-redhill-sand transition-all cursor-pointer shadow-md active:scale-[0.99]"
               >
                 Explore Our Projects
-                <ArrowRight className="w-4 h-4 text-redhill-gold" />
+                <ArrowRight className="w-4 h-4 text-redhill-charcoal" />
               </button>
+
               <button
                 type="button"
                 onClick={scrollToAccessSection}
-                className="btn-press inline-flex items-center justify-center gap-2 rounded-xs px-6 sm:px-7 py-3.5 sm:py-4 text-xs font-semibold uppercase tracking-[0.16em] border border-white/40 text-white hover:border-white hover:bg-white/10 backdrop-blur-xs transition-all cursor-pointer active:scale-98"
+                className="w-full h-[48px] rounded-xs inline-flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] bg-[#16171a] border border-redhill-gold-soft text-redhill-gold-soft hover:bg-[#1f2025] transition-all cursor-pointer shadow-md active:scale-[0.99]"
               >
                 <Lock className="w-3.5 h-3.5 text-redhill-gold-soft" />
                 Investor Access
               </button>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Bodhi-Inspired Scroll Indicator */}
-        <motion.div
-          style={{ opacity: heroContentOpacity }}
-          className="relative z-20 pb-5 sm:pb-7 hidden sm:flex flex-col items-center justify-center gap-2 pointer-events-none"
-        >
-          <span className="text-[10px] uppercase tracking-[0.24em] text-white/50 font-medium">
-            Scroll to Discover
-          </span>
-          <div className="w-px h-6 sm:h-7 bg-gradient-to-b from-white/40 via-redhill-gold-soft to-transparent animate-pulse" />
-        </motion.div>
+        {/* ============================================================ */}
+        {/* DESKTOP CINEMATIC HERO (>= md)                                */}
+        {/* Full-viewport cinematic backdrop with subtle parallax        */}
+        {/* ============================================================ */}
+        <div className="hidden md:flex min-h-dvh flex-col justify-between relative overflow-hidden">
+          {/* Architectural Photograph / Video Backdrop with cinematic movement */}
+          <motion.div
+            style={{ y: heroParallax, opacity: heroOpacity }}
+            className="absolute inset-0 z-0 overflow-hidden"
+          >
+            {HERO_VIDEO && !reduceMotion ? (
+              <video
+                className="w-full h-full object-cover object-center"
+                src={HERO_VIDEO}
+                poster="/assets/projects/hero-biophilic-desktop.jpg"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <div
+                className="w-full h-full"
+                style={{
+                  imageRendering: 'auto',
+                  WebkitBackfaceVisibility: 'hidden',
+                }}
+              >
+                <picture className="w-full h-full block">
+                  <source type="image/avif" srcSet="/assets/projects/hero-biophilic-desktop.avif" />
+                  <source type="image/webp" srcSet="/assets/projects/hero-biophilic-desktop.webp" />
+                  <img
+                    src="/assets/projects/hero-biophilic-desktop.jpg"
+                    alt="Redhill contemporary biophilic boutique residential community in Bengaluru"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="w-full h-full object-cover object-center md:object-[68%_center] select-none pointer-events-none"
+                    style={{
+                      imageRendering: 'auto',
+                      WebkitBackfaceVisibility: 'hidden',
+                    }}
+                  />
+                </picture>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Ambient Architectural Scrim */}
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
+
+          {/* Top Header Spacer */}
+          <div className="h-20 shrink-0" aria-hidden="true" />
+
+          {/* Hero Editorial Content */}
+          <motion.div
+            style={{ y: heroContentY, opacity: heroContentOpacity }}
+            className="relative z-20 page-container flex-1 flex items-center py-12"
+          >
+            <div className="max-w-3xl space-y-7 w-full">
+              <motion.div {...rise(0.05)} className="flex items-center gap-3">
+                <span className="w-12 h-px bg-redhill-gold-soft/80 shrink-0" />
+                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-redhill-gold-soft leading-tight">
+                  Redhill Infra · Boutique High-Rise Living
+                </span>
+              </motion.div>
+
+              <motion.h1
+                {...rise(0.14)}
+                className="font-serif text-[clamp(2.5rem,5.5vw,4.8rem)] text-white font-normal tracking-tight leading-[1.04] drop-shadow-[0_3px_18px_rgba(0,0,0,0.85)]"
+              >
+                Thoughtfully Designed.{' '}
+                <span className="block italic text-redhill-gold-soft font-light mt-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
+                  Built for Better Living.
+                </span>
+              </motion.h1>
+
+              <motion.p
+                {...rise(0.22)}
+                className="text-base lg:text-lg text-white/90 leading-relaxed max-w-xl font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
+              >
+                Contemporary residential communities crafted for modern urban living across Bengaluru’s prime neighbourhoods.
+              </motion.p>
+
+              <motion.div {...rise(0.3)} className="flex items-center gap-4 pt-3">
+                <button
+                  type="button"
+                  onClick={() => scrollToSection('experience')}
+                  className="btn-press inline-flex items-center justify-center gap-2 rounded-xs px-7 py-4 text-xs font-semibold uppercase tracking-[0.16em] bg-white text-redhill-charcoal hover:bg-redhill-sand transition-all cursor-pointer shadow-lg active:scale-98"
+                >
+                  Explore Our Projects
+                  <ArrowRight className="w-4 h-4 text-redhill-gold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollToAccessSection}
+                  className="btn-press inline-flex items-center justify-center gap-2 rounded-xs px-7 py-4 text-xs font-semibold uppercase tracking-[0.16em] border border-white/40 text-white hover:border-white hover:bg-white/10 backdrop-blur-xs transition-all cursor-pointer active:scale-98"
+                >
+                  <Lock className="w-3.5 h-3.5 text-redhill-gold-soft" />
+                  Investor Access
+                </button>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Bodhi-Inspired Scroll Indicator */}
+          <motion.div
+            style={{ opacity: heroContentOpacity }}
+            className="relative z-20 pb-7 flex flex-col items-center justify-center gap-2 pointer-events-none"
+          >
+            <span className="text-[10px] uppercase tracking-[0.24em] text-white/50 font-medium">
+              Scroll to Discover
+            </span>
+            <div className="w-px h-7 bg-gradient-to-b from-white/40 via-redhill-gold-soft to-transparent animate-pulse" />
+          </motion.div>
+        </div>
       </section>
 
       {/* ================================================================ */}
