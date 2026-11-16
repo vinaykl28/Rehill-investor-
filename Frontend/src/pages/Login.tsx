@@ -1078,30 +1078,30 @@ export default function Login({ onLogin }: LoginProps) {
       {/* ================================================================ */}
       {/* 01 — THE INVESTOR EXPERIENCE (Swan Realty Bodhi Editorial Style) */}
       {/* ================================================================ */}
-      <section id="experience" className="relative bg-[#F7F0E8] text-[#304B36] py-20 sm:py-28 lg:py-36 overflow-hidden border-b border-[#E8E0D5]">
+      <section id="experience" className="relative bg-[#F7F0E8] text-[#304B36] py-16 sm:py-24 lg:py-28 overflow-hidden border-b border-[#E8E0D5]">
         <div className="page-container relative">
           
-          {/* Oversized Editorial Heading spanning across upper portion & visually overlapping */}
-          <div className="relative z-20 mb-8 sm:mb-12 lg:-mb-12 xl:-mb-16 pointer-events-none">
+          {/* Section Heading */}
+          <div className="relative z-20 mb-8 sm:mb-12 lg:mb-14">
             <Reveal>
-              <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3 pointer-events-auto">
+              <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
                 <span className="w-6 sm:w-10 h-px bg-[#304B36]/40" />
                 <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-[#304B36]/75 font-semibold">
                   01 — Portfolio Transparency
                 </span>
               </div>
-              <h2 className="font-serif text-[clamp(2.35rem,7.2vw,6.5rem)] font-light text-[#304B36] tracking-[0.03em] sm:tracking-[0.05em] leading-[0.94] uppercase select-none drop-shadow-xs">
+              <h2 className="font-serif text-[clamp(2.2rem,4.8vw,4.2rem)] font-light text-[#304B36] tracking-[0.03em] sm:tracking-[0.04em] leading-[1.05] uppercase select-none drop-shadow-xs">
                 The Investor Experience
               </h2>
             </Reveal>
           </div>
 
           {/* Two-Column Bodhi Layout: 50-55% Image (Left) + Editorial Content (Right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-20 items-start pt-2 lg:pt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-20 items-start">
             
             {/* Left Column: Architectural Photography (Occupying ~55% content width on desktop) */}
             <Reveal className="lg:col-span-7 xl:col-span-7 relative z-10">
-              <div className="relative aspect-[4/5] sm:aspect-[16/11] lg:aspect-[4/5] rounded-xs overflow-hidden border border-[#304B36]/15 shadow-[0_24px_60px_-24px_rgba(48,75,54,0.18)] group bg-[#EDE4D8]">
+              <div className="relative aspect-[4/5] sm:aspect-[16/11] lg:aspect-[4/3] rounded-xs overflow-hidden border border-[#304B36]/15 shadow-[0_24px_60px_-24px_rgba(48,75,54,0.18)] group bg-[#EDE4D8]">
                 <img
                   src={EXPERIENCE_IMAGE}
                   alt="Redhill contemporary boutique residential high-rise architecture in Bengaluru"
@@ -1118,9 +1118,9 @@ export default function Login({ onLogin }: LoginProps) {
             </Reveal>
 
             {/* Right Column: Investor Experience Description & Feature Breakdown (~45% width) */}
-            <div className="lg:col-span-5 xl:col-span-5 relative z-20 space-y-7 sm:space-y-9 lg:pt-20 xl:pt-24">
+            <div className="lg:col-span-5 xl:col-span-5 relative z-20 space-y-7 sm:space-y-8">
               <Reveal>
-                <h3 className="font-serif text-[clamp(1.75rem,2.7vw,2.65rem)] text-[#304B36] font-normal leading-[1.14] tracking-tight">
+                <h3 className="font-serif text-[clamp(1.75rem,2.5vw,2.4rem)] text-[#304B36] font-normal leading-[1.16] tracking-tight">
                   Every square foot, milestone and rupee — accounted for in real time.
                 </h3>
                 <p className="mt-4 sm:mt-5 text-[#304B36]/80 leading-relaxed text-sm sm:text-base lg:text-[16px] font-light">
