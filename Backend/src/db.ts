@@ -19,6 +19,12 @@ if (isPg) {
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
   });
+
+  // Handle unexpected idle connection errors to prevent unhandled node crash on serverless wake/sleep
+  (pgPool as any).on('error', (err: any) => {
+    console.error('Unexpected idle client error in PostgreSQL pool (handled gracefully):', err?.message || err);
+  });
+
   console.log('📦 Connected to Neon PostgreSQL database.');
 } else {
   const dbDir = path.dirname(config.DATABASE_PATH);
