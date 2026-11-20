@@ -1009,7 +1009,7 @@ export default function Login({ onLogin }: LoginProps) {
               </motion.p>
 
               <motion.div {...rise(0.34)} className="mt-7 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <button type="button" onClick={() => scrollToSection('experience')} className="btn-botanical w-full sm:w-auto">
+                <button type="button" onClick={() => openAccessDrawer('login')} className="btn-botanical w-full sm:w-auto">
                   Explore Our Projects
                   <ArrowRight className="w-4 h-4" />
                 </button>
