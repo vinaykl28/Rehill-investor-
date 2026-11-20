@@ -752,7 +752,7 @@ export default function Login({ onLogin }: LoginProps) {
             aria-label="Redhill Infra — home"
             className="justify-self-start shrink-0"
           >
-            <Logo />
+            <Logo className="scale-90 origin-left sm:scale-100" />
           </a>
 
           <nav aria-label="Primary" className="hidden md:flex items-center justify-center gap-8 lg:gap-11 justify-self-center">
@@ -901,7 +901,7 @@ export default function Login({ onLogin }: LoginProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[52fr_48fr] lg:min-h-[calc(100dvh-5rem)]">
           {/* LEFT — Dynamic 4-image architectural slideshow */}
           <div
-            className="relative overflow-hidden bg-rh-forest aspect-[4/5] sm:aspect-[4/3] lg:aspect-auto lg:h-full"
+            className="relative overflow-hidden bg-rh-forest h-[52dvh] min-h-[340px] max-h-[430px] lg:min-h-0 lg:max-h-none lg:h-full"
             onMouseEnter={() => setHeroPaused(true)}
             onMouseLeave={() => setHeroPaused(false)}
             aria-roledescription="carousel"
@@ -987,30 +987,30 @@ export default function Login({ onLogin }: LoginProps) {
 
           {/* RIGHT — Editorial content (min-w-0 prevents CSS grid horizontal overflow) */}
           <div className="flex items-center min-w-0 overflow-hidden">
-            <div className="w-full px-6 sm:px-10 md:px-12 lg:px-10 xl:px-16 2xl:px-20 py-12 sm:py-16 lg:py-20 max-w-[680px]">
-              <motion.p {...rise(0.05)} className="text-[11px] sm:text-xs uppercase tracking-[0.24em] text-rh-champagne font-medium mb-5 sm:mb-7">
+            <div className="w-full px-6 py-8 sm:px-10 sm:py-12 lg:px-10 xl:px-16 2xl:px-20 lg:py-20 max-w-[680px]">
+              <motion.p {...rise(0.05)} className="text-[11px] sm:text-xs uppercase tracking-[0.24em] text-rh-champagne font-medium mb-4 sm:mb-7">
                 Redhill Infra · Bengaluru
               </motion.p>
 
               <motion.h1
                 {...rise(0.12)}
-                className="font-serif font-light uppercase text-rh-botanical text-[clamp(1.75rem,2.75vw,3.25rem)] leading-[1.08] tracking-[0.015em] break-words"
+                className="font-serif font-light uppercase text-rh-botanical text-[clamp(2rem,8vw,2.75rem)] leading-[1.15] lg:text-[clamp(1.75rem,2.75vw,3.25rem)] lg:leading-[1.08] tracking-[0.015em] break-words"
               >
                 Spaces that inspire.
                 <span className="block">Homes that belong.</span>
               </motion.h1>
 
-              <motion.div {...rise(0.2)} className="h-px w-20 bg-rh-stone my-7 sm:my-9" aria-hidden="true" />
+              <motion.div {...rise(0.2)} className="h-px w-20 bg-rh-stone my-6 sm:my-9" aria-hidden="true" />
 
               <motion.p {...rise(0.24)} className="text-[15px] sm:text-base lg:text-[17px] leading-relaxed text-rh-botanical/80 font-light max-w-md">
                 Thoughtfully designed residences where contemporary architecture, nature and everyday comfort come together.
               </motion.p>
 
-              <motion.p {...rise(0.28)} className="mt-6 font-serif italic text-xl sm:text-2xl text-rh-botanical">
+              <motion.p {...rise(0.28)} className="mt-5 sm:mt-6 font-serif italic text-xl sm:text-2xl text-rh-botanical">
                 Discover Redhill Infra.
               </motion.p>
 
-              <motion.div {...rise(0.34)} className="mt-9 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <motion.div {...rise(0.34)} className="mt-7 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button type="button" onClick={() => scrollToSection('experience')} className="btn-botanical w-full sm:w-auto">
                   Explore Our Projects
                   <ArrowRight className="w-4 h-4" />
@@ -1028,11 +1028,11 @@ export default function Login({ onLogin }: LoginProps) {
       {/* ================================================================ */}
       {/* 01 — THE INVESTOR EXPERIENCE (Swan Realty Bodhi Editorial Style) */}
       {/* ================================================================ */}
-      <section id="experience" className="relative bg-rh-ivory border-t text-rh-botanical py-20 sm:py-28 lg:py-36 overflow-hidden border-b border-rh-stone">
+      <section id="experience" className="relative bg-rh-ivory border-t text-rh-botanical py-12 sm:py-24 lg:py-32 overflow-hidden border-b border-rh-stone">
         <div className="page-container relative">
           
           {/* Section Heading */}
-          <div className="relative z-20 mb-8 sm:mb-12 lg:mb-14">
+          <div className="relative z-20 mb-6 sm:mb-12 lg:mb-14">
             <Reveal>
               <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
                 <span className="w-6 sm:w-10 h-px bg-rh-botanical/40" />
@@ -1047,7 +1047,7 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
 
           {/* Two-Column Bodhi Layout: 50-55% Image (Left) + Editorial Content (Right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-20 items-start lg:items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-14 xl:gap-20 items-start lg:items-center">
             
             {/* Left Column: Architectural Photography (Occupying ~55% content width on desktop) */}
             <Reveal className="lg:col-span-7 xl:col-span-7 relative z-10">
@@ -1126,7 +1126,7 @@ export default function Login({ onLogin }: LoginProps) {
       {/* ================================================================ */}
       {/* 02 — INVESTOR ACCESS (Refined Two-Column Private Portfolio View)  */}
       {/* ================================================================ */}
-      <section id="access" className="py-16 sm:py-24 lg:py-28 bg-white">
+      <section id="access" className="py-12 sm:py-24 lg:py-28 bg-white">
         <div className="page-container">
           <div className="overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-rh-stone bg-white">
             {/* Left Column: Architectural Imagery + Welcome Editorial Presentation */}
@@ -1159,18 +1159,18 @@ export default function Login({ onLogin }: LoginProps) {
                 </p>
               </div>
 
-              <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3 sm:gap-4 pt-4 sm:pt-6 border-t border-white/20 text-xs">
+              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 sm:pt-6 border-t border-white/20 text-xs">
                 <div>
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3]">Developments</p>
-                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5">2 – 5 Acres</p>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#E3CFA3]">Developments</p>
+                  <p className="text-white font-medium text-sm mt-0.5">2 – 5 Acres</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3]">Architecture</p>
-                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5">12+ Storeys</p>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#E3CFA3]">Architecture</p>
+                  <p className="text-white font-medium text-sm mt-0.5">12+ Storeys</p>
                 </div>
-                <div className="col-span-2 sm:col-span-1">
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3]">Support</p>
-                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5">Relationship Desk</p>
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#E3CFA3]">Support</p>
+                  <p className="text-white font-medium text-sm mt-0.5">Relationship Desk</p>
                 </div>
               </div>
             </div>
@@ -1195,7 +1195,7 @@ export default function Login({ onLogin }: LoginProps) {
       </section>
 
       {/* Contact Us */}
-      <section id="contact" className="bg-rh-ivory border-t border-rh-stone py-16 sm:py-20">
+      <section id="contact" className="bg-rh-ivory border-t border-rh-stone py-12 sm:py-20">
         <div className="page-container">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-1.5 max-w-xl">
@@ -1208,7 +1208,7 @@ export default function Login({ onLogin }: LoginProps) {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 shrink-0 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 shrink-0 text-sm">
               <div className="border-l border-rh-stone pl-4">
                 <p className="text-[10px] uppercase tracking-[0.16em] text-redhill-muted">Email</p>
                 <a href="mailto:invest@redhillinfra.com" className="font-medium text-rh-botanical hover:text-rh-forest underline-offset-4 hover:underline transition-colors mt-0.5 block">
