@@ -28,6 +28,14 @@
   --color-redhill-charcoal: #191A1E;    /* deep charcoal typography */
   --color-redhill-ink: #111215;         /* cinematic deep slate/ink */
 
+  /* Public website — architectural editorial palette */
+  --color-rh-ivory: #F7F1EA;            /* warm ivory canvas */
+  --color-rh-botanical: #304B36;        /* botanical green typography */
+  --color-rh-forest: #203A2B;           /* forest green (hover / depth) */
+  --color-rh-champagne: #B79A65;        /* champagne gold — use sparingly */
+  --color-rh-stone: #DDD4C8;            /* soft stone hair-lines */
+  --color-rh-charcoal: #282A27;         /* warm charcoal */
+
   /* Legacy aliases (kept so any untouched markup still renders coherently) */
   --color-redhill-dark: #191A1E;
   --color-redhill-gray: #FFFFFF;
@@ -169,6 +177,27 @@
   background: var(--color-redhill-ink);
   color: #F7F5F0;
 }
+
+/* ---------------------------------------------------------------------
+   Public editorial buttons (botanical palette)
+   --------------------------------------------------------------------- */
+.btn-botanical, .btn-botanical-outline {
+  @apply inline-flex items-center justify-center gap-2.5 min-h-[48px] px-7 text-[12px] font-medium uppercase tracking-[0.16em] cursor-pointer rounded-none;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s var(--ease-cinematic);
+}
+.btn-botanical {
+  background: var(--color-rh-botanical);
+  color: var(--color-rh-ivory);
+  border: 1px solid var(--color-rh-botanical);
+}
+.btn-botanical:hover { background: var(--color-rh-forest); border-color: var(--color-rh-forest); }
+.btn-botanical-outline {
+  background: transparent;
+  color: var(--color-rh-botanical);
+  border: 1px solid color-mix(in srgb, var(--color-rh-botanical) 45%, transparent);
+}
+.btn-botanical-outline:hover { border-color: var(--color-rh-botanical); background: color-mix(in srgb, var(--color-rh-botanical) 5%, transparent); }
+.btn-botanical:active, .btn-botanical-outline:active { transform: scale(0.985); }
 
 /* ---------------------------------------------------------------------
    Buttons
