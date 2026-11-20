@@ -40,9 +40,9 @@ const HERO_SLIDES = [
   {
     base: '/images/hero-slide-1',
     width: 1920,
-    height: 2160,
-    pos: 'object-[50%_40%]',
-    alt: 'Redhill Infra entrance gate and illuminated contemporary biophilic residential tower at twilight',
+    height: 2571,
+    pos: 'object-center',
+    alt: 'Luxury contemporary curved residential high-rise in Bengaluru at golden twilight with teak soffits and cascading greenery',
   },
   {
     base: '/images/hero-slide-2',
