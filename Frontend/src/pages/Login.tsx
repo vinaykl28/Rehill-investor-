@@ -39,7 +39,7 @@ const HERO_SLIDES = [
     width: 1920,
     height: 2571,
     pos: 'object-center',
-    alt: 'Luxury contemporary curved residential high-rise in Bengaluru at golden twilight with teak soffits and cascading greenery',
+    alt: 'Grand luxury multi-tower high-rise residential community in Bengaluru at twilight with landscaped courtyard and reflection pools',
   },
   {
     base: '/images/hero-slide-2',
@@ -148,12 +148,12 @@ export default function Login({ onLogin }: LoginProps) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Auto-advance 4-image architectural hero slideshow every 4.5s
+  // Auto-advance 4-image architectural hero slideshow every 3.0s
   useEffect(() => {
     if (reduceMotion || heroPaused) return;
     const id = window.setInterval(() => {
       setActiveSlide(prev => (prev + 1) % HERO_SLIDES.length);
-    }, 4500);
+    }, 3000);
     return () => window.clearInterval(id);
   }, [reduceMotion, heroPaused]);
 
@@ -911,7 +911,7 @@ export default function Login({ onLogin }: LoginProps) {
                 <div
                   key={slide.base}
                   aria-hidden={!isActive}
-                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
                     isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                   }`}
                 >
@@ -939,7 +939,7 @@ export default function Login({ onLogin }: LoginProps) {
                       className={`w-full h-full object-cover ${slide.pos} select-none ${
                         reduceMotion
                           ? ''
-                          : `transition-transform duration-[6000ms] ease-out will-change-transform ${
+                          : `transition-transform duration-[3500ms] ease-out will-change-transform ${
                               isActive ? 'scale-[1.06]' : 'scale-100'
                             }`
                       }`}
