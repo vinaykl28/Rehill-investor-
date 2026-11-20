@@ -891,14 +891,14 @@ export default function Login({ onLogin }: LoginProps) {
 
           {/* RIGHT — Editorial content */}
           <div className="flex items-center">
-            <div className="w-full px-5 sm:px-10 md:px-12 lg:px-16 xl:px-24 py-12 sm:py-16 lg:py-20 max-w-[720px]">
+            <div className="w-full px-5 sm:px-10 md:px-12 lg:px-12 xl:px-20 py-12 sm:py-16 lg:py-20 max-w-[740px]">
               <motion.p {...rise(0.05)} className="text-[11px] sm:text-xs uppercase tracking-[0.24em] text-rh-champagne font-medium mb-6 sm:mb-8">
                 Redhill Infra · Bengaluru
               </motion.p>
 
               <motion.h1
                 {...rise(0.12)}
-                className="font-serif font-light uppercase text-rh-botanical text-[clamp(2.25rem,4.6vw,4.75rem)] leading-[1.02] tracking-[0.01em]"
+                className="font-serif font-light uppercase text-rh-botanical text-[clamp(1.85rem,3.05vw,3.35rem)] leading-[1.08] tracking-[0.015em]"
               >
                 Spaces that inspire.
                 <span className="block">Homes that belong.</span>
@@ -951,7 +951,7 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
 
           {/* Two-Column Bodhi Layout: 50-55% Image (Left) + Editorial Content (Right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-20 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-20 items-start lg:items-center">
             
             {/* Left Column: Architectural Photography (Occupying ~55% content width on desktop) */}
             <Reveal className="lg:col-span-7 xl:col-span-7 relative z-10">
@@ -1047,18 +1047,18 @@ export default function Login({ onLogin }: LoginProps) {
                 </p>
               </div>
 
-              <div className="relative z-10 grid grid-cols-3 gap-2 sm:gap-4 pt-4 sm:pt-6 border-t border-white/20 text-xs">
+              <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3 sm:gap-4 pt-4 sm:pt-6 border-t border-white/20 text-xs">
                 <div>
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3] truncate">Developments</p>
-                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5 truncate">2 – 5 Acres</p>
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3]">Developments</p>
+                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5">2 – 5 Acres</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3] truncate">Architecture</p>
-                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5 truncate">12+ Storeys</p>
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3]">Architecture</p>
+                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5">12+ Storeys</p>
                 </div>
-                <div>
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3] truncate">Support</p>
-                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5 truncate">Relationship Desk</p>
+                <div className="col-span-2 sm:col-span-1">
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[#E3CFA3]">Support</p>
+                  <p className="text-white font-medium text-xs sm:text-sm mt-0.5">Relationship Desk</p>
                 </div>
               </div>
             </div>
@@ -1084,7 +1084,7 @@ export default function Login({ onLogin }: LoginProps) {
 
       {/* Contact Us */}
       <section id="contact" className="bg-rh-ivory border-t border-rh-stone py-16 sm:py-20">
-        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div className="page-container">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-1.5 max-w-xl">
               <p className="eyebrow text-rh-champagne">03 — Contact Us</p>
@@ -1120,7 +1120,7 @@ export default function Login({ onLogin }: LoginProps) {
 
       {/* Footer */}
       <footer className="bg-rh-ivory border-t border-rh-stone py-8" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
-        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="page-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <Logo />
           <p className="text-xs text-redhill-muted">
             © {new Date().getFullYear()} Redhill Infra Pvt Ltd. Contemporary Boutique High-Rise Living · Bengaluru, India.

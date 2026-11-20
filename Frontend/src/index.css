@@ -182,7 +182,7 @@
    Public editorial buttons (botanical palette)
    --------------------------------------------------------------------- */
 .btn-botanical, .btn-botanical-outline {
-  @apply inline-flex items-center justify-center gap-2.5 min-h-[48px] px-7 text-[12px] font-medium uppercase tracking-[0.16em] cursor-pointer rounded-none;
+  @apply inline-flex items-center justify-center gap-2.5 min-h-[48px] px-5 lg:px-6 text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.14em] whitespace-nowrap shrink-0 cursor-pointer rounded-none;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s var(--ease-cinematic);
 }
 .btn-botanical {
@@ -209,12 +209,12 @@
 
 .btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-xs px-6 py-3.5 text-xs font-medium uppercase tracking-[0.14em] text-white cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed;
-  background: var(--color-redhill-charcoal);
-  border: 1px solid var(--color-redhill-charcoal);
+  background: var(--color-rh-botanical);
+  border: 1px solid var(--color-rh-botanical);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-redhill-red);
-  border-color: var(--color-redhill-red);
+  background: var(--color-rh-forest);
+  border-color: var(--color-rh-forest);
 }
 
 .btn-dark {
