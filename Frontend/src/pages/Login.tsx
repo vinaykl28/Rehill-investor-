@@ -33,7 +33,6 @@ interface LoginProps {
   onLogin: (user: User) => void;
 }
 
-const EXPERIENCE_IMAGE = '/assets/projects/pinnacle-heights.jpg';
 const ACCESS_EDITORIAL_IMAGE = '/assets/projects/signature-towers.jpg';
 
 const HERO_SLIDES = [
@@ -1052,14 +1051,30 @@ export default function Login({ onLogin }: LoginProps) {
             
             {/* Left Column: Architectural Photography (Occupying ~55% content width on desktop) */}
             <Reveal className="lg:col-span-7 xl:col-span-7 relative z-10">
-              <div className="relative aspect-[4/5] sm:aspect-[16/11] lg:aspect-[4/3] rounded-xs overflow-hidden border border-rh-botanical/15 shadow-[0_24px_60px_-24px_rgba(48,75,54,0.18)] group bg-[#EDE4D8]">
-                <img
-                  src={EXPERIENCE_IMAGE}
-                  alt="Redhill contemporary boutique residential high-rise architecture in Bengaluru"
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                />
+              <div className="relative aspect-[4/3] rounded-xs overflow-hidden border border-rh-botanical/15 shadow-[0_24px_60px_-24px_rgba(48,75,54,0.18)] group bg-[#EDE4D8]">
+                <picture className="block w-full h-full">
+                  <source
+                    type="image/avif"
+                    srcSet="/images/experience-feature-800.avif 800w, /images/experience-feature-1200.avif 1200w, /images/experience-feature-1920.avif 1920w"
+                    sizes="(min-width: 1024px) 55vw, 100vw"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet="/images/experience-feature-800.webp 800w, /images/experience-feature-1200.webp 1200w, /images/experience-feature-1920.webp 1920w"
+                    sizes="(min-width: 1024px) 55vw, 100vw"
+                  />
+                  <img
+                    src="/images/experience-feature-1200.jpg"
+                    srcSet="/images/experience-feature-800.jpg 800w, /images/experience-feature-1200.jpg 1200w, /images/experience-feature-1920.jpg 1920w"
+                    sizes="(min-width: 1024px) 55vw, 100vw"
+                    width={1920}
+                    height={1434}
+                    alt="Curved travertine and teak-soffit residential residence with landscaped stone water court in Bengaluru"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                  />
+                </picture>
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1F3124]/80 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-5 sm:bottom-6 left-5 sm:left-6 right-5 sm:right-6 text-xs text-white/95 flex items-center justify-between border-t border-white/20 pt-3 sm:pt-3.5 backdrop-blur-xs">
                   <span className="uppercase tracking-[0.2em] font-medium text-[10px] sm:text-[11px]">Boutique High-Rise Living</span>
