@@ -33,8 +33,6 @@ interface LoginProps {
   onLogin: (user: User) => void;
 }
 
-const ACCESS_EDITORIAL_IMAGE = '/assets/projects/signature-towers.jpg';
-
 const HERO_SLIDES = [
   {
     base: '/images/hero-slide-1',
@@ -1231,15 +1229,33 @@ export default function Login({ onLogin }: LoginProps) {
       <section id="access" className="py-12 sm:py-24 lg:py-28 bg-white">
         <div className="page-container">
           <div className="overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-rh-stone bg-white">
-            {/* Left Column: Architectural Imagery + Welcome Editorial Presentation */}
-            <div className="lg:col-span-6 relative min-h-[260px] sm:min-h-[360px] lg:min-h-[620px] flex flex-col justify-between p-6 sm:p-10 lg:p-12 text-white bg-rh-forest overflow-hidden">
-              <img
-                src={ACCESS_EDITORIAL_IMAGE}
-                alt="Redhill contemporary boutique high-rise residence in Bengaluru"
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#16291E]/95 via-[#16291E]/75 to-[#16291E]/55" />
+            {/* Left Column: Moody Blue-Hour Architectural Imagery + Welcome Editorial Presentation */}
+            <div className="lg:col-span-6 relative min-h-[320px] sm:min-h-[380px] lg:min-h-[620px] flex flex-col justify-between p-6 sm:p-10 lg:p-12 text-white bg-[#0B1118] overflow-hidden">
+              <picture className="absolute inset-0 block w-full h-full">
+                <source
+                  type="image/avif"
+                  srcSet="/images/access-portal-800.avif 800w, /images/access-portal-1200.avif 1200w, /images/access-portal-1920.avif 1920w"
+                  sizes="(min-width: 1024px) 48vw, 100vw"
+                />
+                <source
+                  type="image/webp"
+                  srcSet="/images/access-portal-800.webp 800w, /images/access-portal-1200.webp 1200w, /images/access-portal-1920.webp 1920w"
+                  sizes="(min-width: 1024px) 48vw, 100vw"
+                />
+                <img
+                  src="/images/access-portal-1200.jpg"
+                  srcSet="/images/access-portal-800.jpg 800w, /images/access-portal-1200.jpg 1200w, /images/access-portal-1920.jpg 1920w"
+                  sizes="(min-width: 1024px) 48vw, 100vw"
+                  width={1920}
+                  height={2571}
+                  alt="Moody blue-hour architectural photograph of a contemporary Redhill residence in Bengaluru"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover object-center"
+                />
+              </picture>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090E14]/92 via-[#0C131B]/60 to-[#090E14]/45" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#090E14]/45 via-transparent to-transparent" />
 
               <div className="relative z-10 flex items-center justify-between gap-4">
                 <Logo light />
