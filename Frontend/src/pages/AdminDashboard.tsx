@@ -228,8 +228,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         setProjectMilestones(data.milestones || []);
         setProjectUpdates(data.updates || []);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
+      showToast('Failed to load project milestones and updates', 'error');
     }
   };
 

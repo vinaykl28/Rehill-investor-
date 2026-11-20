@@ -10,9 +10,14 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const ShowcaseExplore = lazy(() => import('./components/ShowcaseExplore'));
 
-const LoadingScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-redhill-ivory">
-    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-redhill-red"></div>
+const LoadingScreen = ({ wakingUp = false }: { wakingUp?: boolean }) => (
+  <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-rh-ivory px-6 text-center">
+    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-rh-botanical" />
+    {wakingUp && (
+      <p className="text-xs uppercase tracking-[0.2em] text-rh-botanical/70 font-medium">
+        Connecting to Redhill Portal…
+      </p>
+    )}
   </div>
 );
 
@@ -37,14 +42,18 @@ function clearStoredToken(): void {
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(() => Boolean(getStoredToken()));
+  const [wakingUp, setWakingUp] = useState<boolean>(false);
 
   useEffect(() => {
     let active = true;
+    const wakeTimer = window.setTimeout(() => {
+      if (active) setWakingUp(true);
+    }, 3000);
     const timeout = window.setTimeout(() => {
       if (active) setLoading(false);
-    }, 6000);
+    }, 25000);
 
-    apiFetch('/api/me')
+    apiFetch('/api/me', { timeoutMs: 25000 })
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
         if (!active) return;
@@ -61,27 +70,36 @@ export default function App() {
         setLoading(false);
       })
       .finally(() => {
+        window.clearTimeout(wakeTimer);
         window.clearTimeout(timeout);
       });
 
+    const onUnauthorized = () => {
+      clearStoredToken();
+      setUser(null);
+    };
+    window.addEventListener('redhill:unauthorized', onUnauthorized);
+
     return () => {
       active = false;
+      window.clearTimeout(wakeTimer);
       window.clearTimeout(timeout);
+      window.removeEventListener('redhill:unauthorized', onUnauthorized);
     };
   }, []);
 
   const handleLogout = async () => {
     try {
       await apiFetch('/api/logout', { method: 'POST' });
-    } catch (err) {
-      console.error('Logout failed', err);
+    } catch {
+      // Proceed with local sign-out even if network is offline
     }
     clearStoredToken();
     setUser(null);
   };
 
   if (loading) {
-    return <LoadingScreen />;
+    return <LoadingScreen wakingUp={wakingUp} />;
   }
 
   return (

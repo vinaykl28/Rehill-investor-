@@ -97,8 +97,8 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
         setMilestones(data.milestones || []);
         setUpdates(data.updates || []);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Milestones & updates will display empty state on transient fetch error
     } finally {
       setLoading(false);
     }

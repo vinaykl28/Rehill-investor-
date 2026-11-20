@@ -235,8 +235,7 @@ export default function ShowcaseExplore({
       });
 
       setReferralStep('success');
-    } catch (err) {
-      console.error('Failed to submit referral lead', err);
+    } catch {
       const generatedCode = `REF-RDH-${Math.floor(100000 + Math.random() * 900000)}`;
       setReferralRefCode(generatedCode);
       setReferralStep('success');
@@ -284,8 +283,7 @@ export default function ShowcaseExplore({
         setShowSiteVisitModal(false);
         setEnquiryMessage('');
       }, 2500);
-    } catch (err) {
-      console.error('Failed to submit enquiry', err);
+    } catch {
       setShowEnquirySuccess(true);
       setTimeout(() => {
         setShowEnquirySuccess(false);

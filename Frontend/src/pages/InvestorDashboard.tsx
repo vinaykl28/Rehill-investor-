@@ -251,8 +251,8 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
 
       pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`redhill_portfolio_${new Date().toISOString().split('T')[0]}.pdf`);
-    } catch (err) {
-      console.error('Error generating PDF', err);
+    } catch {
+      // PDF export aborted gracefully
     }
   };
 

@@ -2,21 +2,25 @@ import { getApiUrl } from '../config/env';
 
 export interface ApiFetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined | null>;
+  timeoutMs?: number;
 }
+
+const PUBLIC_AUTH_ENDPOINTS = ['/api/login', '/api/signup', '/api/forgot-password', '/api/reset-password'];
 
 /**
  * Enhanced fetch wrapper for the application:
  * 1. Automatically prepends VITE_API_BASE_URL (if configured)
- * 2. Automatically includes credentials (cookies) for cross-domain / same-domain auth
- * 3. Handles query parameters cleanly
+ * 2. Automatically includes credentials (cookies) and Bearer token
+ * 3. Handles Render cold-start timeouts (35s default) and expired 401 sessions
  */
 export async function apiFetch(endpoint: string, options: ApiFetchOptions = {}): Promise<Response> {
+  const { params, timeoutMs = 35000, signal: callerSignal, ...fetchInit } = options;
   let url = getApiUrl(endpoint);
 
   // Append query params if provided
-  if (options.params) {
+  if (params) {
     const searchParams = new URLSearchParams();
-    Object.entries(options.params).forEach(([key, value]) => {
+    Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         searchParams.append(key, String(value));
       }
@@ -28,32 +32,57 @@ export async function apiFetch(endpoint: string, options: ApiFetchOptions = {}):
   }
 
   const defaultHeaders: Record<string, string> = {};
-  if (options.body && !(options.body instanceof FormData)) {
+  if (fetchInit.body && !(fetchInit.body instanceof FormData)) {
     defaultHeaders['Content-Type'] = 'application/json';
   }
 
   // Include Bearer token from localStorage for seamless cross-domain auth across Render subdomains
+  let hadToken = false;
   if (typeof window !== 'undefined') {
     try {
       const token = localStorage.getItem('redhill_auth_token');
       if (token) {
         defaultHeaders['Authorization'] = `Bearer ${token}`;
+        hadToken = true;
       }
     } catch {
       // Ignore storage access errors in strict private browsing
     }
   }
 
+  const controller = new AbortController();
+  const timeoutId = typeof window !== 'undefined' ? window.setTimeout(() => controller.abort(), timeoutMs) : null;
+  if (callerSignal) {
+    if (callerSignal.aborted) controller.abort();
+    else callerSignal.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+
   const finalOptions: RequestInit = {
     credentials: 'include', // Ensures session cookie is sent across Render domains
-    ...options,
+    ...fetchInit,
+    signal: controller.signal,
     headers: {
       ...defaultHeaders,
-      ...options.headers,
+      ...fetchInit.headers,
     },
   };
 
-  return fetch(url, finalOptions);
+  try {
+    const res = await fetch(url, finalOptions);
+    if (res.status === 401 && hadToken && !PUBLIC_AUTH_ENDPOINTS.some(p => endpoint.startsWith(p))) {
+      try {
+        localStorage.removeItem('redhill_auth_token');
+      } catch {
+        // ignore storage errors
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('redhill:unauthorized'));
+      }
+    }
+    return res;
+  } finally {
+    if (timeoutId !== null) window.clearTimeout(timeoutId);
+  }
 }
 
 /**

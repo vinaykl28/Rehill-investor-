@@ -168,8 +168,8 @@ export default function ManageMilestonesModal({
           const upData = await upRes.json();
           finalDoc = upData.url;
         }
-      } catch (err) {
-        console.error('File upload error:', err);
+      } catch {
+        showToast('Document upload failed — saving milestone without attachment', 'error');
       }
     }
 
@@ -240,8 +240,8 @@ export default function ManageMilestonesModal({
           const upData = await upRes.json();
           finalMedia = upData.url;
         }
-      } catch (err) {
-        console.error('Daily progress media upload error:', err);
+      } catch {
+        showToast('Media upload failed — please retry or paste an image URL', 'error');
       }
     }
 

@@ -226,17 +226,42 @@ export default function Login({ onLogin }: LoginProps) {
   // =====================================================================
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
+    const isLogin = authMode === 'login';
+    const cleanEmail = email.trim();
+    const cleanName = name.trim();
+    const cleanPhone = phone.trim();
+    const phoneDigits = cleanPhone.replace(/\D/g, '');
+
+    if (!isLogin) {
+      if (cleanName.length < 2) {
+        setError('Please enter your full name (at least 2 characters).');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        setError('Please enter a valid email address.');
+        return;
+      }
+      if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+        setError('Please enter a valid 10–15 digit phone number.');
+        return;
+      }
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters long.');
+        return;
+      }
+    } else if (!cleanEmail || !password) {
+      setError('Please enter your email, Login ID, or phone number and password.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccessMsg('');
 
     try {
-      const isLogin = authMode === 'login';
       const endpoint = isLogin ? '/api/login' : '/api/signup';
-      const cleanEmail = email.trim();
-      const cleanName = name.trim();
-      const cleanPhone = phone.trim();
-
       const body = isLogin
         ? { email: cleanEmail, password }
         : { name: cleanName, email: cleanEmail, phone: cleanPhone, password };
@@ -262,8 +287,11 @@ export default function Login({ onLogin }: LoginProps) {
         setError(data.error || (isLogin ? 'Login failed' : 'Sign up failed'));
       }
     } catch (err: any) {
-      console.error('Auth request failed:', err);
-      setError(err?.message || 'Something went wrong. Please check your connection.');
+      if (err?.name === 'AbortError') {
+        setError('Server is waking up. Please try again in a moment.');
+      } else {
+        setError(err?.message || 'Unable to reach the server. Please check your connection.');
+      }
     } finally {
       setLoading(false);
     }
@@ -303,8 +331,11 @@ export default function Login({ onLogin }: LoginProps) {
         setError(data.error || 'Failed to send verification code. Please check your details.');
       }
     } catch (err: any) {
-      console.error('Forgot password request failed:', err);
-      setError(err?.message || 'Unable to connect to server. Please try again.');
+      if (err?.name === 'AbortError') {
+        setError('Server is waking up. Please try again in a moment.');
+      } else {
+        setError(err?.message || 'Unable to connect to server. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -319,8 +350,8 @@ export default function Login({ onLogin }: LoginProps) {
       return;
     }
 
-    if (!newPassword || newPassword.length < 4) {
-      setError('Password must be at least 4 characters long');
+    if (!newPassword || newPassword.length < 6) {
+      setError('Password must be at least 6 characters long');
       return;
     }
 
@@ -346,7 +377,11 @@ export default function Login({ onLogin }: LoginProps) {
 
       const data = await res.json();
       if (res.ok && data.token) {
-        localStorage.setItem('redhill_auth_token', data.token);
+        try {
+          localStorage.setItem('redhill_auth_token', data.token);
+        } catch {
+          // ignore storage errors in private browsing
+        }
         setSuccessMsg('Password reset successfully! Logging you in...');
         setTimeout(() => {
           onLogin(data);
@@ -355,8 +390,11 @@ export default function Login({ onLogin }: LoginProps) {
         setError(data.error || 'Failed to reset password. Please verify the OTP.');
       }
     } catch (err: any) {
-      console.error('Password reset failed:', err);
-      setError(err?.message || 'Network error occurred. Please try again.');
+      if (err?.name === 'AbortError') {
+        setError('Server is waking up. Please try again in a moment.');
+      } else {
+        setError(err?.message || 'Network error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

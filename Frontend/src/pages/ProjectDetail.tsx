@@ -102,8 +102,8 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
       setNewMessage('');
       queryClient.invalidateQueries({ queryKey: ['project', id] });
     },
-    onError: (err) => {
-      console.error(err);
+    onError: () => {
+      // Handled by React Query error state
     }
   });
 
