@@ -66,7 +66,39 @@ const HERO_SLIDES = [
   },
 ] as const;
 
+const PUBLIC_PROJECTS = [
+  {
+    name: 'Signature Towers',
+    category: 'Boutique High-Rise',
+    location: 'Bengaluru',
+    image: '/assets/projects/signature-towers.jpg',
+    description: 'Sculpted contemporary high-rise residences designed around natural daylight, cross-ventilation and landscaped sky terraces.',
+  },
+  {
+    name: 'Pinnacle Heights',
+    category: 'Residential Community',
+    location: 'Bengaluru',
+    image: '/assets/projects/pinnacle-heights.jpg',
+    description: 'Architectural apartment living set within calm tropical gardens, private arrival courts and curated resident spaces.',
+  },
+  {
+    name: 'Emerald Gardens',
+    category: 'Biophilic Residences',
+    location: 'Bengaluru',
+    image: '/assets/projects/emerald-gardens.jpg',
+    description: 'Low-density urban sanctuary integrating lush vertical greenery, warm timber accents and tranquil water courts.',
+  },
+  {
+    name: 'Sovereign Estates',
+    category: 'Signature Enclave',
+    location: 'Bengaluru',
+    image: '/assets/projects/sovereign-estates.jpg',
+    description: 'Thoughtfully proportioned residences crafted with enduring stone, glass and natural materials for modern urban families.',
+  },
+] as const;
+
 const NAV_LINKS = [
+  { id: 'projects', label: 'Our Projects' },
   { id: 'experience', label: 'Investor Experience' },
   { id: 'access', label: 'Investor Access' },
   { id: 'contact', label: 'Contact Us' },
@@ -1011,7 +1043,7 @@ export default function Login({ onLogin }: LoginProps) {
               </motion.p>
 
               <motion.div {...rise(0.34)} className="mt-7 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <button type="button" onClick={() => scrollToSection('experience')} className="btn-botanical w-full sm:w-auto">
+                <button type="button" onClick={() => scrollToSection('projects')} className="btn-botanical w-full sm:w-auto">
                   Explore Our Projects
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -1021,6 +1053,76 @@ export default function Login({ onLogin }: LoginProps) {
                 </button>
               </motion.div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================ */}
+      {/* OUR PROJECTS — Large Image-Led Architectural Showcase             */}
+      {/* ================================================================ */}
+      <section id="projects" className="bg-white text-rh-botanical py-12 sm:py-24 lg:py-28 border-t border-rh-stone">
+        <div className="page-container">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 sm:mb-14">
+            <Reveal>
+              <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
+                <span className="w-6 sm:w-10 h-px bg-rh-botanical/40" />
+                <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-rh-botanical/75 font-semibold">
+                  01 — Selected Developments
+                </span>
+              </div>
+              <h2 className="font-serif text-[clamp(2.1rem,4.5vw,3.9rem)] font-light text-rh-botanical tracking-[0.02em] leading-[1.06] uppercase">
+                Our Projects
+              </h2>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <p className="text-sm sm:text-base text-rh-botanical/75 font-light max-w-md leading-relaxed">
+                Contemporary residential communities across Bengaluru, thoughtfully planned with enduring materials and generous greenery.
+              </p>
+            </Reveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            {PUBLIC_PROJECTS.map((proj, idx) => (
+              <Reveal key={proj.name} delay={idx * 0.06} className="group">
+                <div className="relative aspect-[16/10] overflow-hidden bg-rh-ivory border border-rh-stone">
+                  <img
+                    src={proj.image}
+                    alt={`${proj.name} — ${proj.category} in ${proj.location}`}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                  />
+                </div>
+                <div className="pt-5 sm:pt-6 flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-rh-champagne font-medium">
+                    <span>{proj.category}</span>
+                    <span className="text-rh-botanical/60">{proj.location}</span>
+                  </div>
+                  <h3 className="font-serif text-2xl sm:text-3xl font-normal text-rh-botanical tracking-tight">
+                    {proj.name}
+                  </h3>
+                  <p className="text-sm text-rh-botanical/75 font-light leading-relaxed max-w-xl">
+                    {proj.description}
+                  </p>
+                  <div className="pt-2 flex flex-wrap items-center gap-5">
+                    <button
+                      type="button"
+                      onClick={() => openAccessDrawer('login')}
+                      className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] font-medium text-rh-botanical hover:text-rh-forest underline-offset-4 hover:underline cursor-pointer min-h-[44px]"
+                    >
+                      Investor Portal Access
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection('contact')}
+                      className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.16em] text-rh-botanical/65 hover:text-rh-botanical cursor-pointer min-h-[44px]"
+                    >
+                      Enquire
+                    </button>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -1037,7 +1139,7 @@ export default function Login({ onLogin }: LoginProps) {
               <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
                 <span className="w-6 sm:w-10 h-px bg-rh-botanical/40" />
                 <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-rh-botanical/75 font-semibold">
-                  01 — Portfolio Transparency
+                  02 — Portfolio Transparency
                 </span>
               </div>
               <h2 className="font-serif text-[clamp(2.2rem,4.8vw,4.2rem)] font-light text-rh-botanical tracking-[0.03em] sm:tracking-[0.04em] leading-[1.05] uppercase select-none">
@@ -1149,7 +1251,7 @@ export default function Login({ onLogin }: LoginProps) {
               <div className="relative z-10 space-y-3 sm:space-y-5 my-auto py-5 sm:py-8">
                 <p className="eyebrow text-[#E3CFA3] flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs">
                   <span className="w-6 sm:w-8 h-px bg-[#E3CFA3]" />
-                  02 — Private Investor Portal
+                  03 — Private Investor Portal
                 </p>
                 <h2 className="font-serif text-[clamp(1.5rem,2.8vw,2.75rem)] text-white font-normal leading-[1.12]">
                   Contemporary residential communities, transparently managed.
@@ -1199,7 +1301,7 @@ export default function Login({ onLogin }: LoginProps) {
         <div className="page-container">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-1.5 max-w-xl">
-              <p className="eyebrow text-rh-champagne">03 — Contact Us</p>
+              <p className="eyebrow text-rh-champagne">04 — Contact Us</p>
               <h2 className="font-serif text-[clamp(1.75rem,3vw,2.5rem)] text-rh-botanical font-light tracking-tight">
                 Speak with the Redhill Bengaluru Desk
               </h2>
