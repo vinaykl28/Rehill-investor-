@@ -36,6 +36,37 @@ interface LoginProps {
 const EXPERIENCE_IMAGE = '/assets/projects/pinnacle-heights.jpg';
 const ACCESS_EDITORIAL_IMAGE = '/assets/projects/signature-towers.jpg';
 
+const HERO_SLIDES = [
+  {
+    base: '/images/hero-slide-1',
+    width: 1920,
+    height: 2160,
+    pos: 'object-[50%_40%]',
+    alt: 'Redhill Infra entrance gate and illuminated contemporary biophilic residential tower at twilight',
+  },
+  {
+    base: '/images/hero-slide-2',
+    width: 1920,
+    height: 2571,
+    pos: 'object-center',
+    alt: 'Curved luxury residential tower in Bengaluru with warm balcony strip lighting and reflecting pool',
+  },
+  {
+    base: '/images/hero-slide-3',
+    width: 1920,
+    height: 2571,
+    pos: 'object-center',
+    alt: 'Architectural close-up of warm timber balcony soffits, cascading vertical gardens and glowing interiors',
+  },
+  {
+    base: '/images/hero-slide-4',
+    width: 1920,
+    height: 2571,
+    pos: 'object-center',
+    alt: 'Timber-clad arrival pavilion canopy and manicured tropical gardens beneath a curved residential tower',
+  },
+] as const;
+
 const NAV_LINKS = [
   { id: 'experience', label: 'Investor Experience' },
   { id: 'access', label: 'Investor Access' },
@@ -84,6 +115,8 @@ export default function Login({ onLogin }: LoginProps) {
   const [accessDrawerOpen, setAccessDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
 
   const inlineFormRef = useRef<HTMLDivElement>(null);
   const drawerFormRef = useRef<HTMLDivElement>(null);
@@ -117,6 +150,15 @@ export default function Login({ onLogin }: LoginProps) {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Auto-advance 4-image architectural hero slideshow every 4.5s
+  useEffect(() => {
+    if (reduceMotion || heroPaused) return;
+    const id = window.setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % HERO_SLIDES.length);
+    }, 4500);
+    return () => window.clearInterval(id);
+  }, [reduceMotion, heroPaused]);
 
   // Track which section is in view
   useEffect(() => {
@@ -853,52 +895,107 @@ export default function Login({ onLogin }: LoginProps) {
 
       {/* ================================================================ */}
       {/* SPLIT-SCREEN ARCHITECTURAL COVER                                  */}
-      {/* Desktop: 52% architectural image (left) / 48% ivory editorial    */}
+      {/* Desktop: 52% dynamic 4-slide image (left) / 48% ivory editorial  */}
       {/* Mobile:  image -> headline -> copy -> actions (stacked)          */}
       {/* ================================================================ */}
-      <section id="top" className="relative bg-rh-ivory text-rh-botanical pt-16 sm:pt-20">
+      <section id="top" className="relative bg-rh-ivory text-rh-botanical pt-16 sm:pt-20 overflow-x-clip">
         <div className="grid grid-cols-1 lg:grid-cols-[52fr_48fr] lg:min-h-[calc(100dvh-5rem)]">
-          {/* LEFT — Architectural image */}
-          <div className="relative overflow-hidden bg-rh-stone aspect-[4/5] sm:aspect-[4/3] lg:aspect-auto lg:h-full">
-            <picture className="block w-full h-full">
-              <source
-                type="image/avif"
-                srcSet="/assets/projects/hero-split-800.avif 800w, /assets/projects/hero-split-1200.avif 1200w, /assets/projects/hero-split-1920.avif 1920w"
-                sizes="(min-width: 1024px) 52vw, 100vw"
-              />
-              <source
-                type="image/webp"
-                srcSet="/assets/projects/hero-split-800.webp 800w, /assets/projects/hero-split-1200.webp 1200w, /assets/projects/hero-split-1920.webp 1920w"
-                sizes="(min-width: 1024px) 52vw, 100vw"
-              />
-              <img
-                src="/assets/projects/hero-split-1200.jpg"
-                srcSet="/assets/projects/hero-split-800.jpg 800w, /assets/projects/hero-split-1200.jpg 1200w, /assets/projects/hero-split-1920.jpg 1920w"
-                sizes="(min-width: 1024px) 52vw, 100vw"
-                width={1920}
-                height={2160}
-                alt="Conceptual render of a Redhill Infra residential tower with curved balconies, integrated greenery and warm wooden soffits"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                className="absolute inset-0 w-full h-full object-cover object-[50%_40%] select-none"
-              />
-            </picture>
-            <span className="absolute left-4 bottom-4 sm:left-6 sm:bottom-6 text-[10px] uppercase tracking-[0.2em] text-white/90 bg-black/25 px-2.5 py-1">
-              Conceptual render
-            </span>
+          {/* LEFT — Dynamic 4-image architectural slideshow */}
+          <div
+            className="relative overflow-hidden bg-rh-forest aspect-[4/5] sm:aspect-[4/3] lg:aspect-auto lg:h-full"
+            onMouseEnter={() => setHeroPaused(true)}
+            onMouseLeave={() => setHeroPaused(false)}
+            aria-roledescription="carousel"
+            aria-label="Redhill Infra architectural gallery"
+          >
+            {HERO_SLIDES.map((slide, idx) => {
+              const isActive = idx === activeSlide;
+              return (
+                <div
+                  key={slide.base}
+                  aria-hidden={!isActive}
+                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                    isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                  }`}
+                >
+                  <picture className="block w-full h-full">
+                    <source
+                      type="image/avif"
+                      srcSet={`${slide.base}-800.avif 800w, ${slide.base}-1200.avif 1200w, ${slide.base}-1920.avif 1920w`}
+                      sizes="(min-width: 1024px) 52vw, 100vw"
+                    />
+                    <source
+                      type="image/webp"
+                      srcSet={`${slide.base}-800.webp 800w, ${slide.base}-1200.webp 1200w, ${slide.base}-1920.webp 1920w`}
+                      sizes="(min-width: 1024px) 52vw, 100vw"
+                    />
+                    <img
+                      src={`${slide.base}-1200.jpg`}
+                      srcSet={`${slide.base}-800.jpg 800w, ${slide.base}-1200.jpg 1200w, ${slide.base}-1920.jpg 1920w`}
+                      sizes="(min-width: 1024px) 52vw, 100vw"
+                      width={slide.width}
+                      height={slide.height}
+                      alt={slide.alt}
+                      loading={idx === 0 ? 'eager' : 'lazy'}
+                      fetchPriority={idx === 0 ? 'high' : 'auto'}
+                      decoding="async"
+                      className={`w-full h-full object-cover ${slide.pos} select-none ${
+                        reduceMotion
+                          ? ''
+                          : `transition-transform duration-[6000ms] ease-out will-change-transform ${
+                              isActive ? 'scale-[1.06]' : 'scale-100'
+                            }`
+                      }`}
+                    />
+                  </picture>
+                </div>
+              );
+            })}
+
+            {/* Subtle bottom gradient for indicator legibility only */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/45 via-black/15 to-transparent z-20 pointer-events-none" />
+
+            {/* Minimal sleek slide indicators + conceptual render tag at bottom-left */}
+            <div className="absolute left-4 right-4 bottom-4 sm:left-6 sm:right-6 sm:bottom-6 z-30 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2" role="tablist" aria-label="Choose architectural slide">
+                  {HERO_SLIDES.map((slide, idx) => (
+                    <button
+                      key={slide.base}
+                      type="button"
+                      role="tab"
+                      aria-selected={idx === activeSlide}
+                      aria-label={`Show architectural view ${idx + 1} of ${HERO_SLIDES.length}`}
+                      onClick={() => setActiveSlide(idx)}
+                      className={`h-[3px] transition-all duration-300 cursor-pointer ${
+                        idx === activeSlide
+                          ? 'w-8 bg-rh-ivory'
+                          : 'w-4 bg-white/45 hover:bg-white/80'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] font-mono tracking-[0.18em] text-white/85 tabular-nums">
+                  0{activeSlide + 1} / 0{HERO_SLIDES.length}
+                </span>
+              </div>
+
+              <span className="text-[10px] uppercase tracking-[0.2em] text-white/85 bg-black/25 px-2.5 py-1">
+                Conceptual render
+              </span>
+            </div>
           </div>
 
-          {/* RIGHT — Editorial content */}
-          <div className="flex items-center">
-            <div className="w-full px-5 sm:px-10 md:px-12 lg:px-12 xl:px-20 py-12 sm:py-16 lg:py-20 max-w-[740px]">
-              <motion.p {...rise(0.05)} className="text-[11px] sm:text-xs uppercase tracking-[0.24em] text-rh-champagne font-medium mb-6 sm:mb-8">
+          {/* RIGHT — Editorial content (min-w-0 prevents CSS grid horizontal overflow) */}
+          <div className="flex items-center min-w-0 overflow-hidden">
+            <div className="w-full px-6 sm:px-10 md:px-12 lg:px-10 xl:px-16 2xl:px-20 py-12 sm:py-16 lg:py-20 max-w-[680px]">
+              <motion.p {...rise(0.05)} className="text-[11px] sm:text-xs uppercase tracking-[0.24em] text-rh-champagne font-medium mb-5 sm:mb-7">
                 Redhill Infra · Bengaluru
               </motion.p>
 
               <motion.h1
                 {...rise(0.12)}
-                className="font-serif font-light uppercase text-rh-botanical text-[clamp(1.85rem,3.05vw,3.35rem)] leading-[1.08] tracking-[0.015em]"
+                className="font-serif font-light uppercase text-rh-botanical text-[clamp(1.75rem,2.75vw,3.25rem)] leading-[1.08] tracking-[0.015em] break-words"
               >
                 Spaces that inspire.
                 <span className="block">Homes that belong.</span>
