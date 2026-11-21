@@ -124,17 +124,17 @@ export const getProjects = async (_req: AuthRequest, res: Response) => {
 };
 
 export const createProject = async (req: AuthRequest, res: Response) => {
-  const { name, location, total_value, status, image_url, cctv_url } = req.body;
+  const { name, location, total_value = '', status, image_url, cctv_url = '', description = '' } = req.body;
   const result = await db.run(
-    'INSERT INTO projects (name, location, total_value, status, image_url, cctv_url) VALUES (?, ?, ?, ?, ?, ?)',
-    name, location, total_value, status, image_url, cctv_url
+    'INSERT INTO projects (name, location, total_value, status, image_url, cctv_url, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    name, location, total_value, status, image_url, cctv_url, description
   );
   res.json({ id: result.lastInsertRowid, name, location });
 };
 
 export const updateProject = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { name, location, total_value, status, image_url, completion_percentage, cctv_url } = req.body;
+  const { name, location, total_value, status, image_url, completion_percentage, cctv_url, description } = req.body;
   try {
     await db.run(`
       UPDATE projects 
@@ -144,9 +144,10 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
           status = COALESCE(?, status),
           image_url = COALESCE(?, image_url),
           completion_percentage = COALESCE(?, completion_percentage),
-          cctv_url = COALESCE(?, cctv_url)
+          cctv_url = COALESCE(?, cctv_url),
+          description = COALESCE(?, description)
       WHERE id = ?
-    `, name, location, total_value, status, image_url, completion_percentage, cctv_url, id);
+    `, name, location, total_value, status, image_url, completion_percentage, cctv_url, description, id);
     res.json({ message: 'Project updated successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });

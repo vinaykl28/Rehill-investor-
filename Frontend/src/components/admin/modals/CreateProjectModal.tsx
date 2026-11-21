@@ -13,11 +13,10 @@ interface CreateProjectModalProps {
   onSubmit: (data: {
     name: string;
     location: string;
-    totalValue: string;
     status: string;
     imageUrl: string;
     completionPercentage: number;
-    cctvUrl: string;
+    description: string;
     imageFile: File | null;
   }) => Promise<void>;
 }
@@ -29,11 +28,10 @@ export default function CreateProjectModal({
 }: CreateProjectModalProps) {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
-  const [totalValue, setTotalValue] = useState('');
   const [status, setStatus] = useState('Construction');
   const [imageUrl, setImageUrl] = useState('');
-  const [completionPercentage, setCompletionPercentage] = useState(0);
-  const [cctvUrl, setCctvUrl] = useState('');
+  const [completionPercentage] = useState(0);
+  const [description, setDescription] = useState('');
   const [imageUploadType, setImageUploadType] = useState<'url' | 'file'>('url');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,18 +46,16 @@ export default function CreateProjectModal({
       await onSubmit({
         name,
         location,
-        totalValue,
         status,
         imageUrl,
         completionPercentage,
-        cctvUrl,
+        description,
         imageFile: imageUploadType === 'file' ? imageFile : null
       });
       setName('');
       setLocation('');
-      setTotalValue('');
       setImageUrl('');
-      setCctvUrl('');
+      setDescription('');
       setImageFile(null);
     } finally {
       setLoading(false);
@@ -127,35 +123,20 @@ export default function CreateProjectModal({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
-                Total Valuation <span className="text-redhill-red">*</span>
-              </label>
-              <input
-                type="text"
-                value={totalValue}
-                onChange={(e) => setTotalValue(e.target.value)}
-                className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
-                placeholder="e.g. ₹185 Cr"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
-                Status
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all cursor-pointer"
-              >
-                <option value="Planning">Planning</option>
-                <option value="Approval">Approval</option>
-                <option value="Construction">Construction</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
+              Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all cursor-pointer"
+            >
+              <option value="Planning">Planning</option>
+              <option value="Approval">Approval</option>
+              <option value="Construction">Construction</option>
+              <option value="Completed">Completed</option>
+            </select>
           </div>
 
           <div>
@@ -217,14 +198,14 @@ export default function CreateProjectModal({
 
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 mb-1.5">
-              Live CCTV Stream URL (Optional)
+              Description (Optional)
             </label>
-            <input
-              type="url"
-              value={cctvUrl}
-              onChange={(e) => setCctvUrl(e.target.value)}
-              className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400"
-              placeholder="https://... secure RTSP or HLS stream link"
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-3.5 py-3 bg-white border border-[#D5CEC2] rounded-xs text-sm text-redhill-charcoal outline-none focus:border-redhill-charcoal focus:ring-1 focus:ring-redhill-charcoal transition-all placeholder:text-stone-400 resize-y"
+              placeholder="Brief architectural overview of the development, amenities, and vision..."
             />
           </div>
 

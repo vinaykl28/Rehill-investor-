@@ -19,6 +19,7 @@ export interface Project {
   status: string;
   image_url: string;
   completion_percentage: number;
+  description?: string;
   contribution?: string;
   cctv_url?: string;
   investment_amount?: number;

@@ -67,8 +67,10 @@ export async function initPostgresTables() {
         image_url TEXT,
         completion_percentage INTEGER DEFAULT 0,
         cctv_url TEXT,
+        description TEXT,
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       );
+      ALTER TABLE projects ADD COLUMN IF NOT EXISTS description TEXT;
 
       CREATE TABLE IF NOT EXISTS investor_projects (
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -210,6 +212,7 @@ function initSqliteTables() {
       image_url TEXT,
       completion_percentage INTEGER DEFAULT 0,
       cctv_url TEXT,
+      description TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -321,6 +324,7 @@ function initSqliteTables() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  try { sqliteDb.exec('ALTER TABLE projects ADD COLUMN description TEXT'); } catch {}
 }
 
 if (!isPg) {

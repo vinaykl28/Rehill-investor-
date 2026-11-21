@@ -126,7 +126,7 @@ export default function ShowcaseExplore({
         possessionDate: p.status || 'Active Development',
         carpetArea: p.allotted_sqft ? `${p.allotted_sqft.toLocaleString('en-IN')} sq.ft.` : 'Custom Layouts',
         statusText: p.status || 'Active Development',
-        description: `${p.name} in ${p.location} — RERA-registered residential development managed by Redhill Infrastructure (${p.completion_percentage || 0}% site completion).`,
+        description: p.description?.trim() || `${p.name} in ${p.location} — RERA-registered residential development managed by Redhill Infrastructure (${p.completion_percentage || 0}% site completion).`,
         highlights: [
           `${p.location} · ${p.status || 'Active'}`,
           `${p.completion_percentage || 0}% Recorded Construction Progress`,

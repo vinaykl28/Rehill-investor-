@@ -310,11 +310,10 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const handleCreateProject = async (data: {
     name: string;
     location: string;
-    totalValue: string;
     status: string;
     imageUrl: string;
     completionPercentage: number;
-    cctvUrl: string;
+    description: string;
     imageFile: File | null;
   }) => {
     let finalImageUrl = data.imageUrl;
@@ -334,11 +333,12 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       body: JSON.stringify({
         name: data.name,
         location: data.location,
-        total_value: data.totalValue,
+        total_value: '',
         status: data.status,
         image_url: finalImageUrl,
         completion_percentage: data.completionPercentage,
-        cctv_url: data.cctvUrl
+        cctv_url: '',
+        description: data.description,
       })
     });
 
