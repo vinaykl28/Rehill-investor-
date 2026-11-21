@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '../components/Layout';
 import Skeleton from '../components/Skeleton';
 import StatusChip from '../components/StatusChip';
+import { HelpdeskMessageMenu, HelpdeskInlineEditor } from '../components/HelpdeskMessageMenu';
 import { formatCurrency, formatDate, formatRelativeTime } from '../utils/formatters';
 import { apiFetch } from '../api/client';
 import { getAssetUrl } from '../config/env';
@@ -42,6 +43,8 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
   const [selectedPhotoMonth, setSelectedPhotoMonth] = useState<number | 'all'>('all');
   const [selectedPhotoYear, setSelectedPhotoYear] = useState<number | 'all'>('all');
   const [newMessage, setNewMessage] = useState('');
+  const [editingMsgId, setEditingMsgId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -104,6 +107,34 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
     },
     onError: () => {
       // Handled by React Query error state
+    }
+  });
+
+  const editMessageMutation = useMutation({
+    mutationFn: async ({ msgId, message }: { msgId: number; message: string }) => {
+      const res = await apiFetch(`/api/queries/${msgId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message.trim() }),
+      });
+      if (!res.ok) throw new Error('Failed to update message');
+      return res.json();
+    },
+    onSuccess: () => {
+      setEditingMsgId(null);
+      setEditingText('');
+      queryClient.invalidateQueries({ queryKey: ['project', id] });
+    }
+  });
+
+  const deleteMessageMutation = useMutation({
+    mutationFn: async (msgId: number) => {
+      const res = await apiFetch(`/api/queries/${msgId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete message');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] });
     }
   });
 
@@ -925,12 +956,36 @@ export default function ProjectDetail({ user, onLogout }: ProjectDetailProps) {
 
                         {/* Message Bubble */}
                         <div className={cn(
-                          "p-4 max-w-[85%] sm:max-w-[75%] text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap transition-all",
+                          "relative p-4 max-w-[85%] sm:max-w-[75%] text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap transition-all",
                           isInvestor
                             ? "bg-redhill-charcoal text-white rounded-2xl rounded-tr-none border border-redhill-charcoal"
                             : "bg-white text-redhill-charcoal border border-redhill-line rounded-2xl rounded-tl-none"
                         )}>
-                          <p className={cn("text-[13px] sm:text-sm font-normal", isInvestor ? "text-white" : "text-redhill-charcoal")}>{q.message}</p>
+                          {editingMsgId === q.id ? (
+                            <HelpdeskInlineEditor
+                              value={editingText}
+                              onChange={setEditingText}
+                              saving={editMessageMutation.isPending}
+                              onCancel={() => { setEditingMsgId(null); setEditingText(''); }}
+                              onSave={() => {
+                                if (editingText.trim()) editMessageMutation.mutate({ msgId: q.id, message: editingText });
+                              }}
+                            />
+                          ) : (
+                            <div className="flex items-start gap-2">
+                              <p className={cn("text-[13px] sm:text-sm font-normal flex-1", isInvestor ? "text-white" : "text-redhill-charcoal")}>{q.message}</p>
+                              {isInvestor && (
+                                <HelpdeskMessageMenu
+                                  disabled={deleteMessageMutation.isPending}
+                                  onEdit={() => {
+                                    setEditingMsgId(q.id);
+                                    setEditingText(q.message);
+                                  }}
+                                  onDelete={() => deleteMessageMutation.mutate(q.id)}
+                                />
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

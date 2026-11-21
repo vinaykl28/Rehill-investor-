@@ -11,6 +11,7 @@ import { twMerge } from 'tailwind-merge';
 import { formatRelativeTime, formatDate } from '../../utils/formatters';
 import { useToast } from '../Toast';
 import Modal from '../Modal';
+import { HelpdeskMessageMenu, HelpdeskInlineEditor } from '../HelpdeskMessageMenu';
 import { apiFetch } from '../../api/client';
 
 function cn(...inputs: ClassValue[]) {
@@ -38,6 +39,8 @@ export default function AdminQueries() {
   const [composeUserId, setComposeUserId] = useState<string>('');
   const [composeProjectId, setComposeProjectId] = useState<string>('');
   const [composeMsgText, setComposeMsgText] = useState<string>('');
+  const [editingMsgId, setEditingMsgId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
   const lastMsgCountRef = useRef(0);
 
   const { data: threads = [], isLoading: loadingThreads, refetch: refetchThreads, isFetching } = useQuery<any[]>({
@@ -146,6 +149,50 @@ export default function AdminQueries() {
     },
     onError: (err: any) => {
       showToast(err.message || 'Failed to send reply. Please try again.', 'error');
+    }
+  });
+
+  const editMutation = useMutation({
+    mutationFn: async ({ id, message }: { id: number; message: string }) => {
+      const res = await apiFetch(`/api/queries/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to edit message');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      setEditingMsgId(null);
+      setEditingText('');
+      queryClient.invalidateQueries({ queryKey: ['admin-thread', selectedThread?.user_id, selectedThread?.project_id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-queries'] });
+      showToast('Message updated', 'success');
+    },
+    onError: (err: any) => {
+      showToast(err.message || 'Failed to update message', 'error');
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiFetch(`/api/queries/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to delete message');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-thread', selectedThread?.user_id, selectedThread?.project_id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-queries'] });
+      showToast('Message deleted', 'success');
+    },
+    onError: (err: any) => {
+      showToast(err.message || 'Failed to delete message', 'error');
     }
   });
 
@@ -510,12 +557,38 @@ export default function AdminQueries() {
 
                       {/* Message Bubble */}
                       <div className={cn(
-                        "p-4 max-w-[85%] sm:max-w-[75%] text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap transition-all",
+                        "relative p-4 max-w-[85%] sm:max-w-[75%] text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap transition-all",
                         isStaff
                           ? "bg-redhill-charcoal text-white rounded-2xl rounded-tr-none border border-redhill-charcoal"
                           : "bg-white text-redhill-charcoal border border-redhill-line rounded-2xl rounded-tl-none"
                       )}>
-                        <p className={cn("text-[13px] sm:text-sm font-normal", isStaff ? "text-white" : "text-redhill-charcoal")}>{msg.message}</p>
+                        {editingMsgId === msg.id ? (
+                          <HelpdeskInlineEditor
+                            value={editingText}
+                            onChange={setEditingText}
+                            saving={editMutation.isPending}
+                            onCancel={() => { setEditingMsgId(null); setEditingText(''); }}
+                            onSave={() => {
+                              if (editingText.trim()) editMutation.mutate({ id: msg.id, message: editingText });
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-start gap-2">
+                            <p className={cn("text-[13px] sm:text-sm font-normal flex-1", isStaff ? "text-white" : "text-redhill-charcoal")}>
+                              {msg.message}
+                            </p>
+                            {isStaff && (
+                              <HelpdeskMessageMenu
+                                disabled={deleteMutation.isPending}
+                                onEdit={() => {
+                                  setEditingMsgId(msg.id);
+                                  setEditingText(msg.message);
+                                }}
+                                onDelete={() => deleteMutation.mutate(msg.id)}
+                              />
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Exact time on hover */}

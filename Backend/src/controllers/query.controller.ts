@@ -81,3 +81,50 @@ export const getAdminQueryThread = async (req: AuthRequest, res: Response) => {
   );
   res.json(queries);
 };
+
+function canManageQuery(user: NonNullable<AuthRequest['user']>, existing: any): boolean {
+  const isStaff = user.role !== 'investor';
+  if (isStaff) {
+    return existing.sender_role !== 'investor';
+  }
+  return Number(existing.user_id) === Number(user.id) && existing.sender_role === 'investor';
+}
+
+export const updateQuery = async (req: AuthRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const trimmed = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+  if (!trimmed) {
+    return res.status(400).json({ error: 'Message cannot be empty' });
+  }
+
+  try {
+    const existing: any = await db.get('SELECT * FROM queries WHERE id = ?', req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Message not found' });
+    if (!canManageQuery(req.user, existing)) {
+      return res.status(403).json({ error: 'You can only edit your own messages' });
+    }
+
+    await db.run('UPDATE queries SET message = ? WHERE id = ?', trimmed, req.params.id);
+    res.json({ id: Number(req.params.id), message: trimmed });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to update message' });
+  }
+};
+
+export const deleteQuery = async (req: AuthRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const existing: any = await db.get('SELECT * FROM queries WHERE id = ?', req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Message not found' });
+    if (!canManageQuery(req.user, existing)) {
+      return res.status(403).json({ error: 'You can only delete your own messages' });
+    }
+
+    await db.run('DELETE FROM queries WHERE id = ?', req.params.id);
+    res.json({ deleted: true, id: Number(req.params.id) });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to delete message' });
+  }
+};
