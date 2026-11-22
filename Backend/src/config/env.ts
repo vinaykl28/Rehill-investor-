@@ -75,6 +75,16 @@ export const config = {
     smtpPort: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 465,
     smtpSecure: process.env.SMTP_SECURE !== 'false',
   },
+
+  // SMS OTP Configuration (Twilio / Fast2SMS / MSG91)
+  sms: {
+    twilioAccountSid: process.env.TWILIO_ACCOUNT_SID,
+    twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
+    twilioFromNumber: process.env.TWILIO_FROM_NUMBER,
+    fast2smsApiKey: process.env.FAST2SMS_API_KEY,
+    msg91AuthKey: process.env.MSG91_AUTH_KEY,
+    msg91TemplateId: process.env.MSG91_TEMPLATE_ID,
+  },
 };
 
 // Security check in production

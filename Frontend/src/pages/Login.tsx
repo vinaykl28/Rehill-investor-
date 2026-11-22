@@ -320,7 +320,11 @@ export default function Login({ onLogin }: LoginProps) {
       if (res.ok && data.success) {
         setTargetEmail(data.email);
         setMaskedEmail(data.maskedEmail || data.email);
-        setSuccessMsg(`Verification code sent to ${data.maskedEmail || data.email}`);
+        setSuccessMsg(
+          data.channel === 'sms'
+            ? `Verification code sent via SMS to ${data.maskedEmail}`
+            : `Verification code sent to ${data.maskedEmail || data.email}`
+        );
         setAuthMode('forgot_reset');
         setResendTimer(45);
         setOtpDigits(['', '', '', '', '', '']);

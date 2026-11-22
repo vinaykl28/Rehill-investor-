@@ -5,6 +5,7 @@ import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 import config from '../config/env.js';
 import { sendEmail, generatePasswordResetOtpHtml } from '../services/email.service.js';
+import { sendSmsOtp, isSmsConfigured } from '../services/sms.service.js';
 
 const maskEmail = (email: string): string => {
   const parts = email.split('@');
@@ -186,6 +187,12 @@ export const getMe = async (req: AuthRequest, res: Response) => {
   res.json(dbUser);
 };
 
+function maskPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 4) return '****';
+  return `${'*'.repeat(Math.max(4, digits.length - 4))}${digits.slice(-4)}`;
+}
+
 export const forgotPassword = async (req: AuthRequest, res: Response) => {
   const { email } = req.body;
   const rawIdentifier = (email || '').trim();
@@ -194,6 +201,7 @@ export const forgotPassword = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Please enter your registered email, Login ID, or phone number' });
   }
 
+  const isPhoneInput = !rawIdentifier.includes('@') && /^\+?[\d\s\-()]{7,18}$/.test(rawIdentifier);
   const user = await findUserByIdentifier(rawIdentifier);
 
   if (!user || !user.email) {
@@ -216,7 +224,12 @@ export const forgotPassword = async (req: AuthRequest, res: Response) => {
       expiresAt
     );
 
-    // Send reset OTP email
+    let smsSent = false;
+    if (isPhoneInput && user.phone && isSmsConfigured()) {
+      smsSent = await sendSmsOtp(user.phone, otp);
+    }
+
+    // Send reset OTP email (primary when email/loginId entered, or backup/fallback when phone entered)
     const htmlContent = generatePasswordResetOtpHtml({
       userName: user.name || 'Investor',
       otp,
@@ -229,15 +242,21 @@ export const forgotPassword = async (req: AuthRequest, res: Response) => {
       html: htmlContent
     });
 
-    if (!emailSent) {
-      console.warn(`[Forgot Password] Email send returned false for ${user.email}`);
+    if (!smsSent && !emailSent) {
+      console.warn(`[Forgot Password] Delivery returned false for ${user.email}`);
     }
+
+    const channel = smsSent ? 'sms' : 'email';
+    const maskedTarget = smsSent ? maskPhone(user.phone) : maskEmail(user.email);
 
     return res.json({
       success: true,
-      message: `A 6-digit verification code has been sent to ${maskEmail(user.email)}.`,
+      channel,
+      message: smsSent
+        ? `A 6-digit verification code has been sent via SMS to ${maskedTarget}.`
+        : `A 6-digit verification code has been sent to ${maskedTarget}.`,
       email: user.email,
-      maskedEmail: maskEmail(user.email)
+      maskedEmail: maskedTarget
     });
   } catch (error: any) {
     console.error('Error generating password reset OTP:', error);
