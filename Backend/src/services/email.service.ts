@@ -59,8 +59,11 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
       }
 
       if (realRecipients.length > 0) {
+        const senderAddress = (fromEmail && fromEmail.includes('@')) ? fromEmail : gmailUser;
+        const senderDisplayName = (fromEmail && !fromEmail.includes('@')) ? fromEmail.replace(/_/g, ' ') : 'Redhill Infra';
+
         const info = await smtpTransporter.sendMail({
-          from: `"Redhill Infra" <${fromEmail || gmailUser}>`,
+          from: `"${senderDisplayName}" <${senderAddress}>`,
           to: realRecipients,
           subject: options.subject,
           text: options.text || options.html.replace(/<[^>]*>?/gm, ''),
