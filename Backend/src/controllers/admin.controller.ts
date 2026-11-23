@@ -420,8 +420,8 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
     // Recalculate project progress immediately in database
     await recalculateProjectProgress(prevMilestone.project_id);
 
-    // Send notifications in background if transition to completed or explicitly requested
-    if ((!wasAlreadyCompleted && isNowCompleted) || sendNotification) {
+    // Send notifications in background whenever milestone is completed or explicitly requested
+    if (newStatus === 'completed' || isNowCompleted || sendNotification) {
       sendMilestoneCompletedNotification(milestoneId, {
         customNotes: notes || prevMilestone.notes,
         dayNumber: current_day || prevMilestone.current_day,

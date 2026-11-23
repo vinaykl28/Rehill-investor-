@@ -16,13 +16,15 @@ const cleanedAppPassword = gmailAppPassword ? String(gmailAppPassword).replace(/
 let smtpTransporter: nodemailer.Transporter | null = null;
 if (gmailUser && cleanedAppPassword) {
   smtpTransporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: gmailUser,
       pass: cleanedAppPassword,
     },
   });
-  console.log(`📧 Gmail SMTP transporter initialized for: ${gmailUser}`);
+  console.log(`📧 Gmail SMTP transporter initialized on port 465 for: ${gmailUser}`);
 } else if (smtpHost && gmailUser && cleanedAppPassword) {
   smtpTransporter = nodemailer.createTransport({
     host: smtpHost,

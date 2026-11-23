@@ -208,18 +208,25 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
     if (updatingMilestoneId !== null) return;
     setUpdatingMilestoneId(milestoneId);
     try {
+      const isCompleted = editMStatus === 'completed' || editMPercentage >= 100;
       const res = await apiFetch(`/api/admin/milestones/${milestoneId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          status: editMStatus,
-          actual_completion: editMStatus === 'completed' ? new Date().toISOString().split('T')[0] : null,
-          completion_percentage: editMStatus === 'completed' ? 100 : editMPercentage,
+          status: isCompleted ? 'completed' : editMStatus,
+          actual_completion: isCompleted ? new Date().toISOString().split('T')[0] : null,
+          completion_percentage: isCompleted ? 100 : editMPercentage,
+          sendNotification: isCompleted,
         }),
       });
 
       if (res.ok) {
-        showToast('Milestone updated successfully!', 'success');
+        showToast(
+          isCompleted 
+            ? 'Milestone completed! Notification email dispatched to all investors.' 
+            : 'Milestone updated successfully!', 
+          'success'
+        );
         setEditingMilestoneId(null);
         if (project) await fetchDetails(project.id);
         onRefreshProjects();
@@ -438,7 +445,13 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                       <label className="text-[10px] font-bold text-redhill-muted uppercase tracking-wider mb-1 block">Status</label>
                       <select
                         value={mStatus}
-                        onChange={(e) => setMStatus(e.target.value as MilestoneStatus)}
+                        onChange={(e) => {
+                          const newStatus = e.target.value as MilestoneStatus;
+                          setMStatus(newStatus);
+                          if (newStatus === 'completed') {
+                            setMPercentage(100);
+                          }
+                        }}
                         className="w-full bg-redhill-sand/70 border border-redhill-line rounded-xl px-3 py-2.5 text-sm text-redhill-charcoal focus:outline-none focus:border-redhill-red/50 focus:ring-1 focus:ring-redhill-red/20"
                       >
                         {MILESTONE_STATUS_OPTIONS.map(s => (
@@ -492,7 +505,13 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                         min="0"
                         max="100"
                         value={mPercentage}
-                        onChange={(e) => setMPercentage(Number(e.target.value))}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setMPercentage(val);
+                          if (val >= 100) {
+                            setMStatus('completed');
+                          }
+                        }}
                         className="w-full bg-redhill-sand/70 border border-redhill-line rounded-xl px-3 py-2.5 text-sm text-redhill-charcoal focus:outline-none focus:border-redhill-red/50 focus:ring-1 focus:ring-redhill-red/20"
                       />
                     </div>
@@ -610,14 +629,15 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                               type="button"
                               disabled={notifyingMilestoneId === m.id}
                               onClick={() => handleNotifyMilestone(m.id)}
-                              className="p-1.5 bg-redhill-sand/70 hover:bg-emerald-500/10 text-emerald-700 rounded-lg border border-redhill-line transition-all disabled:opacity-50 cursor-pointer"
-                              title="Send/Re-send milestone completed email to investors"
+                              className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-300 transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1 text-[10px] font-bold"
+                              title="Send/Re-send milestone completion email to investors"
                             >
                               {notifyingMilestoneId === m.id ? (
-                                <div className="w-3.5 h-3.5 border-2 border-emerald-600/30 border-t-emerald-700 rounded-full animate-spin" />
+                                <div className="w-3 h-3 border-2 border-emerald-600/30 border-t-emerald-700 rounded-full animate-spin" />
                               ) : (
-                                <Mail className="w-3.5 h-3.5" />
+                                <Mail className="w-3 h-3 text-emerald-700" />
                               )}
+                              <span>Send Mail</span>
                             </button>
                           )}
                           {m.doc_url && (
@@ -651,7 +671,7 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                               onClick={() => {
                                 setEditingMilestoneId(m.id);
                                 setEditMStatus(m.status);
-                                setEditMPercentage(m.completion_percentage);
+                                setEditMPercentage(m.status === 'completed' ? 100 : m.completion_percentage);
                               }}
                               className="px-3 py-1.5 bg-redhill-sand/70 hover:bg-redhill-sand text-stone-700 text-[10px] font-bold rounded-lg border border-redhill-line transition-all cursor-pointer"
                             >
@@ -669,7 +689,13 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                             <select
                               value={editMStatus}
                               disabled={updatingMilestoneId === m.id}
-                              onChange={(e) => setEditMStatus(e.target.value as MilestoneStatus)}
+                              onChange={(e) => {
+                                const newStatus = e.target.value as MilestoneStatus;
+                                setEditMStatus(newStatus);
+                                if (newStatus === 'completed') {
+                                  setEditMPercentage(100);
+                                }
+                              }}
                               className="bg-redhill-sand/70 border border-redhill-line rounded-lg px-2 py-1.5 text-xs text-redhill-charcoal focus:outline-none focus:border-redhill-red/50 disabled:opacity-60"
                             >
                               {MILESTONE_STATUS_OPTIONS.map(s => (
@@ -685,7 +711,13 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                               max="100"
                               disabled={updatingMilestoneId === m.id}
                               value={editMPercentage}
-                              onChange={(e) => setEditMPercentage(Number(e.target.value))}
+                              onChange={(e) => {
+                                const val = Number(e.target.value);
+                                setEditMPercentage(val);
+                                if (val >= 100) {
+                                  setEditMStatus('completed');
+                                }
+                              }}
                               className="w-16 bg-redhill-sand/70 border border-redhill-line rounded-lg px-2 py-1.5 text-xs text-redhill-charcoal focus:outline-none focus:border-redhill-red/50 disabled:opacity-60"
                             />
                             <span className="text-[10px] text-redhill-muted">%</span>
