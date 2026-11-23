@@ -9,26 +9,33 @@ if (sendgridApiKey) {
   sgMail.setApiKey(sendgridApiKey);
 }
 
+// Clean app password (stripping any spaces if user pasted 'abcd efgh ijkl mnop')
+const cleanedAppPassword = gmailAppPassword ? String(gmailAppPassword).replace(/\s+/g, '') : '';
+
 // Setup Nodemailer Transporter for Gmail / Custom SMTP
 let smtpTransporter: nodemailer.Transporter | null = null;
-if (gmailUser && gmailAppPassword) {
+if (gmailUser && cleanedAppPassword) {
   smtpTransporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: gmailUser,
-      pass: gmailAppPassword,
+      pass: cleanedAppPassword,
     },
   });
-} else if (smtpHost && gmailUser && gmailAppPassword) {
+  console.log(`📧 Gmail SMTP transporter initialized for: ${gmailUser}`);
+} else if (smtpHost && gmailUser && cleanedAppPassword) {
   smtpTransporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
     secure: smtpSecure,
     auth: {
       user: gmailUser,
-      pass: gmailAppPassword,
+      pass: cleanedAppPassword,
     },
   });
+  console.log(`📧 Custom SMTP transporter initialized for host: ${smtpHost}`);
+} else {
+  console.log(`⚠️ GMAIL_USER or GMAIL_APP_PASSWORD not set in environment variables. Real email dispatch disabled.`);
 }
 
 export interface EmailOptions {
@@ -52,18 +59,19 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
       }
 
       if (realRecipients.length > 0) {
-        await smtpTransporter.sendMail({
+        const info = await smtpTransporter.sendMail({
           from: `"Redhill Infra" <${fromEmail || gmailUser}>`,
           to: realRecipients,
           subject: options.subject,
           text: options.text || options.html.replace(/<[^>]*>?/gm, ''),
           html: options.html,
         });
-        console.log(`[EMAIL DISPATCH - GMAIL SMTP SUCCESS] Sent to: ${realRecipients.join(', ')}`);
+        console.log(`[EMAIL DISPATCH - GMAIL SMTP SUCCESS] ID: ${info?.messageId || 'ok'} Sent to: ${realRecipients.join(', ')}`);
       }
       return true;
-    } catch (smtpError) {
-      console.error('Error sending email via Gmail SMTP:', smtpError);
+    } catch (smtpError: any) {
+      console.error('Error sending email via Gmail SMTP:', smtpError?.message || smtpError);
+      return false;
     }
   }
 
@@ -88,13 +96,13 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
 
   // 3. Fallback: Development Mock Logger when no credentials are in .env
   console.log('====================================================');
-  console.log(`[EMAIL DISPATCH - DEV MOCK]`);
+  console.log(`[EMAIL DISPATCH - DEV MOCK (NO SMTP CREDENTIALS IN ENV)]`);
   console.log(`To: ${recipients.join(', ')}`);
   console.log(`Subject: ${options.subject}`);
   console.log(`Timestamp: ${new Date().toISOString()}`);
-  console.log(`Note: To send to actual Gmail inboxes, add GMAIL_USER and GMAIL_APP_PASSWORD to Backend/.env`);
+  console.log(`Note: To send to actual Gmail inboxes, set GMAIL_USER and GMAIL_APP_PASSWORD in Render Environment Variables`);
   console.log('====================================================');
-  return true;
+  return false;
 };
 
 export interface MilestoneEmailParams {

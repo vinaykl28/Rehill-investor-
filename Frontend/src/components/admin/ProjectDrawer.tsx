@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   X, CheckCircle2, Clock, AlertCircle, Hammer, Upload, Link as LinkIcon,
   Image as ImageIcon, Video, FileVideo, PlusCircle, Trash2, ChevronDown, ChevronUp,
-  Save, ExternalLink, Eye
+  Save, ExternalLink, Eye, Mail
 } from 'lucide-react';
 import { Project, Milestone, MilestoneCategory, MilestoneStatus, ProgressUpdate } from '../../types';
 import { useToast } from '../Toast';
@@ -80,6 +80,7 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
   const [editMStatus, setEditMStatus] = useState<MilestoneStatus>('pending');
   const [editMPercentage, setEditMPercentage] = useState(0);
   const [updatingMilestoneId, setUpdatingMilestoneId] = useState<number | null>(null);
+  const [notifyingMilestoneId, setNotifyingMilestoneId] = useState<number | null>(null);
 
   // Fetch project details
   useEffect(() => {
@@ -176,6 +177,30 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
       showToast('An error occurred while creating the milestone', 'error');
     } finally {
       setSubmittingMilestone(false);
+    }
+  };
+
+  const handleNotifyMilestone = async (milestoneId: number) => {
+    if (notifyingMilestoneId !== null) return;
+    setNotifyingMilestoneId(milestoneId);
+    try {
+      const res = await apiFetch(`/api/admin/milestones/${milestoneId}/notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        showToast(data.message || 'Milestone completion email dispatched to investors!', 'success');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Failed to dispatch email', 'error');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Error dispatching email', 'error');
+    } finally {
+      setNotifyingMilestoneId(null);
     }
   };
 
@@ -580,6 +605,21 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
 
                         {/* Edit / Doc Actions */}
                         <div className="flex items-center gap-1.5 shrink-0">
+                          {m.status === 'completed' && (
+                            <button
+                              type="button"
+                              disabled={notifyingMilestoneId === m.id}
+                              onClick={() => handleNotifyMilestone(m.id)}
+                              className="p-1.5 bg-redhill-sand/70 hover:bg-emerald-500/10 text-emerald-700 rounded-lg border border-redhill-line transition-all disabled:opacity-50 cursor-pointer"
+                              title="Send/Re-send milestone completed email to investors"
+                            >
+                              {notifyingMilestoneId === m.id ? (
+                                <div className="w-3.5 h-3.5 border-2 border-emerald-600/30 border-t-emerald-700 rounded-full animate-spin" />
+                              ) : (
+                                <Mail className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          )}
                           {m.doc_url && (
                             <a
                               href={m.doc_url}
