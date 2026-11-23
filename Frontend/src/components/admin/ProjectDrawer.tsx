@@ -79,6 +79,7 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
   const [editingMilestoneId, setEditingMilestoneId] = useState<number | null>(null);
   const [editMStatus, setEditMStatus] = useState<MilestoneStatus>('pending');
   const [editMPercentage, setEditMPercentage] = useState(0);
+  const [updatingMilestoneId, setUpdatingMilestoneId] = useState<number | null>(null);
 
   // Fetch project details
   useEffect(() => {
@@ -179,6 +180,8 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
   };
 
   const handleUpdateMilestone = async (milestoneId: number) => {
+    if (updatingMilestoneId !== null) return;
+    setUpdatingMilestoneId(milestoneId);
     try {
       const res = await apiFetch(`/api/admin/milestones/${milestoneId}`, {
         method: 'PATCH',
@@ -193,13 +196,16 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
       if (res.ok) {
         showToast('Milestone updated successfully!', 'success');
         setEditingMilestoneId(null);
-        if (project) fetchDetails(project.id);
+        if (project) await fetchDetails(project.id);
         onRefreshProjects();
       } else {
-        showToast('Failed to update milestone', 'error');
+        const errData = await res.json().catch(() => ({}));
+        showToast(`Failed: ${errData.error || 'Failed to update milestone'}`, 'error');
       }
-    } catch {
-      showToast('An error occurred', 'error');
+    } catch (err: any) {
+      showToast(err?.message || 'An error occurred', 'error');
+    } finally {
+      setUpdatingMilestoneId(null);
     }
   };
 
@@ -588,9 +594,17 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                           {editingMilestoneId === m.id ? (
                             <button
                               onClick={() => handleUpdateMilestone(m.id)}
-                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer"
+                              disabled={updatingMilestoneId === m.id}
+                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
                             >
-                              Save
+                              {updatingMilestoneId === m.id ? (
+                                <>
+                                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                  <span>Saving...</span>
+                                </>
+                              ) : (
+                                'Save'
+                              )}
                             </button>
                           ) : (
                             <button
@@ -614,8 +628,9 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                             <label className="text-[10px] text-redhill-muted font-bold">Status:</label>
                             <select
                               value={editMStatus}
+                              disabled={updatingMilestoneId === m.id}
                               onChange={(e) => setEditMStatus(e.target.value as MilestoneStatus)}
-                              className="bg-redhill-sand/70 border border-redhill-line rounded-lg px-2 py-1.5 text-xs text-redhill-charcoal focus:outline-none focus:border-redhill-red/50"
+                              className="bg-redhill-sand/70 border border-redhill-line rounded-lg px-2 py-1.5 text-xs text-redhill-charcoal focus:outline-none focus:border-redhill-red/50 disabled:opacity-60"
                             >
                               {MILESTONE_STATUS_OPTIONS.map(s => (
                                 <option key={s.value} value={s.value}>{s.label}</option>
@@ -628,15 +643,18 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                               type="number"
                               min="0"
                               max="100"
+                              disabled={updatingMilestoneId === m.id}
                               value={editMPercentage}
                               onChange={(e) => setEditMPercentage(Number(e.target.value))}
-                              className="w-16 bg-redhill-sand/70 border border-redhill-line rounded-lg px-2 py-1.5 text-xs text-redhill-charcoal focus:outline-none focus:border-redhill-red/50"
+                              className="w-16 bg-redhill-sand/70 border border-redhill-line rounded-lg px-2 py-1.5 text-xs text-redhill-charcoal focus:outline-none focus:border-redhill-red/50 disabled:opacity-60"
                             />
                             <span className="text-[10px] text-redhill-muted">%</span>
                           </div>
                           <button
+                            type="button"
+                            disabled={updatingMilestoneId === m.id}
                             onClick={() => setEditingMilestoneId(null)}
-                            className="text-[10px] text-redhill-muted hover:text-redhill-charcoal ml-auto cursor-pointer"
+                            className="text-[10px] text-redhill-muted hover:text-redhill-charcoal disabled:opacity-50 ml-auto cursor-pointer"
                           >
                             Cancel
                           </button>

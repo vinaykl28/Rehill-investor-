@@ -342,27 +342,23 @@ export const createMilestone = async (req: AuthRequest, res: Response) => {
     );
 
     const milestoneId = Number(result.lastInsertRowid);
-    let notificationResult = null;
+
+    await recalculateProjectProgress(project_id);
 
     if (isCompleted) {
-      try {
-        notificationResult = await sendMilestoneCompletedNotification(milestoneId, {
-          customNotes: notes,
-          dayNumber: current_day,
-          completionDate: finalActual,
-        });
-      } catch (notifyErr) {
+      sendMilestoneCompletedNotification(milestoneId, {
+        customNotes: notes,
+        dayNumber: current_day,
+        completionDate: finalActual,
+      }).catch((notifyErr) => {
         console.error('Error triggering milestone notification:', notifyErr);
-      }
-    } else {
-      await recalculateProjectProgress(project_id);
+      });
     }
 
     res.json({
       id: milestoneId,
       status: finalStatus,
       completion_percentage: finalPct,
-      notificationResult,
     });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -388,7 +384,8 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
     const prevMilestone: any = await db.get('SELECT * FROM milestones WHERE id = ?', milestoneId);
     if (!prevMilestone) return res.status(404).json({ error: 'Milestone not found' });
 
-    const isNowCompleted = status === 'completed' || completion_percentage >= 100;
+    const wasAlreadyCompleted = prevMilestone.status === 'completed' || Number(prevMilestone.completion_percentage) >= 100;
+    const isNowCompleted = status === 'completed' || (completion_percentage !== undefined && Number(completion_percentage) >= 100);
 
     const newStatus = isNowCompleted ? 'completed' : (status || prevMilestone.status);
     const newPct = isNowCompleted ? 100 : (completion_percentage !== undefined ? completion_percentage : prevMilestone.completion_percentage);
@@ -420,26 +417,23 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
       milestoneId
     );
 
-    let notificationResult = null;
+    // Recalculate project progress immediately in database
+    await recalculateProjectProgress(prevMilestone.project_id);
 
-    if (newStatus === 'completed' || isNowCompleted || sendNotification) {
-      try {
-        notificationResult = await sendMilestoneCompletedNotification(milestoneId, {
-          customNotes: notes || prevMilestone.notes,
-          dayNumber: current_day || prevMilestone.current_day,
-          completionDate: newActual,
-        });
-      } catch (err) {
+    // Send notifications in background if transition to completed or explicitly requested
+    if ((!wasAlreadyCompleted && isNowCompleted) || sendNotification) {
+      sendMilestoneCompletedNotification(milestoneId, {
+        customNotes: notes || prevMilestone.notes,
+        dayNumber: current_day || prevMilestone.current_day,
+        completionDate: newActual,
+      }).catch((err) => {
         console.error('Error dispatching automated milestone notification:', err);
-      }
-    } else {
-      await recalculateProjectProgress(prevMilestone.project_id);
+      });
     }
 
     res.json({
       success: true,
       message: 'Milestone updated successfully',
-      notificationResult,
     });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -526,18 +520,16 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
         milestone.id
       );
 
+      await recalculateProjectProgress(project_id);
+
       if (willComplete && milestone.status !== 'completed') {
-        try {
-          notificationResult = await sendMilestoneCompletedNotification(milestone.id, {
-            customNotes: work_notes,
-            dayNumber: day_number,
-            completionDate: date,
-          });
-        } catch (err) {
+        sendMilestoneCompletedNotification(milestone.id, {
+          customNotes: work_notes,
+          dayNumber: day_number,
+          completionDate: date,
+        }).catch((err) => {
           console.error('Error dispatching automated milestone completion email:', err);
-        }
-      } else {
-        await recalculateProjectProgress(project_id);
+        });
       }
     } else {
       await recalculateProjectProgress(project_id);
@@ -546,7 +538,6 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
     res.json({
       success: true,
       message: 'Daily construction progress logged successfully',
-      notificationResult,
     });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
