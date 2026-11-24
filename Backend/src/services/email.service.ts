@@ -1,3 +1,26 @@
+import dns from 'dns';
+
+// Force Node.js DNS to prefer IPv4 and disable IPv6 AAAA queries.
+// Render cloud containers do not support outbound IPv6 routing, which causes ENETUNREACH errors.
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+const origResolve6 = dns.resolve6;
+if (origResolve6) {
+  (dns as any).resolve6 = function (hostname: string, ...args: any[]) {
+    const cb = typeof args[args.length - 1] === 'function' ? args[args.length - 1] : null;
+    if (cb) {
+      const err: any = new Error(`queryAaaa ENODATA ${hostname}`);
+      err.code = 'ENODATA';
+      return cb(err, []);
+    }
+    return origResolve6.apply(dns, [hostname, ...args]);
+  };
+}
+if (dns.promises && (dns.promises as any).resolve6) {
+  (dns.promises as any).resolve6 = async () => [];
+}
+
 import nodemailer from 'nodemailer';
 import sgMail from '@sendgrid/mail';
 import config from '../config/env.js';
@@ -88,8 +111,10 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
       port: 465,
       secure: true,
       auth: { user, pass },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 10000,
+      tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
     });
 
     const info = await transporter465.sendMail({
@@ -112,8 +137,10 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
         port: 587,
         secure: false,
         auth: { user, pass },
-        tls: { rejectUnauthorized: false },
-        connectionTimeout: 10000,
+        tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 20000,
       });
 
       const info = await transporter587.sendMail({
@@ -127,8 +154,42 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
       console.log(`[EMAIL DISPATCH - GMAIL SMTP PORT 587 SUCCESS] ID: ${info?.messageId} Sent to: ${realRecipients.join(', ')}`);
       return { success: true, messageId: info?.messageId };
     } catch (err587: any) {
-      const finalError = `Port 465 error: (${err465?.message}) | Port 587 error: (${err587?.message})`;
-      console.error(`[EMAIL DISPATCH - BOTH SMTP PORTS FAILED]: ${finalError}`);
+      console.warn(`[GMAIL SMTP PORT 587 FAILED]: ${err587?.message}. Trying fallback direct IPv4 on Port 465...`);
+
+      // Attempt 3: Direct IPv4 lookup (bypasses any potential IPv6 resolution)
+      try {
+        const ipv4Addresses = await dns.promises.resolve4('smtp.gmail.com').catch(() => []);
+        if (ipv4Addresses && ipv4Addresses.length > 0) {
+          const directIp = ipv4Addresses[0];
+          console.log(`[EMAIL DISPATCH - ATTEMPT 3 DIRECT IPV4]: Connecting to ${directIp}:465...`);
+          const transporterDirect = nodemailer.createTransport({
+            host: directIp,
+            port: 465,
+            secure: true,
+            auth: { user, pass },
+            tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 20000,
+          });
+
+          const info = await transporterDirect.sendMail({
+            from: fromFormatted,
+            to: realRecipients,
+            subject: options.subject,
+            text: textContent,
+            html: options.html,
+          });
+
+          console.log(`[EMAIL DISPATCH - DIRECT IPV4 SUCCESS] ID: ${info?.messageId} Sent to: ${realRecipients.join(', ')}`);
+          return { success: true, messageId: info?.messageId };
+        }
+      } catch (errDirect: any) {
+        console.warn(`[GMAIL SMTP DIRECT IPV4 FAILED]: ${errDirect?.message}`);
+      }
+
+      const finalError = `Port 465: (${err465?.message}) | Port 587: (${err587?.message})`;
+      console.error(`[EMAIL DISPATCH - ALL SMTP ATTEMPTS FAILED]: ${finalError}`);
       return { success: false, error: finalError };
     }
   }

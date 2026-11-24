@@ -1,3 +1,26 @@
+import dns from 'dns';
+
+// Force Node.js DNS to prefer IPv4 and disable IPv6 AAAA queries.
+// Render cloud containers do not support outbound IPv6 routing, which causes ENETUNREACH errors.
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+const origResolve6 = dns.resolve6;
+if (origResolve6) {
+  (dns as any).resolve6 = function (hostname: string, ...args: any[]) {
+    const cb = typeof args[args.length - 1] === 'function' ? args[args.length - 1] : null;
+    if (cb) {
+      const err: any = new Error(`queryAaaa ENODATA ${hostname}`);
+      err.code = 'ENODATA';
+      return cb(err, []);
+    }
+    return origResolve6.apply(dns, [hostname, ...args]);
+  };
+}
+if (dns.promises && (dns.promises as any).resolve6) {
+  (dns.promises as any).resolve6 = async () => [];
+}
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
