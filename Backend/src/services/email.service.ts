@@ -47,67 +47,96 @@ export interface EmailOptions {
   html: string;
 }
 
-export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
+export interface SendEmailResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
+export function getEmailCredentials() {
+  const user = (process.env.GMAIL_USER || process.env.SMTP_USER || config.email.gmailUser || '').trim().replace(/["']/g, '');
+  const pass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || config.email.gmailAppPassword || '').trim().replace(/\s+/g, '').replace(/["']/g, '');
+  const from = (process.env.FROM_EMAIL || config.email.fromEmail || user || 'noreply@redhillinfra.com').trim().replace(/["']/g, '');
+  const senderAddress = from.includes('@') ? from : (user || 'noreply@redhillinfra.com');
+  const senderDisplayName = !from.includes('@') ? from.replace(/_/g, ' ') : 'Redhill Infra';
+
+  return { user, pass, senderAddress, senderDisplayName };
+}
+
+export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmailResult> => {
   const recipients = Array.isArray(options.to) ? options.to : [options.to];
+  const { user, pass, senderAddress, senderDisplayName } = getEmailCredentials();
 
-  // 1. If Gmail / SMTP is configured, deliver directly to actual Gmail inboxes!
-  if (smtpTransporter) {
-    try {
-      const realRecipients = recipients.filter(r => !r.endsWith('@example.com') && !r.endsWith('@test.com'));
-      const mockRecipients = recipients.filter(r => r.endsWith('@example.com') || r.endsWith('@test.com'));
-
-      if (mockRecipients.length > 0) {
-        console.log(`[EMAIL DISPATCH - MOCK ACCOUNT] Sent to test accounts: ${mockRecipients.join(', ')}`);
-      }
-
-      if (realRecipients.length > 0) {
-        const senderAddress = (fromEmail && fromEmail.includes('@')) ? fromEmail : gmailUser;
-        const senderDisplayName = (fromEmail && !fromEmail.includes('@')) ? fromEmail.replace(/_/g, ' ') : 'Redhill Infra';
-
-        const info = await smtpTransporter.sendMail({
-          from: `"${senderDisplayName}" <${senderAddress}>`,
-          to: realRecipients,
-          subject: options.subject,
-          text: options.text || options.html.replace(/<[^>]*>?/gm, ''),
-          html: options.html,
-        });
-        console.log(`[EMAIL DISPATCH - GMAIL SMTP SUCCESS] ID: ${info?.messageId || 'ok'} Sent to: ${realRecipients.join(', ')}`);
-      }
-      return true;
-    } catch (smtpError: any) {
-      console.error('Error sending email via Gmail SMTP:', smtpError?.message || smtpError);
-      return false;
-    }
+  if (!user || !pass) {
+    const errorMsg = 'GMAIL_USER or GMAIL_APP_PASSWORD is not configured in server environment';
+    console.error(`[EMAIL DISPATCH ERROR]: ${errorMsg}`);
+    return { success: false, error: errorMsg };
   }
 
-  // 2. If SendGrid is configured
-  if (sendgridApiKey) {
+  const realRecipients = recipients.filter(r => !r.endsWith('@example.com') && !r.endsWith('@test.com'));
+  if (realRecipients.length === 0) {
+    return { success: true, messageId: 'mock-recipients-only' };
+  }
+
+  const fromFormatted = `"${senderDisplayName}" <${senderAddress}>`;
+  const textContent = options.text || options.html.replace(/<[^>]*>?/gm, '');
+
+  // Attempt 1: Port 465 (Direct SSL)
+  try {
+    const transporter465 = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 10000,
+    });
+
+    const info = await transporter465.sendMail({
+      from: fromFormatted,
+      to: realRecipients,
+      subject: options.subject,
+      text: textContent,
+      html: options.html,
+    });
+
+    console.log(`[EMAIL DISPATCH - GMAIL SMTP PORT 465 SUCCESS] ID: ${info?.messageId} Sent to: ${realRecipients.join(', ')}`);
+    return { success: true, messageId: info?.messageId };
+  } catch (err465: any) {
+    console.warn(`[GMAIL SMTP PORT 465 FAILED]: ${err465?.message}. Trying fallback Port 587 STARTTLS...`);
+
+    // Attempt 2: Port 587 (STARTTLS)
     try {
-      const msg = {
-        to: options.to,
-        from: fromEmail,
+      const transporter587 = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: { user, pass },
+        tls: { rejectUnauthorized: false },
+        connectionTimeout: 10000,
+      });
+
+      const info = await transporter587.sendMail({
+        from: fromFormatted,
+        to: realRecipients,
         subject: options.subject,
-        text: options.text || options.html.replace(/<[^>]*>?/gm, ''),
+        text: textContent,
         html: options.html,
-      };
-      await sgMail.send(msg);
-      console.log(`[EMAIL DISPATCH - SENDGRID SUCCESS] Sent to: ${recipients.join(', ')}`);
-      return true;
-    } catch (error) {
-      console.error('Error sending email via SendGrid:', error);
-      return false;
+      });
+
+      console.log(`[EMAIL DISPATCH - GMAIL SMTP PORT 587 SUCCESS] ID: ${info?.messageId} Sent to: ${realRecipients.join(', ')}`);
+      return { success: true, messageId: info?.messageId };
+    } catch (err587: any) {
+      const finalError = `Port 465 error: (${err465?.message}) | Port 587 error: (${err587?.message})`;
+      console.error(`[EMAIL DISPATCH - BOTH SMTP PORTS FAILED]: ${finalError}`);
+      return { success: false, error: finalError };
     }
   }
+};
 
-  // 3. Fallback: Development Mock Logger when no credentials are in .env
-  console.log('====================================================');
-  console.log(`[EMAIL DISPATCH - DEV MOCK (NO SMTP CREDENTIALS IN ENV)]`);
-  console.log(`To: ${recipients.join(', ')}`);
-  console.log(`Subject: ${options.subject}`);
-  console.log(`Timestamp: ${new Date().toISOString()}`);
-  console.log(`Note: To send to actual Gmail inboxes, set GMAIL_USER and GMAIL_APP_PASSWORD in Render Environment Variables`);
-  console.log('====================================================');
-  return false;
+export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
+  const result = await sendEmailDetailed(options);
+  return result.success;
 };
 
 export interface MilestoneEmailParams {

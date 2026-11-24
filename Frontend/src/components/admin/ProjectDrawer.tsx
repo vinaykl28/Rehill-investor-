@@ -180,6 +180,30 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
     }
   };
 
+  const [testingSmtp, setTestingSmtp] = useState(false);
+
+  const handleTestSmtp = async () => {
+    if (testingSmtp) return;
+    setTestingSmtp(true);
+    try {
+      const res = await apiFetch('/api/admin/smtp/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: 'vinaykspammail@gmail.com' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        showToast(data.message || 'SMTP Verified! Test email delivered to vinaykspammail@gmail.com', 'success');
+      } else {
+        showToast(`SMTP Error: ${data.error || 'Connection failed'}`, 'error');
+      }
+    } catch (err: any) {
+      showToast(`SMTP Error: ${err?.message || 'Failed to connect'}`, 'error');
+    } finally {
+      setTestingSmtp(false);
+    }
+  };
+
   const handleNotifyMilestone = async (milestoneId: number) => {
     if (notifyingMilestoneId !== null) return;
     setNotifyingMilestoneId(milestoneId);
@@ -190,12 +214,11 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
         body: JSON.stringify({}),
       });
 
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        const data = await res.json();
         showToast(data.message || 'Milestone completion email dispatched to investors!', 'success');
       } else {
-        const err = await res.json().catch(() => ({}));
-        showToast(err.error || 'Failed to dispatch email', 'error');
+        showToast(`Email error: ${data.error || 'Failed to dispatch email'}`, 'error');
       }
     } catch (err: any) {
       showToast(err?.message || 'Error dispatching email', 'error');
@@ -406,15 +429,31 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
           {/* MILESTONES TAB */}
           {!loading && activeTab === 'milestones' && (
             <div className="space-y-5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h3 className="text-redhill-charcoal font-bold text-sm">Project Milestones</h3>
-                <button
-                  onClick={() => setShowMilestoneForm(!showMilestoneForm)}
-                  className="px-4 py-2 bg-redhill-red hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-lg "
-                >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  Add Milestone
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={testingSmtp}
+                    onClick={handleTestSmtp}
+                    className="px-3 py-2 bg-redhill-sand/70 hover:bg-emerald-50 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-300 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    title="Send a live test email to vinaykspammail@gmail.com to verify Gmail SMTP"
+                  >
+                    {testingSmtp ? (
+                      <div className="w-3.5 h-3.5 border-2 border-emerald-600/30 border-t-emerald-700 rounded-full animate-spin" />
+                    ) : (
+                      <Mail className="w-3.5 h-3.5 text-emerald-700" />
+                    )}
+                    <span>{testingSmtp ? 'Testing...' : 'Test SMTP Mail'}</span>
+                  </button>
+                  <button
+                    onClick={() => setShowMilestoneForm(!showMilestoneForm)}
+                    className="px-4 py-2 bg-redhill-red hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-lg"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    Add Milestone
+                  </button>
+                </div>
               </div>
 
               {/* Add Milestone Form */}

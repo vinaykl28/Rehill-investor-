@@ -24,6 +24,7 @@ import {
   deleteMilestone,
   logDailyProgress,
   manualNotifyMilestone,
+  testSmtpConnection,
   getNotifications,
   createUpdate,
   uploadFile,
@@ -72,6 +73,7 @@ router.patch('/admin/milestones/:id', authenticateToken, isAdmin, updateMileston
 router.delete('/admin/milestones/:id', authenticateToken, isAdmin, deleteMilestone);
 router.post('/admin/milestones/:id/daily-progress', authenticateToken, isAdmin, logDailyProgress);
 router.post('/admin/milestones/:id/notify', authenticateToken, isAdmin, manualNotifyMilestone);
+router.post('/admin/smtp/test', authenticateToken, isAdmin, testSmtpConnection);
 
 // Automated Messages / Notification Logs
 router.get('/admin/notifications', authenticateToken, isAdmin, getNotifications);

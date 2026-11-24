@@ -2,7 +2,7 @@ import { Response } from 'express';
 import bcrypt from 'bcryptjs';
 import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
-import { sendEmail } from '../services/email.service.js';
+import { sendEmail, sendEmailDetailed } from '../services/email.service.js';
 import {
   sendMilestoneCompletedNotification,
   recalculateProjectProgress,
@@ -553,9 +553,31 @@ export const manualNotifyMilestone = async (req: AuthRequest, res: Response) => 
       customNotes,
       dayNumber,
     });
+    if (!result.success) {
+      return res.status(500).json({ error: result.message, details: result });
+    }
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
+  }
+};
+
+export const testSmtpConnection = async (req: AuthRequest, res: Response) => {
+  try {
+    const targetEmail = req.body?.to || req.user?.email || 'vinaykspammail@gmail.com';
+    const result = await sendEmailDetailed({
+      to: targetEmail,
+      subject: '🧪 Redhill Infra SMTP Connection Test',
+      html: `<h2>Redhill Infra Verification</h2><p>Your Gmail SMTP setup is working and successfully connected from Render to ${targetEmail}!</p>`
+    });
+
+    if (result.success) {
+      res.json({ success: true, message: `Test email successfully sent to ${targetEmail}`, messageId: result.messageId });
+    } else {
+      res.status(500).json({ error: result.error || 'SMTP delivery failed' });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 };
 

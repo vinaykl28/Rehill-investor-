@@ -1,5 +1,5 @@
 import db from '../db.js';
-import { sendEmail, generateMilestoneCompletedHtml } from './email.service.js';
+import { sendEmail, sendEmailDetailed, generateMilestoneCompletedHtml } from './email.service.js';
 
 export interface ProjectInvestor {
   id: number;
@@ -18,6 +18,7 @@ export interface MilestoneNotificationResult {
   milestoneName: string;
   totalInvestors: number;
   notifiedRecipients: { id: number; name: string; email: string }[];
+  sendResults?: { email: string; success: boolean; error?: string }[];
   announcementCreated: boolean;
   message?: string;
 }
@@ -97,6 +98,7 @@ export const sendMilestoneCompletedNotification = async (
   const investors = await getProjectInvestors(projectId);
 
   const notifiedRecipients: { id: number; name: string; email: string }[] = [];
+  const sendResults: { email: string; success: boolean; error?: string }[] = [];
 
   // 2. Dispatch personalized branded emails to each investor concurrently
   await Promise.all(
@@ -116,11 +118,21 @@ export const sendMilestoneCompletedNotification = async (
         notes,
       });
 
-      const isSent = await sendEmail({
+      const emailResult = await sendEmailDetailed({
         to: investor.email,
         subject,
         html,
       });
+
+      sendResults.push({
+        email: investor.email,
+        success: emailResult.success,
+        error: emailResult.error,
+      });
+
+      const statusVal = emailResult.success
+        ? 'sent'
+        : `failed: ${emailResult.error || 'delivery error'}`.slice(0, 50);
 
       // 3. Log notification in database for audit and transparency
       try {
@@ -137,14 +149,16 @@ export const sendMilestoneCompletedNotification = async (
           subject,
           'milestone_completed',
           html,
-          isSent ? 'sent' : 'failed'
+          statusVal
         );
 
-        notifiedRecipients.push({
-          id: investor.id,
-          name: investor.name,
-          email: investor.email,
-        });
+        if (emailResult.success) {
+          notifiedRecipients.push({
+            id: investor.id,
+            name: investor.name,
+            email: investor.email,
+          });
+        }
       } catch (logErr) {
         console.error(`Error logging notification for investor ${investor.id}:`, logErr);
       }
@@ -171,16 +185,22 @@ export const sendMilestoneCompletedNotification = async (
   // 5. Recalculate project progress
   await recalculateProjectProgress(projectId);
 
+  const anyFailed = sendResults.some(r => !r.success);
+  const failureDetails = sendResults.filter(r => !r.success).map(r => `${r.email}: ${r.error}`).join('; ');
+
   return {
-    success: true,
+    success: !anyFailed,
     projectId,
     projectName,
     milestoneId,
     milestoneName,
     totalInvestors: investors.length,
     notifiedRecipients,
+    sendResults,
     announcementCreated,
-    message: `Automated email successfully dispatched to ${notifiedRecipients.length} investor(s) of ${projectName}.`,
+    message: anyFailed
+      ? `Email delivery failed: ${failureDetails}`
+      : `Automated email successfully delivered to ${notifiedRecipients.length} investor(s) of ${projectName}.`,
   };
 };
 
