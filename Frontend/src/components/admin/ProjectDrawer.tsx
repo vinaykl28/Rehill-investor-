@@ -190,6 +190,7 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: 'vinaykspammail@gmail.com' }),
+        timeoutMs: 60000,
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
@@ -212,6 +213,7 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
+        timeoutMs: 60000,
       });
 
       const data = await res.json().catch(() => ({}));
