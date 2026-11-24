@@ -66,20 +66,109 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
     return { success: true, messageId: 'mock-recipients-only' };
   }
 
+  const webhookUrl = (process.env.EMAIL_WEBHOOK_URL || config.email.webhookUrl || '').trim();
+  const webhookSecret = (process.env.EMAIL_WEBHOOK_SECRET || config.email.webhookSecret || '').trim();
+  const brevoApiKey = (process.env.BREVO_API_KEY || config.email.brevoApiKey || '').trim();
   const resendApiKey = (process.env.RESEND_API_KEY || config.email.resendApiKey || '').trim();
   const sendgridKey = (process.env.SENDGRID_API_KEY || config.email.sendgridApiKey || '').trim();
   const { user, pass, senderAddress, senderDisplayName } = getEmailCredentials();
   const fromFormatted = `"${senderDisplayName}" <${senderAddress}>`;
   const textContent = options.text || options.html.replace(/<[^>]*>?/gm, '');
+  const providerErrors: string[] = [];
 
-  // 1. Resend HTTP REST API (Port 443 — NEVER BLOCKED by Render Free Tier firewall)
+  // 1. Google Apps Script / HTTPS Email Webhook (Port 443 — Free Gmail delivery, NEVER BLOCKED on Render)
+  if (webhookUrl) {
+    try {
+      console.log(`[EMAIL DISPATCH - WEBHOOK HTTPS]: Sending to ${realRecipients.join(', ')}...`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: realRecipients.join(','),
+          subject: options.subject,
+          html: options.html,
+          text: textContent,
+          fromName: senderDisplayName,
+          secret: webhookSecret || undefined,
+        }),
+        redirect: 'follow',
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeout));
+
+      const rawBody = await response.text();
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(rawBody);
+      } catch {
+        // Non-JSON response is acceptable when HTTP status is OK and not an HTML error page
+      }
+
+      if (!response.ok || parsed?.error || parsed?.success === false) {
+        throw new Error(parsed?.error || `HTTP ${response.status}: ${rawBody.slice(0, 150)}`);
+      }
+      if (!parsed && rawBody.trim().startsWith('<')) {
+        throw new Error('Webhook returned HTML instead of JSON. Ensure Apps Script is deployed with access "Anyone".');
+      }
+
+      console.log(`[EMAIL DISPATCH - WEBHOOK SUCCESS] Sent to: ${realRecipients.join(', ')}`);
+      return { success: true, messageId: parsed?.messageId || `webhook-${Date.now()}` };
+    } catch (webhookErr: any) {
+      const msg = webhookErr?.message || 'Webhook delivery failed';
+      console.warn(`[WEBHOOK FAILED]: ${msg}. Trying next provider...`);
+      providerErrors.push(`Email Webhook: ${msg}`);
+    }
+  }
+
+  // 2. Brevo HTTP REST API (Port 443 — Free 300/day, sends to ANY recipient with verified Gmail)
+  if (brevoApiKey) {
+    try {
+      console.log(`[EMAIL DISPATCH - BREVO HTTP API]: Sending to ${realRecipients.join(', ')}...`);
+      const brevoSenderEmail = (senderAddress.includes('redhillinfra.com') && user) ? user : senderAddress;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': brevoApiKey,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: senderDisplayName, email: brevoSenderEmail },
+          to: realRecipients.map(email => ({ email })),
+          subject: options.subject,
+          htmlContent: options.html,
+          textContent,
+        }),
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeout));
+
+      const data: any = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data?.message || data?.code || `HTTP ${response.status}`);
+      }
+
+      console.log(`[EMAIL DISPATCH - BREVO SUCCESS] ID: ${data?.messageId}`);
+      return { success: true, messageId: data?.messageId || `brevo-${response.status}` };
+    } catch (brevoErr: any) {
+      const msg = brevoErr?.message || 'Brevo delivery failed';
+      console.warn(`[BREVO FAILED]: ${msg}. Trying next provider...`);
+      providerErrors.push(`Brevo API: ${msg}`);
+    }
+  }
+
+  // 3. Resend HTTP REST API (Port 443 — NEVER BLOCKED by Render Free Tier firewall)
   if (resendApiKey) {
     try {
       console.log(`[EMAIL DISPATCH - RESEND HTTP API]: Sending to ${realRecipients.join(', ')}...`);
       const resend = new Resend(resendApiKey);
-      const resendFrom = senderAddress.includes('redhillinfra.com') && !process.env.RESEND_VERIFIED_DOMAIN
-        ? 'Redhill Infra <onboarding@resend.dev>'
-        : fromFormatted;
+      const explicitResendFrom = (process.env.RESEND_FROM_EMAIL || config.email.resendFromEmail || '').trim();
+      const hasVerifiedDomain = Boolean(process.env.RESEND_VERIFIED_DOMAIN || explicitResendFrom);
+      const resendFrom = explicitResendFrom
+        ? (explicitResendFrom.includes('<') ? explicitResendFrom : `"${senderDisplayName}" <${explicitResendFrom}>`)
+        : (hasVerifiedDomain ? fromFormatted : `${senderDisplayName} <onboarding@resend.dev>`);
 
       const data = await resend.emails.send({
         from: resendFrom,
@@ -87,6 +176,7 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
         subject: options.subject,
         text: textContent,
         html: options.html,
+        ...(senderAddress && !senderAddress.includes('redhillinfra.com') ? { replyTo: senderAddress } : {}),
       });
 
       if (data.error) {
@@ -96,11 +186,13 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
       console.log(`[EMAIL DISPATCH - RESEND SUCCESS] ID: ${data.data?.id}`);
       return { success: true, messageId: data.data?.id };
     } catch (resendErr: any) {
-      console.warn(`[RESEND FAILED]: ${resendErr?.message}. Trying fallback provider...`);
+      const msg = resendErr?.message || 'Resend delivery failed';
+      console.warn(`[RESEND FAILED]: ${msg}. Trying fallback provider...`);
+      providerErrors.push(`Resend API: ${msg}`);
     }
   }
 
-  // 2. SendGrid HTTP REST API (Port 443 — NEVER BLOCKED by Render Free Tier firewall)
+  // 4. SendGrid HTTP REST API (Port 443 — NEVER BLOCKED by Render Free Tier firewall)
   if (sendgridKey) {
     try {
       console.log(`[EMAIL DISPATCH - SENDGRID HTTP API]: Sending to ${realRecipients.join(', ')}...`);
@@ -115,29 +207,34 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
       console.log(`[EMAIL DISPATCH - SENDGRID SUCCESS] Status: ${response.statusCode}`);
       return { success: true, messageId: `sg-${response.statusCode}` };
     } catch (sgErr: any) {
-      console.warn(`[SENDGRID FAILED]: ${sgErr?.message}. Trying SMTP...`);
+      const msg = sgErr?.response?.body?.errors?.[0]?.message || sgErr?.message || 'SendGrid delivery failed';
+      console.warn(`[SENDGRID FAILED]: ${msg}. Trying SMTP...`);
+      providerErrors.push(`SendGrid API: ${msg}`);
     }
   }
 
-  // 3. Gmail / Custom SMTP (Supported on localhost and Render Paid plans)
+  // 5. Gmail / Custom SMTP (Supported on localhost and Render Paid plans)
   if (!user || !pass) {
-    const errorMsg = 'No email credentials configured. Please set RESEND_API_KEY (recommended for Render) or GMAIL_USER & GMAIL_APP_PASSWORD.';
+    const errorMsg = providerErrors.length > 0
+      ? providerErrors.join(' | ')
+      : 'No HTTPS email provider configured. On Render Free Tier, set EMAIL_WEBHOOK_URL, BREVO_API_KEY, or RESEND_API_KEY in Render Environment Variables.';
     console.error(`[EMAIL DISPATCH ERROR]: ${errorMsg}`);
     return { success: false, error: errorMsg };
   }
 
-  // Attempt 1: Port 465 (Direct SSL)
+  // Attempt 1: Port 465 (Direct SSL, IPv4 forced)
   try {
     const transporter465 = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
       secure: true,
+      family: 4,
       auth: { user, pass },
       tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
       connectionTimeout: 6000,
       greetingTimeout: 6000,
       socketTimeout: 8000,
-    });
+    } as any);
 
     const info = await transporter465.sendMail({
       from: fromFormatted,
@@ -152,18 +249,19 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
   } catch (err465: any) {
     console.warn(`[GMAIL SMTP PORT 465 FAILED]: ${err465?.message}. Trying fallback Port 587 STARTTLS...`);
 
-    // Attempt 2: Port 587 (STARTTLS)
+    // Attempt 2: Port 587 (STARTTLS, IPv4 forced)
     try {
       const transporter587 = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
+        family: 4,
         auth: { user, pass },
         tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
         connectionTimeout: 6000,
         greetingTimeout: 6000,
         socketTimeout: 8000,
-      });
+      } as any);
 
       const info = await transporter587.sendMail({
         from: fromFormatted,
@@ -176,12 +274,14 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
       console.log(`[EMAIL DISPATCH - GMAIL SMTP PORT 587 SUCCESS] ID: ${info?.messageId} Sent to: ${realRecipients.join(', ')}`);
       return { success: true, messageId: info?.messageId };
     } catch (err587: any) {
-      const isConnectionTimeout = String(err465?.message || '').includes('timeout') || String(err587?.message || '').includes('timeout');
-      const renderNote = isConnectionTimeout
-        ? ' (Render Free Tier blocks outbound SMTP ports 465/587. Please add RESEND_API_KEY in Render Environment Variables for free HTTPS Port 443 delivery)'
-        : '';
-      const finalError = `Port 465: (${err465?.message}) | Port 587: (${err587?.message})${renderNote}`;
-      console.error(`[EMAIL DISPATCH - ALL SMTP ATTEMPTS FAILED]: ${finalError}`);
+      const err465Msg = String(err465?.message || '');
+      const err587Msg = String(err587?.message || '');
+      const isSmtpBlocked = err465Msg.includes('timeout') || err587Msg.includes('timeout') || err465Msg.includes('ENETUNREACH') || err587Msg.includes('ENETUNREACH');
+      const smtpError = `SMTP Port 465: (${err465Msg}) | Port 587: (${err587Msg})`;
+      const finalError = providerErrors.length > 0
+        ? `${providerErrors.join(' | ')} | ${smtpError}`
+        : `${smtpError}${isSmtpBlocked ? ' — Render Free Tier blocks outbound SMTP ports 465/587. Add EMAIL_WEBHOOK_URL (Gmail Apps Script), BREVO_API_KEY, or RESEND_API_KEY in Render Environment Variables.' : ''}`;
+      console.error(`[EMAIL DISPATCH - ALL ATTEMPTS FAILED]: ${finalError}`);
       return { success: false, error: finalError };
     }
   }

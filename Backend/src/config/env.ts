@@ -65,9 +65,13 @@ export const config = {
   DATABASE_PATH: process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve('database.sqlite'),
   UPLOADS_DIR: process.env.UPLOADS_DIR ? path.resolve(process.env.UPLOADS_DIR) : path.resolve('uploads'),
 
-  // Email Configuration (Resend / SendGrid / Gmail SMTP)
+  // Email Configuration (Webhook / Brevo / Resend / SendGrid / Gmail SMTP)
   email: {
+    webhookUrl: process.env.EMAIL_WEBHOOK_URL,
+    webhookSecret: process.env.EMAIL_WEBHOOK_SECRET,
+    brevoApiKey: process.env.BREVO_API_KEY,
     resendApiKey: process.env.RESEND_API_KEY,
+    resendFromEmail: process.env.RESEND_FROM_EMAIL,
     sendgridApiKey: process.env.SENDGRID_API_KEY,
     gmailUser: process.env.GMAIL_USER || process.env.SMTP_USER,
     gmailAppPassword: process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS,
