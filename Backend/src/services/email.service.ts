@@ -23,6 +23,7 @@ if (dns.promises && (dns.promises as any).resolve6) {
 
 import nodemailer from 'nodemailer';
 import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 import config from '../config/env.js';
 
 const { sendgridApiKey, gmailUser, gmailAppPassword, fromEmail, smtpHost, smtpPort, smtpSecure } = config.email;
@@ -34,34 +35,6 @@ if (sendgridApiKey) {
 
 // Clean app password (stripping any spaces if user pasted 'abcd efgh ijkl mnop')
 const cleanedAppPassword = gmailAppPassword ? String(gmailAppPassword).replace(/\s+/g, '') : '';
-
-// Setup Nodemailer Transporter for Gmail / Custom SMTP
-let smtpTransporter: nodemailer.Transporter | null = null;
-if (gmailUser && cleanedAppPassword) {
-  smtpTransporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: gmailUser,
-      pass: cleanedAppPassword,
-    },
-  });
-  console.log(`📧 Gmail SMTP transporter initialized on port 465 for: ${gmailUser}`);
-} else if (smtpHost && gmailUser && cleanedAppPassword) {
-  smtpTransporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpSecure,
-    auth: {
-      user: gmailUser,
-      pass: cleanedAppPassword,
-    },
-  });
-  console.log(`📧 Custom SMTP transporter initialized for host: ${smtpHost}`);
-} else {
-  console.log(`⚠️ GMAIL_USER or GMAIL_APP_PASSWORD not set in environment variables. Real email dispatch disabled.`);
-}
 
 export interface EmailOptions {
   to: string | string[];
@@ -88,21 +61,70 @@ export function getEmailCredentials() {
 
 export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmailResult> => {
   const recipients = Array.isArray(options.to) ? options.to : [options.to];
-  const { user, pass, senderAddress, senderDisplayName } = getEmailCredentials();
-
-  if (!user || !pass) {
-    const errorMsg = 'GMAIL_USER or GMAIL_APP_PASSWORD is not configured in server environment';
-    console.error(`[EMAIL DISPATCH ERROR]: ${errorMsg}`);
-    return { success: false, error: errorMsg };
-  }
-
   const realRecipients = recipients.filter(r => !r.endsWith('@example.com') && !r.endsWith('@test.com'));
   if (realRecipients.length === 0) {
     return { success: true, messageId: 'mock-recipients-only' };
   }
 
+  const resendApiKey = (process.env.RESEND_API_KEY || config.email.resendApiKey || '').trim();
+  const sendgridKey = (process.env.SENDGRID_API_KEY || config.email.sendgridApiKey || '').trim();
+  const { user, pass, senderAddress, senderDisplayName } = getEmailCredentials();
   const fromFormatted = `"${senderDisplayName}" <${senderAddress}>`;
   const textContent = options.text || options.html.replace(/<[^>]*>?/gm, '');
+
+  // 1. Resend HTTP REST API (Port 443 — NEVER BLOCKED by Render Free Tier firewall)
+  if (resendApiKey) {
+    try {
+      console.log(`[EMAIL DISPATCH - RESEND HTTP API]: Sending to ${realRecipients.join(', ')}...`);
+      const resend = new Resend(resendApiKey);
+      const resendFrom = senderAddress.includes('redhillinfra.com') && !process.env.RESEND_VERIFIED_DOMAIN
+        ? 'Redhill Infra <onboarding@resend.dev>'
+        : fromFormatted;
+
+      const data = await resend.emails.send({
+        from: resendFrom,
+        to: realRecipients,
+        subject: options.subject,
+        text: textContent,
+        html: options.html,
+      });
+
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+
+      console.log(`[EMAIL DISPATCH - RESEND SUCCESS] ID: ${data.data?.id}`);
+      return { success: true, messageId: data.data?.id };
+    } catch (resendErr: any) {
+      console.warn(`[RESEND FAILED]: ${resendErr?.message}. Trying fallback provider...`);
+    }
+  }
+
+  // 2. SendGrid HTTP REST API (Port 443 — NEVER BLOCKED by Render Free Tier firewall)
+  if (sendgridKey) {
+    try {
+      console.log(`[EMAIL DISPATCH - SENDGRID HTTP API]: Sending to ${realRecipients.join(', ')}...`);
+      sgMail.setApiKey(sendgridKey);
+      const [response] = await sgMail.send({
+        to: realRecipients,
+        from: senderAddress,
+        subject: options.subject,
+        text: textContent,
+        html: options.html,
+      });
+      console.log(`[EMAIL DISPATCH - SENDGRID SUCCESS] Status: ${response.statusCode}`);
+      return { success: true, messageId: `sg-${response.statusCode}` };
+    } catch (sgErr: any) {
+      console.warn(`[SENDGRID FAILED]: ${sgErr?.message}. Trying SMTP...`);
+    }
+  }
+
+  // 3. Gmail / Custom SMTP (Supported on localhost and Render Paid plans)
+  if (!user || !pass) {
+    const errorMsg = 'No email credentials configured. Please set RESEND_API_KEY (recommended for Render) or GMAIL_USER & GMAIL_APP_PASSWORD.';
+    console.error(`[EMAIL DISPATCH ERROR]: ${errorMsg}`);
+    return { success: false, error: errorMsg };
+  }
 
   // Attempt 1: Port 465 (Direct SSL)
   try {
@@ -112,9 +134,9 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
       secure: true,
       auth: { user, pass },
       tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 20000,
+      connectionTimeout: 6000,
+      greetingTimeout: 6000,
+      socketTimeout: 8000,
     });
 
     const info = await transporter465.sendMail({
@@ -138,9 +160,9 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
         secure: false,
         auth: { user, pass },
         tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
-        connectionTimeout: 15000,
-        greetingTimeout: 15000,
-        socketTimeout: 20000,
+        connectionTimeout: 6000,
+        greetingTimeout: 6000,
+        socketTimeout: 8000,
       });
 
       const info = await transporter587.sendMail({
@@ -154,41 +176,11 @@ export const sendEmailDetailed = async (options: EmailOptions): Promise<SendEmai
       console.log(`[EMAIL DISPATCH - GMAIL SMTP PORT 587 SUCCESS] ID: ${info?.messageId} Sent to: ${realRecipients.join(', ')}`);
       return { success: true, messageId: info?.messageId };
     } catch (err587: any) {
-      console.warn(`[GMAIL SMTP PORT 587 FAILED]: ${err587?.message}. Trying fallback direct IPv4 on Port 465...`);
-
-      // Attempt 3: Direct IPv4 lookup (bypasses any potential IPv6 resolution)
-      try {
-        const ipv4Addresses = await dns.promises.resolve4('smtp.gmail.com').catch(() => []);
-        if (ipv4Addresses && ipv4Addresses.length > 0) {
-          const directIp = ipv4Addresses[0];
-          console.log(`[EMAIL DISPATCH - ATTEMPT 3 DIRECT IPV4]: Connecting to ${directIp}:465...`);
-          const transporterDirect = nodemailer.createTransport({
-            host: directIp,
-            port: 465,
-            secure: true,
-            auth: { user, pass },
-            tls: { rejectUnauthorized: false, servername: 'smtp.gmail.com' },
-            connectionTimeout: 15000,
-            greetingTimeout: 15000,
-            socketTimeout: 20000,
-          });
-
-          const info = await transporterDirect.sendMail({
-            from: fromFormatted,
-            to: realRecipients,
-            subject: options.subject,
-            text: textContent,
-            html: options.html,
-          });
-
-          console.log(`[EMAIL DISPATCH - DIRECT IPV4 SUCCESS] ID: ${info?.messageId} Sent to: ${realRecipients.join(', ')}`);
-          return { success: true, messageId: info?.messageId };
-        }
-      } catch (errDirect: any) {
-        console.warn(`[GMAIL SMTP DIRECT IPV4 FAILED]: ${errDirect?.message}`);
-      }
-
-      const finalError = `Port 465: (${err465?.message}) | Port 587: (${err587?.message})`;
+      const isConnectionTimeout = String(err465?.message || '').includes('timeout') || String(err587?.message || '').includes('timeout');
+      const renderNote = isConnectionTimeout
+        ? ' (Render Free Tier blocks outbound SMTP ports 465/587. Please add RESEND_API_KEY in Render Environment Variables for free HTTPS Port 443 delivery)'
+        : '';
+      const finalError = `Port 465: (${err465?.message}) | Port 587: (${err587?.message})${renderNote}`;
       console.error(`[EMAIL DISPATCH - ALL SMTP ATTEMPTS FAILED]: ${finalError}`);
       return { success: false, error: finalError };
     }

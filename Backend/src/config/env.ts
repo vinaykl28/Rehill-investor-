@@ -65,8 +65,9 @@ export const config = {
   DATABASE_PATH: process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve('database.sqlite'),
   UPLOADS_DIR: process.env.UPLOADS_DIR ? path.resolve(process.env.UPLOADS_DIR) : path.resolve('uploads'),
 
-  // Email Configuration (Gmail / SMTP / SendGrid)
+  // Email Configuration (Resend / SendGrid / Gmail SMTP)
   email: {
+    resendApiKey: process.env.RESEND_API_KEY,
     sendgridApiKey: process.env.SENDGRID_API_KEY,
     gmailUser: process.env.GMAIL_USER || process.env.SMTP_USER,
     gmailAppPassword: process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS,
