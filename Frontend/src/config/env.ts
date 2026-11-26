@@ -100,7 +100,7 @@ export function getAssetUrl(path?: string | null, seed?: number | string | null)
   }
 
   if (/^(https?:|\/\/|data:)/i.test(path)) return path;
-  if (path.startsWith('/assets/')) return path;
+  if (path.startsWith('/assets/') || path.startsWith('/images/')) return path;
 
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return ASSETS_BASE_URL ? `${ASSETS_BASE_URL}${normalizedPath}` : normalizedPath;

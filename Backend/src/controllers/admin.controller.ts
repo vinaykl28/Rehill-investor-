@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
@@ -629,6 +630,20 @@ export const createUpdate = async (req: AuthRequest, res: Response) => {
 export const uploadFile = (req: AuthRequest, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
+  }
+  // Persist uploaded images (<= 4MB) as self-contained data URIs so they never disappear on ephemeral Render restarts
+  if (req.file.mimetype?.startsWith('image/') && req.file.size <= 4 * 1024 * 1024 && req.file.path) {
+    try {
+      const base64 = fs.readFileSync(req.file.path).toString('base64');
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.json({
+        url: `data:${req.file.mimetype};base64,${base64}`,
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,
+      });
+    } catch {
+      // Fallback to local /uploads URL if file read fails
+    }
   }
   const fileUrl = `/uploads/${req.file.filename}`;
   res.json({ url: fileUrl, filename: req.file.originalname, mimetype: req.file.mimetype });

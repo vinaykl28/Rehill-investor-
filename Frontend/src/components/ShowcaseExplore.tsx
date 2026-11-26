@@ -556,6 +556,13 @@ export default function ShowcaseExplore({
                       <img 
                         src={allShowcaseProjects[0].image} 
                         alt="Spotlight"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (!img.dataset.fallback) {
+                            img.dataset.fallback = '1';
+                            img.src = getAssetUrl(null, allShowcaseProjects[0].id);
+                          }
+                        }}
                         className="w-full h-full object-cover img-zoom" 
                       />
                     </div>
@@ -663,6 +670,13 @@ export default function ShowcaseExplore({
                     <img 
                       src={project.image} 
                       alt={project.name}
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.dataset.fallback) {
+                          img.dataset.fallback = '1';
+                          img.src = getAssetUrl(null, project.id);
+                        }
+                      }}
                       className="w-full h-full object-cover img-zoom"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -964,7 +978,14 @@ export default function ShowcaseExplore({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4 }}
                     src={currentPhoto.url} 
-                    alt={currentPhoto.title} 
+                    alt={currentPhoto.title}
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      if (!img.dataset.fallback) {
+                        img.dataset.fallback = '1';
+                        img.src = getAssetUrl(null, selectedProject.id);
+                      }
+                    }}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/30" />
@@ -1046,7 +1067,18 @@ export default function ShowcaseExplore({
                             : 'border-redhill-line opacity-60 hover:opacity-100 hover:border-redhill-stone'
                         }`}
                       >
-                        <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
+                        <img
+                          src={item.url}
+                          alt={item.title}
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            if (!img.dataset.fallback) {
+                              img.dataset.fallback = '1';
+                              img.src = getAssetUrl(null, selectedProject.id);
+                            }
+                          }}
+                          className="w-full h-full object-cover"
+                        />
                         <span className="absolute bottom-0.5 left-1 text-[8px] font-medium uppercase tracking-wider text-white bg-black/70 px-1 rounded-xs truncate max-w-[90%]">
                           {item.tag}
                         </span>
