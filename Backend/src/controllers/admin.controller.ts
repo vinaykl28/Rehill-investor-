@@ -88,16 +88,26 @@ export const getInvestors = async (_req: AuthRequest, res: Response) => {
 };
 
 export const createInvestor = async (req: AuthRequest, res: Response) => {
-  const { email, password, name, phone } = req.body;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const login_id = (name.substring(0, 2).toLowerCase() + phone.replace(/\D/g, '').slice(-3));
+  const cleanEmail = (req.body?.email || '').trim().toLowerCase();
+  const cleanName = (req.body?.name || '').trim();
+  const cleanPhone = (req.body?.phone || '').trim();
+  const rawPassword = typeof req.body?.password === 'string' ? req.body.password : '';
+  if (!cleanEmail || !cleanName || !rawPassword) {
+    return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
+  const hashedPassword = bcrypt.hashSync(rawPassword, 10);
+  const login_id = (
+    cleanName.substring(0, 2).toLowerCase() +
+    (cleanPhone.replace(/\D/g, '').slice(-3) || Math.floor(100 + Math.random() * 900)) +
+    Math.floor(10 + Math.random() * 90)
+  );
 
   try {
     const result = await db.run(
       'INSERT INTO users (email, password, name, role, phone, login_id) VALUES (?, ?, ?, ?, ?, ?)',
-      email, hashedPassword, name, 'investor', phone, login_id
+      cleanEmail, hashedPassword, cleanName, 'investor', cleanPhone, login_id
     );
-    res.json({ id: result.lastInsertRowid, email, name, role: 'investor', login_id, phone });
+    res.json({ id: result.lastInsertRowid, email: cleanEmail, name: cleanName, role: 'investor', login_id, phone: cleanPhone });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }

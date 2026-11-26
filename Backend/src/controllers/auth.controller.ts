@@ -74,7 +74,7 @@ export const login = async (req: AuthRequest, res: Response) => {
   });
 
   const invRow: any = await db.get(
-    'SELECT COUNT(*)::int as count FROM investor_projects WHERE user_id = ?',
+    'SELECT COUNT(*) as count FROM investor_projects WHERE user_id = ?',
     user.id
   );
   const hasInvestments = Number(invRow?.count || 0) > 0;
@@ -180,7 +180,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     return res.status(401).json({ error: 'User not found' });
   }
   const invRow: any = await db.get(
-    'SELECT COUNT(*)::int as count FROM investor_projects WHERE user_id = ?',
+    'SELECT COUNT(*) as count FROM investor_projects WHERE user_id = ?',
     dbUser.id
   );
   dbUser.has_investments = Number(invRow?.count || 0) > 0;
