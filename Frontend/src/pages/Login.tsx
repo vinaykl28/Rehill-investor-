@@ -4,19 +4,13 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  ArrowLeft,
-  ArrowUpRight,
   User as UserIcon,
   Phone,
   Eye,
   EyeOff,
-  KeyRound,
-  ShieldCheck,
-  RotateCcw,
   CheckCircle2,
   Menu,
   X,
-  Landmark,
   Activity,
   BookOpen,
   Camera,
@@ -27,7 +21,7 @@ import Logo from '../components/Logo';
 import Reveal from '../components/Reveal';
 import { apiFetch } from '../api/client';
 
-type AuthMode = 'login' | 'signup' | 'forgot_request' | 'forgot_reset';
+type AuthMode = 'login' | 'signup';
 
 interface LoginProps {
   onLogin: (user: User) => void;
@@ -89,17 +83,6 @@ export default function Login({ onLogin }: LoginProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Forgot password & reset state
-  const [forgotIdentifier, setForgotIdentifier] = useState('');
-  const [targetEmail, setTargetEmail] = useState('');
-  const [maskedEmail, setMaskedEmail] = useState('');
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [resendTimer, setResendTimer] = useState(0);
-
   // Status & feedback state
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -120,24 +103,10 @@ export default function Login({ onLogin }: LoginProps) {
   const activeSectionRef = useRef<string | null>(null);
   activeSectionRef.current = activeSection;
 
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-
   const completeLogin = (user: User) => {
     setEntering(true);
     window.setTimeout(() => onLogin(user), reduceMotion ? 0 : 240);
   };
-
-  // Countdown timer for resending OTP
-  useEffect(() => {
-    let interval: any;
-    if (resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer(prev => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [resendTimer]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -297,155 +266,6 @@ export default function Login({ onLogin }: LoginProps) {
     }
   };
 
-  const handleRequestOtp = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const identifier = forgotIdentifier.trim() || email.trim();
-    if (!identifier) {
-      setError('Please enter your email, Login ID, or phone number');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    setSuccessMsg('');
-
-    try {
-      const res = await apiFetch('/api/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: identifier }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setTargetEmail(data.email);
-        setMaskedEmail(data.maskedEmail || data.email);
-        setSuccessMsg(
-          data.channel === 'sms'
-            ? `Verification code sent via SMS to ${data.maskedEmail}`
-            : `Verification code sent to ${data.maskedEmail || data.email}`
-        );
-        setAuthMode('forgot_reset');
-        setResendTimer(45);
-        setOtpDigits(['', '', '', '', '', '']);
-        setTimeout(() => {
-          otpInputRefs.current[0]?.focus();
-        }, 300);
-      } else {
-        setError(data.error || 'Failed to send verification code. Please check your details.');
-      }
-    } catch (err: any) {
-      if (err?.name === 'AbortError') {
-        setError('Server is waking up. Please try again in a moment.');
-      } else {
-        setError(err?.message || 'Unable to connect to server. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const otp = otpDigits.join('').trim();
-
-    if (otp.length !== 6) {
-      setError('Please enter the complete 6-digit OTP code');
-      return;
-    }
-
-    if (!newPassword || newPassword.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match. Please re-enter.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    setSuccessMsg('');
-
-    try {
-      const res = await apiFetch('/api/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: targetEmail,
-          otp,
-          newPassword,
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.token) {
-        try {
-          localStorage.setItem('redhill_auth_token', data.token);
-        } catch {
-          // ignore storage errors in private browsing
-        }
-        setSuccessMsg('Password reset successfully! Logging you in...');
-        setTimeout(() => {
-          onLogin(data);
-        }, 600);
-      } else {
-        setError(data.error || 'Failed to reset password. Please verify the OTP.');
-      }
-    } catch (err: any) {
-      if (err?.name === 'AbortError') {
-        setError('Server is waking up. Please try again in a moment.');
-      } else {
-        setError(err?.message || 'Network error occurred. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOtpChange = (index: number, val: string) => {
-    const cleanVal = val.replace(/\D/g, '');
-    if (cleanVal.length > 1) {
-      const chars = cleanVal.slice(0, 6).split('');
-      const newDigits = [...otpDigits];
-      chars.forEach((c, i) => {
-        if (i < 6) newDigits[i] = c;
-      });
-      setOtpDigits(newDigits);
-      const nextIndex = Math.min(chars.length, 5);
-      otpInputRefs.current[nextIndex]?.focus();
-      return;
-    }
-
-    const newDigits = [...otpDigits];
-    newDigits[index] = cleanVal;
-    setOtpDigits(newDigits);
-
-    if (cleanVal && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const switchToForgot = () => {
-    setForgotIdentifier(email || '');
-    setError('');
-    setSuccessMsg('');
-    setAuthMode('forgot_request');
-  };
-
-  const switchToLogin = () => {
-    setError('');
-    setSuccessMsg('');
-    setAuthMode('login');
-  };
-
   const rise = (delay: number) =>
     reduceMotion
       ? {}
@@ -461,19 +281,9 @@ export default function Login({ onLogin }: LoginProps) {
           title: 'Welcome to Your Private Portfolio',
           sub: 'Access your investments, project updates and important documents in one place.',
         }
-      : authMode === 'signup'
-      ? {
+      : {
           title: 'Create Your Investor Account',
           sub: 'Register your profile to access Redhill residential developments and portfolio records.',
-        }
-      : authMode === 'forgot_request'
-      ? {
-          title: 'Reset Your Password',
-          sub: 'Enter your registered account details to receive a 6-digit verification code.',
-        }
-      : {
-          title: 'Verify & Set New Password',
-          sub: 'Confirm your 6-digit code and choose a new password.',
         };
 
   // =====================================================================
@@ -564,18 +374,7 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label htmlFor={`${prefix}-pwd`} className="field-label mb-0">Password</label>
-              {authMode === 'login' && (
-                <button
-                  type="button"
-                  onClick={switchToForgot}
-                  className="text-xs font-medium text-redhill-red hover:text-redhill-crimson transition-colors cursor-pointer"
-                >
-                  Forgot password?
-                </button>
-              )}
-            </div>
+            <label htmlFor={`${prefix}-pwd`} className="field-label">Password</label>
             <div className="relative">
               <Lock className={iconCls} />
               <input
@@ -623,152 +422,6 @@ export default function Login({ onLogin }: LoginProps) {
             Dedicated portal for registered Redhill Infra investors and partners.
           </p>
         </form>
-      )}
-
-      {authMode === 'forgot_request' && (
-        <div className="space-y-5">
-          <div className="flex items-start gap-3 p-3.5 bg-redhill-ivory border border-redhill-line rounded-md">
-            <KeyRound className="w-4 h-4 text-redhill-gold shrink-0 mt-0.5" />
-            <p className="text-xs text-redhill-muted leading-relaxed">
-              Enter your registered email, Login ID or phone number to receive a 6-digit verification code.
-            </p>
-          </div>
-          <form onSubmit={handleRequestOtp} className="space-y-4">
-            <div>
-              <label htmlFor={`${prefix}-forgot`} className="field-label">Account Identifier</label>
-              <div className="relative">
-                <Mail className={iconCls} />
-                <input
-                  id={`${prefix}-forgot`}
-                  type="text"
-                  autoComplete="username"
-                  value={forgotIdentifier}
-                  onChange={(e) => setForgotIdentifier(e.target.value)}
-                  className="field field-icon-left"
-                  placeholder="Email, Login ID or phone number"
-                  required
-                />
-              </div>
-            </div>
-            {error && <div role="alert" className={errorCls}>{error}</div>}
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3.5">
-              {loading ? <><Spinner />Sending Code…</> : <>Send Verification Code<ArrowRight className="w-4 h-4" /></>}
-            </button>
-            <button
-              type="button"
-              onClick={switchToLogin}
-              className="w-full py-2 text-xs text-redhill-muted hover:text-redhill-charcoal inline-flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Sign In
-            </button>
-          </form>
-        </div>
-      )}
-
-      {authMode === 'forgot_reset' && (
-        <div className="space-y-5">
-          <div className="flex items-start gap-3 p-3.5 bg-redhill-ivory border border-redhill-line rounded-md">
-            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-            <p className="text-xs text-redhill-muted leading-relaxed">
-              Enter the 6-digit code sent to <strong className="text-redhill-charcoal">{maskedEmail || targetEmail}</strong>.
-            </p>
-          </div>
-
-          <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="field-label mb-0">6-Digit Verification Code</span>
-                <button
-                  type="button"
-                  disabled={resendTimer > 0 || loading}
-                  onClick={() => handleRequestOtp()}
-                  className="text-xs font-medium text-redhill-red hover:text-redhill-crimson disabled:opacity-50 cursor-pointer inline-flex items-center gap-1"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
-                </button>
-              </div>
-              <div className="grid grid-cols-6 gap-2" role="group" aria-label="Verification code">
-                {otpDigits.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    ref={(el) => { if (prefix === 'inline' || accessDrawerOpen) otpInputRefs.current[idx] = el; }}
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete={idx === 0 ? 'one-time-code' : 'off'}
-                    aria-label={`Digit ${idx + 1}`}
-                    maxLength={6}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="field px-0 h-12 text-center text-lg font-semibold tabular"
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor={`${prefix}-newpwd`} className="field-label">New Password</label>
-              <div className="relative">
-                <Lock className={iconCls} />
-                <input
-                  id={`${prefix}-newpwd`}
-                  type={showNewPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="field field-icon-left field-icon-right"
-                  placeholder="At least 4 characters"
-                  required
-                />
-                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className={toggleCls} tabIndex={-1} aria-label={showNewPassword ? 'Hide password' : 'Show password'}>
-                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor={`${prefix}-cfmpwd`} className="field-label">Confirm New Password</label>
-              <div className="relative">
-                <Lock className={iconCls} />
-                <input
-                  id={`${prefix}-cfmpwd`}
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="field field-icon-left field-icon-right"
-                  placeholder="Re-type new password"
-                  required
-                />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className={toggleCls} tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {error && <div role="alert" className={errorCls}>{error}</div>}
-            {successMsg && (
-              <div role="status" className={successCls}>
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>{successMsg}</span>
-              </div>
-            )}
-
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3.5">
-              {loading ? <><Spinner />Updating Password…</> : <>Reset Password &amp; Sign In<ArrowRight className="w-4 h-4" /></>}
-            </button>
-
-            <div className="flex items-center justify-between text-xs pt-1">
-              <button type="button" onClick={() => { setAuthMode('forgot_request'); setError(''); }} className="text-redhill-muted hover:text-redhill-charcoal cursor-pointer">
-                ← Change Identifier
-              </button>
-              <button type="button" onClick={switchToLogin} className="text-redhill-red hover:text-redhill-crimson cursor-pointer">
-                Back to Sign In
-              </button>
-            </div>
-          </form>
-        </div>
       )}
     </div>
   );

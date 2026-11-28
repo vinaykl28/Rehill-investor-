@@ -3,9 +3,7 @@ import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
-import { sendEmail, sendEmailDetailed } from '../services/email.service.js';
 import {
-  sendMilestoneCompletedNotification,
   recalculateProjectProgress,
   getNotificationLogs,
   getProjectInvestors,
@@ -356,16 +354,6 @@ export const createMilestone = async (req: AuthRequest, res: Response) => {
 
     await recalculateProjectProgress(project_id);
 
-    if (isCompleted) {
-      sendMilestoneCompletedNotification(milestoneId, {
-        customNotes: notes,
-        dayNumber: current_day,
-        completionDate: finalActual,
-      }).catch((notifyErr) => {
-        console.error('Error triggering milestone notification:', notifyErr);
-      });
-    }
-
     res.json({
       id: milestoneId,
       status: finalStatus,
@@ -430,17 +418,6 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
 
     // Recalculate project progress immediately in database
     await recalculateProjectProgress(prevMilestone.project_id);
-
-    // Send notifications in background whenever milestone is completed or explicitly requested
-    if (newStatus === 'completed' || isNowCompleted || sendNotification) {
-      sendMilestoneCompletedNotification(milestoneId, {
-        customNotes: notes || prevMilestone.notes,
-        dayNumber: current_day || prevMilestone.current_day,
-        completionDate: newActual,
-      }).catch((err) => {
-        console.error('Error dispatching automated milestone notification:', err);
-      });
-    }
 
     res.json({
       success: true,
@@ -532,16 +509,6 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
       );
 
       await recalculateProjectProgress(project_id);
-
-      if (willComplete && milestone.status !== 'completed') {
-        sendMilestoneCompletedNotification(milestone.id, {
-          customNotes: work_notes,
-          dayNumber: day_number,
-          completionDate: date,
-        }).catch((err) => {
-          console.error('Error dispatching automated milestone completion email:', err);
-        });
-      }
     } else {
       await recalculateProjectProgress(project_id);
     }
@@ -555,41 +522,12 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const manualNotifyMilestone = async (req: AuthRequest, res: Response) => {
-  const milestoneId = parseInt(req.params.id, 10);
-  const { customNotes, dayNumber } = req.body;
-
-  try {
-    const result = await sendMilestoneCompletedNotification(milestoneId, {
-      customNotes,
-      dayNumber,
-    });
-    if (!result.success) {
-      return res.status(500).json({ error: result.message, details: result });
-    }
-    res.json(result);
-  } catch (e: any) {
-    res.status(400).json({ error: e.message });
-  }
+export const manualNotifyMilestone = async (_req: AuthRequest, res: Response) => {
+  res.json({ success: true, message: 'Email notifications are disabled.' });
 };
 
-export const testSmtpConnection = async (req: AuthRequest, res: Response) => {
-  try {
-    const targetEmail = req.body?.to || req.user?.email || 'vinaykspammail@gmail.com';
-    const result = await sendEmailDetailed({
-      to: targetEmail,
-      subject: '🧪 Redhill Infra SMTP Connection Test',
-      html: `<h2>Redhill Infra Verification</h2><p>Your Gmail SMTP setup is working and successfully connected from Render to ${targetEmail}!</p>`
-    });
-
-    if (result.success) {
-      res.json({ success: true, message: `Test email successfully sent to ${targetEmail}`, messageId: result.messageId });
-    } else {
-      res.status(500).json({ error: result.error || 'SMTP delivery failed' });
-    }
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
+export const testSmtpConnection = async (_req: AuthRequest, res: Response) => {
+  res.json({ success: false, message: 'Email automation and SMTP notifications are disabled.' });
 };
 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
@@ -611,18 +549,6 @@ export const createUpdate = async (req: AuthRequest, res: Response) => {
     'INSERT INTO progress_updates (project_id, type, url, caption, date, milestone_id) VALUES (?, ?, ?, ?, ?, ?)',
     project_id, type, url, caption, date, milestone_id
   );
-
-  const project: any = await db.get('SELECT name FROM projects WHERE id = ?', project_id);
-  const investors: any[] = await db.all('SELECT u.email, u.name FROM users u JOIN investor_projects ip ON ip.user_id = u.id WHERE ip.project_id = ?', project_id);
-  
-  if (project && investors.length > 0) {
-    const emails = investors.map(i => i.email);
-    sendEmail({
-      to: emails,
-      subject: `New Media Update: ${project.name}`,
-      html: `<h2>Redhill Infra Updates</h2><p>A new ${type} update has been added to ${project.name}.</p><p><strong>Caption:</strong> ${caption}</p><p>Log in to your portal to view it.</p>`
-    }).catch(console.error);
-  }
 
   res.json({ id: result.lastInsertRowid });
 };

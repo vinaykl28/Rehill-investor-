@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
-import { sendEmail } from '../services/email.service.js';
 
 export const sendQuery = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
@@ -19,30 +18,6 @@ export const sendQuery = async (req: AuthRequest, res: Response) => {
       'INSERT INTO queries (user_id, project_id, message, sender_role) VALUES (?, ?, ?, ?)',
       targetUserId, project_id, message.trim(), req.user.role
     );
-
-    // Send email notifications asynchronously without blocking the reply
-    const project: any = await db.get('SELECT name FROM projects WHERE id = ?', project_id);
-    if (project) {
-      if (isStaff) {
-        const investor: any = await db.get('SELECT email, name FROM users WHERE id = ?', targetUserId);
-        if (investor && investor.email) {
-          sendEmail({
-            to: investor.email,
-            subject: `New Reply to Your Query: ${project.name}`,
-            html: `<h2>Redhill Infra</h2><p>Hello ${investor.name},</p><p>A representative has replied to your query regarding <strong>${project.name}</strong>.</p><p><strong>Reply:</strong> ${message}</p><p>Please log in to your portal to respond.</p>`
-          }).catch((err: any) => console.error('Email notification error:', err));
-        }
-      } else {
-        const admins: any[] = await db.all("SELECT email FROM users WHERE role IN ('admin', 'super_admin', 'senior_admin', 'support_agent')");
-        if (admins.length > 0) {
-          sendEmail({
-            to: admins.map(a => a.email),
-            subject: `New Investor Query: ${project.name}`,
-            html: `<h2>Redhill Infra Admin Alert</h2><p>A new query has been posted by an investor for <strong>${project.name}</strong>.</p><p><strong>Message:</strong> ${message}</p><p>Please log in to the admin dashboard to reply.</p>`
-          }).catch((err: any) => console.error('Email notification error:', err));
-        }
-      }
-    }
 
     res.json({ id: result.lastInsertRowid, created_at: new Date().toISOString() });
   } catch (err: any) {

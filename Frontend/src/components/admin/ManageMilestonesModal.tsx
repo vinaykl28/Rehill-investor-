@@ -1,16 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Project, Milestone, MilestoneCategory, MilestoneStatus, ProjectWithAudience, NotificationLog } from '../../types';
+import { Project, Milestone, MilestoneCategory, MilestoneStatus, ProjectWithAudience } from '../../types';
 import {
-  X, CheckCircle2, Clock, AlertCircle, Plus, Sparkles, Send, Mail,
-  Calendar, Layers, FileText, Check, Trash2, Pencil, ExternalLink,
-  ChevronRight, Upload, Video, Image as ImageIcon, Users, ShieldCheck,
+  X, CheckCircle2, Clock, AlertCircle, Plus, Sparkles,
+  Calendar, Layers, FileText, Check, Trash2, Pencil,
+  ChevronRight, Upload, Video, Image as ImageIcon, Users,
   CheckCircle, ArrowRight
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useToast } from '../Toast';
-import EmailPreviewModal from './EmailPreviewModal';
 import { apiFetch } from '../../api/client';
 import { getAssetUrl } from '../../config/env';
 
@@ -34,7 +33,7 @@ export default function ManageMilestonesModal({
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] = useState<'milestones' | 'daily' | 'history'>('milestones');
+  const [activeTab, setActiveTab] = useState<'milestones' | 'daily'>('milestones');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMilestoneId, setEditingMilestoneId] = useState<number | null>(null);
 
@@ -61,9 +60,6 @@ export default function ManageMilestonesModal({
   const [dailyFile, setDailyFile] = useState<File | null>(null);
   const [isSubmittingDaily, setIsSubmittingDaily] = useState(false);
 
-  // Preview Email State
-  const [previewEmail, setPreviewEmail] = useState<NotificationLog | null>(null);
-
   // Fetch Milestones and Enrolled Investors Audience for this Project
   const {
     data: audienceData,
@@ -79,26 +75,12 @@ export default function ManageMilestonesModal({
     enabled: isOpen,
   });
 
-  // Fetch Project Email History
-  const {
-    data: projectEmails = [],
-    refetch: refetchProjectEmails,
-  } = useQuery<NotificationLog[]>({
-    queryKey: ['project-notifications', project.id],
-    queryFn: async () => {
-      const res = await apiFetch(`/api/admin/notifications?projectId=${project.id}`);
-      if (!res.ok) return [];
-      return res.json();
-    },
-    enabled: isOpen,
-  });
-
   const milestones = audienceData?.milestones || [];
   const investors = audienceData?.investors || [];
 
   // Update Milestone Mutation
   const updateMilestoneMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Milestone> & { sendNotification?: boolean } }) => {
+    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Milestone> }) => {
       const res = await apiFetch(`/api/admin/milestones/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -110,20 +92,11 @@ export default function ManageMilestonesModal({
       }
       return res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       refetchAudience();
-      refetchProjectEmails();
       queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
       if (onRefresh) onRefresh();
-
-      if (data.notificationResult && data.notificationResult.notifiedRecipients?.length > 0) {
-        showToast(
-          `Milestone updated & emails dispatched to ${data.notificationResult.notifiedRecipients.length} investor(s)!`,
-          'success'
-        );
-      } else {
-        showToast('Milestone updated successfully', 'success');
-      }
+      showToast('Milestone updated successfully', 'success');
       setEditingMilestoneId(null);
     },
     onError: (err: any) => {
@@ -198,18 +171,9 @@ export default function ManageMilestonesModal({
         setNewDocUrl('');
         setNewDocFile(null);
         refetchAudience();
-        refetchProjectEmails();
         queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
         if (onRefresh) onRefresh();
-
-        if (data.notificationResult && data.notificationResult.notifiedRecipients?.length > 0) {
-          showToast(
-            `Milestone created & automated emails dispatched to ${data.notificationResult.notifiedRecipients.length} investor(s)!`,
-            'success'
-          );
-        } else {
-          showToast('Milestone created successfully!', 'success');
-        }
+        showToast('Milestone created successfully!', 'success');
       } else {
         showToast(data.error || 'Failed to create milestone', 'error');
       }
@@ -265,18 +229,9 @@ export default function ManageMilestonesModal({
       const data = await res.json();
       if (res.ok) {
         refetchAudience();
-        refetchProjectEmails();
         queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
         if (onRefresh) onRefresh();
-
-        if (data.notificationResult && data.notificationResult.notifiedRecipients?.length > 0) {
-          showToast(
-            `🚀 Day ${dailyDayNumber} progress logged! Milestone completed & automated emails dispatched to ${data.notificationResult.notifiedRecipients.length} investor(s)!`,
-            'success'
-          );
-        } else {
-          showToast(`Day ${dailyDayNumber} progress logged successfully!`, 'success');
-        }
+        showToast(`Day ${dailyDayNumber} progress logged successfully!`, 'success');
 
         setDailyNotes('');
         setDailyFile(null);
@@ -300,7 +255,6 @@ export default function ManageMilestonesModal({
         completion_percentage: 100,
         actual_completion: new Date().toISOString().split('T')[0],
         current_day: m.target_days || m.current_day,
-        sendNotification: true,
       },
     });
   };
@@ -332,7 +286,7 @@ export default function ManageMilestonesModal({
                 </span>
               </div>
               <p className="text-xs text-redhill-muted mt-1">
-                Manage construction milestones, daily progress updates, and automated investor notifications.
+                Manage construction milestones and daily progress updates.
               </p>
             </div>
           </div>
@@ -417,18 +371,6 @@ export default function ManageMilestonesModal({
             >
               <Sparkles className="w-4 h-4 text-amber-700" />
               Log Daily Construction Work
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={cn(
-                'py-3.5 px-4 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer',
-                activeTab === 'history'
-                  ? 'border-redhill-red text-redhill-charcoal'
-                  : 'border-transparent text-redhill-muted hover:text-redhill-charcoal'
-              )}
-            >
-              <Mail className="w-4 h-4" />
-              Dispatched Emails ({projectEmails.length})
             </button>
           </div>
 
@@ -703,7 +645,6 @@ export default function ManageMilestonesModal({
                                     status: newStatusVal,
                                     completion_percentage: newStatusVal === 'completed' ? 100 : m.completion_percentage,
                                     actual_completion: newStatusVal === 'completed' ? new Date().toISOString().split('T')[0] : m.actual_completion,
-                                    sendNotification: newStatusVal === 'completed',
                                   },
                                 });
                               }}
@@ -884,8 +825,8 @@ export default function ManageMilestonesModal({
                       'Logging Progress...'
                     ) : (
                       <>
-                        <Send className="w-4 h-4" />
-                        Log Day {dailyDayNumber} Progress & Send Email
+                        <CheckCircle className="w-4 h-4" />
+                        Log Day {dailyDayNumber} Progress
                       </>
                     )}
                   </button>
@@ -894,74 +835,10 @@ export default function ManageMilestonesModal({
             </div>
           )}
 
-          {/* TAB 3: PROJECT EMAIL HISTORY & AUDIT LOG */}
-          {activeTab === 'history' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-redhill-charcoal flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-redhill-red" />
-                  Automated Emails Dispatched for {project.name}
-                </h3>
-                <span className="text-xs text-redhill-muted">
-                  {projectEmails.length} message{projectEmails.length === 1 ? '' : 's'} recorded
-                </span>
-              </div>
-
-              {projectEmails.length === 0 ? (
-                <div className="text-center py-12 bg-[#FBF9F5] border border-redhill-line rounded-2xl">
-                  <Mail className="w-12 h-12 text-stone-400 mx-auto mb-3" />
-                  <p className="text-sm font-bold text-stone-700">No automated emails sent yet</p>
-                  <p className="text-xs text-stone-500 mt-1">
-                    When you complete a milestone or log daily progress, emails sent to investors will appear here.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {projectEmails.map((log) => (
-                    <div
-                      key={log.id}
-                      className="bg-[#FBF9F5] border border-redhill-line hover:border-redhill-line p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-redhill-charcoal">{log.subject}</span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-bold">
-                            Sent
-                          </span>
-                        </div>
-                        <div className="text-xs text-redhill-muted flex items-center gap-4">
-                          <span>
-                            To: <strong className="text-redhill-charcoal">{log.recipient_name}</strong> &lt;{log.recipient_email}&gt;
-                          </span>
-                          <span>
-                            {new Date(log.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
-                          </span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => setPreviewEmail(log)}
-                        className="px-3.5 py-1.5 bg-redhill-sand/70 hover:bg-redhill-sand text-xs font-bold text-redhill-charcoal rounded-lg border border-redhill-line transition-colors flex items-center gap-1.5 self-start md:self-auto cursor-pointer"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        View Rendered Email
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-redhill-line bg-white flex items-center justify-between">
-          <div className="text-xs text-redhill-muted flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-700" />
-            <span>Targeted Dispatch: Emails are sent strictly to investors assigned to <strong>{project.name}</strong>.</span>
-          </div>
-
+        <div className="p-4 border-t border-redhill-line bg-white flex items-center justify-end">
           <button
             onClick={onClose}
             className="px-5 py-2 bg-redhill-sand hover:bg-redhill-sand text-redhill-charcoal text-xs font-bold rounded-xl transition-all cursor-pointer"
@@ -971,21 +848,6 @@ export default function ManageMilestonesModal({
         </div>
 
       </div>
-
-      {/* Rendered Email Preview Modal */}
-      {previewEmail && (
-        <EmailPreviewModal
-          isOpen={!!previewEmail}
-          onClose={() => setPreviewEmail(null)}
-          subject={previewEmail.subject}
-          recipientName={previewEmail.recipient_name}
-          recipientEmail={previewEmail.recipient_email}
-          projectName={project.name}
-          milestoneName={previewEmail.milestone_name}
-          htmlContent={previewEmail.content_html}
-          sentAt={previewEmail.created_at}
-        />
-      )}
     </div>
   );
 }

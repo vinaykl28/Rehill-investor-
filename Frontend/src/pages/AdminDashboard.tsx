@@ -21,7 +21,6 @@ import Skeleton from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 import StatusChip from '../components/StatusChip';
 import ManageMilestonesModal from '../components/admin/ManageMilestonesModal';
-import AutomatedMessagesView from '../components/admin/AutomatedMessagesView';
 import { formatCurrency, formatDate, formatRelativeTime } from '../utils/formatters';
 import { ROLE_CONFIG, RoleMetadata } from '../constants/roles';
 import { apiFetch } from '../api/client';
@@ -363,8 +362,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       refetchInvestors();
       showToast('Investor account created successfully!', 'success');
     } else {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({ error: 'Failed to create investor' }));
       showToast(`Error: ${err.error}`, 'error');
+      throw new Error(err.error || 'Failed to create investor');
     }
   };
 
