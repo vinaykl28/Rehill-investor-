@@ -243,3 +243,97 @@ export const getNotificationLogs = async (filters?: { projectId?: number; milest
 
   return await db.all(query, ...params);
 };
+
+export type PortalNotificationType =
+  | 'milestone'
+  | 'progress'
+  | 'payment'
+  | 'project'
+  | 'investment'
+  | 'announcement'
+  | 'query';
+
+/**
+ * Create unread in-portal notifications (no emails) for investor(s) of a project.
+ */
+export const createPortalNotifications = async (params: {
+  projectId: number;
+  type: PortalNotificationType;
+  title: string;
+  message: string;
+  milestoneId?: number | null;
+  targetUserId?: number | null;
+}): Promise<number> => {
+  try {
+    const project: any = await db.get('SELECT id, name FROM projects WHERE id = ?', params.projectId);
+    const projectName = project?.name ? ` — ${project.name}` : '';
+    const subject = `${params.title}${projectName}`;
+
+    let recipients: { id: number; name: string; email: string }[] = [];
+    if (params.targetUserId) {
+      const user: any = await db.get(
+        'SELECT id, name, email FROM users WHERE id = ? AND role = ?',
+        params.targetUserId,
+        'investor'
+      );
+      if (user) recipients = [user];
+    } else {
+      recipients = await getProjectInvestors(params.projectId);
+    }
+
+    if (recipients.length === 0) return 0;
+
+    let inserted = 0;
+    for (const investor of recipients) {
+      try {
+        await db.run(
+          `INSERT INTO notifications (
+            project_id, milestone_id, user_id, recipient_email, recipient_name,
+            subject, type, content_html, message, is_read, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'unread')`,
+          params.projectId,
+          params.milestoneId ?? null,
+          investor.id,
+          investor.email,
+          investor.name,
+          subject,
+          params.type,
+          params.message,
+          params.message
+        );
+        inserted++;
+      } catch (err) {
+        console.error(`Error creating portal notification for investor ${investor.id}:`, err);
+      }
+    }
+    return inserted;
+  } catch (err) {
+    console.error('Error in createPortalNotifications:', err);
+    return 0;
+  }
+};
+
+/**
+ * Mark one or all notifications as read for a given investor.
+ */
+export const markInvestorNotificationsRead = async (
+  userId: number,
+  notificationId?: number
+): Promise<void> => {
+  if (notificationId) {
+    await db.run(
+      `UPDATE notifications
+       SET is_read = 1, read_at = CURRENT_TIMESTAMP, status = 'read'
+       WHERE id = ? AND user_id = ?`,
+      notificationId,
+      userId
+    );
+  } else {
+    await db.run(
+      `UPDATE notifications
+       SET is_read = 1, read_at = CURRENT_TIMESTAMP, status = 'read'
+       WHERE user_id = ? AND (is_read = 0 OR is_read IS NULL)`,
+      userId
+    );
+  }
+};

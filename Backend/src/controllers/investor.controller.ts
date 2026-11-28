@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
-import { getNotificationLogs } from '../services/notification.service.js';
+import { getNotificationLogs, markInvestorNotificationsRead } from '../services/notification.service.js';
 
 export const getProjects = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
@@ -104,7 +104,21 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
     const notifications = await getNotificationLogs({ userId });
-    res.json(notifications);
+    const unreadCount = notifications.filter((n: any) => !n.is_read || Number(n.is_read) === 0).length;
+    res.json({ notifications, unreadCount });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+export const markNotificationsRead = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const notificationId = req.params.id ? Number(req.params.id) : undefined;
+    await markInvestorNotificationsRead(userId, notificationId);
+    res.json({ success: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

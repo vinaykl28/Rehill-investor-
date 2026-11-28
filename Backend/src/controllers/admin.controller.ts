@@ -7,6 +7,7 @@ import {
   recalculateProjectProgress,
   getNotificationLogs,
   getProjectInvestors,
+  createPortalNotifications,
 } from '../services/notification.service.js';
 
 const VALID_STAFF_ROLES = ['super_admin', 'senior_admin', 'admin', 'site_manager', 'financial_officer', 'marketing_manager', 'support_agent'];
@@ -157,6 +158,14 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
           description = COALESCE(?, description)
       WHERE id = ?
     `, name, location, total_value, status, image_url, completion_percentage, cctv_url, description, id);
+
+    await createPortalNotifications({
+      projectId: Number(id),
+      type: 'project',
+      title: 'Project Details Updated',
+      message: `${name || 'Your project'} was updated${status ? ` (Status: ${status})` : ''}.`,
+    });
+
     res.json({ message: 'Project updated successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -215,6 +224,14 @@ export const assignInvestor = async (req: AuthRequest, res: Response) => {
     `,
       user_id, project_id, 'initial_assignment', investment_amount || 0, contribution, allotted_sqft || 0, price_at_investment || market_price_per_sqft || 0, market_price_per_sqft || 0, 'Initial Investor Assignment', investment_date || new Date().toISOString().split('T')[0]
     );
+
+    await createPortalNotifications({
+      projectId: Number(project_id),
+      targetUserId: Number(user_id),
+      type: 'investment',
+      title: 'New Project Assignment',
+      message: `You have been assigned to this project${allotted_sqft ? ` with ${allotted_sqft} sq.ft. allotted` : ''}.`,
+    });
 
     res.json({ message: 'Assigned successfully' });
   } catch (e: any) {
@@ -292,6 +309,14 @@ export const addSubInvestment = async (req: AuthRequest, res: Response) => {
       user_id, project_id, 'sub_investment', investment_amount, existing.contribution || '', allotted_sqft, price_at_investment || newPrice, newPrice, note || 'Sub-investment capital infusion', transaction_date || new Date().toISOString().split('T')[0]
     );
 
+    await createPortalNotifications({
+      projectId: Number(project_id),
+      targetUserId: Number(user_id),
+      type: 'investment',
+      title: 'New Sub-Investment Recorded',
+      message: note || `A sub-investment of ₹${Number(investment_amount || 0).toLocaleString('en-IN')} was added to your ledger.`,
+    });
+
     res.json({ success: true, message: 'Sub-investment recorded successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -353,6 +378,14 @@ export const createMilestone = async (req: AuthRequest, res: Response) => {
     const milestoneId = Number(result.lastInsertRowid);
 
     await recalculateProjectProgress(project_id);
+
+    await createPortalNotifications({
+      projectId: Number(project_id),
+      milestoneId,
+      type: 'milestone',
+      title: `New Milestone: ${name}`,
+      message: `${name} (${category || 'project'}) added — ${finalPct}% complete${notes ? `. ${notes}` : ''}`,
+    });
 
     res.json({
       id: milestoneId,
@@ -418,6 +451,17 @@ export const updateMilestone = async (req: AuthRequest, res: Response) => {
 
     // Recalculate project progress immediately in database
     await recalculateProjectProgress(prevMilestone.project_id);
+
+    const milestoneLabel = name || prevMilestone.name;
+    await createPortalNotifications({
+      projectId: Number(prevMilestone.project_id),
+      milestoneId,
+      type: 'milestone',
+      title: isNowCompleted && !wasAlreadyCompleted
+        ? `Milestone Completed: ${milestoneLabel}`
+        : `Milestone Updated: ${milestoneLabel}`,
+      message: `${milestoneLabel} is now ${newPct}% complete (${newStatus.replace(/_/g, ' ')})${notes ? `. ${notes}` : ''}`,
+    });
 
     res.json({
       success: true,
@@ -513,6 +557,14 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
       await recalculateProjectProgress(project_id);
     }
 
+    await createPortalNotifications({
+      projectId: Number(project_id),
+      milestoneId: milestone?.id ?? null,
+      type: 'progress',
+      title: `Site Progress Update${day_number ? ` (Day ${day_number})` : ''}`,
+      message: work_notes || (milestone ? `Progress logged on ${milestone.name}` : 'New daily site progress update posted.'),
+    });
+
     res.json({
       success: true,
       message: 'Daily construction progress logged successfully',
@@ -549,6 +601,14 @@ export const createUpdate = async (req: AuthRequest, res: Response) => {
     'INSERT INTO progress_updates (project_id, type, url, caption, date, milestone_id) VALUES (?, ?, ?, ?, ?, ?)',
     project_id, type, url, caption, date, milestone_id
   );
+
+  await createPortalNotifications({
+    projectId: Number(project_id),
+    milestoneId: milestone_id ? Number(milestone_id) : null,
+    type: 'progress',
+    title: `New ${type === 'video' ? 'Video' : 'Photo'} Update`,
+    message: caption || 'A new project media update has been posted.',
+  });
 
   res.json({ id: result.lastInsertRowid });
 };
@@ -605,5 +665,14 @@ export const addPayment = async (req: AuthRequest, res: Response) => {
     'INSERT INTO payments (project_id, user_id, amount, date, type, status, description, file_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     project_id, user_id, amount, date, type, status, description, file_url
   );
+
+  await createPortalNotifications({
+    projectId: Number(project_id),
+    targetUserId: Number(user_id),
+    type: 'payment',
+    title: 'New Payment Record',
+    message: description || `${type || 'Payment'} of ₹${Number(amount || 0).toLocaleString('en-IN')} (${status || 'recorded'}).`,
+  });
+
   res.json({ id: result.lastInsertRowid });
 };

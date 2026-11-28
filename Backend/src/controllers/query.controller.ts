@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import db from '../db.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
+import { createPortalNotifications } from '../services/notification.service.js';
 
 export const sendQuery = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
@@ -18,6 +19,16 @@ export const sendQuery = async (req: AuthRequest, res: Response) => {
       'INSERT INTO queries (user_id, project_id, message, sender_role) VALUES (?, ?, ?, ?)',
       targetUserId, project_id, message.trim(), req.user.role
     );
+
+    if (isStaff && Number(targetUserId) !== Number(req.user.id)) {
+      await createPortalNotifications({
+        projectId: Number(project_id),
+        targetUserId: Number(targetUserId),
+        type: 'query',
+        title: 'New Concierge Response',
+        message: message.trim().slice(0, 160),
+      });
+    }
 
     res.json({ id: result.lastInsertRowid, created_at: new Date().toISOString() });
   } catch (err: any) {

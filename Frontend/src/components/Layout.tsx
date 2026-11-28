@@ -1,9 +1,12 @@
 import { ReactNode, useState, useEffect, useRef } from 'react';
-import { Menu, X, LogOut, ChevronDown, ShieldCheck, ArrowLeft } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, LogOut, ChevronDown, ShieldCheck, ArrowLeft, Bell, CheckCheck } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import Logo from './Logo';
-import { User } from '../types';
+import { User, NotificationLog } from '../types';
+import { apiFetch } from '../api/client';
+import { formatDate } from '../utils/formatters';
 
 interface LayoutProps {
   user: User;
@@ -27,30 +30,93 @@ const INVESTOR_NAV = [
 export default function Layout({ user, onLogout, sidebarContent, children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const reduceMotion = useReducedMotion();
   const profileRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
+  const isInvestor = user?.role === 'investor';
+
+  const { data: notificationData } = useQuery<{ notifications: NotificationLog[]; unreadCount: number }>({
+    queryKey: ['investor-notifications'],
+    enabled: isInvestor,
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+    queryFn: async () => {
+      const res = await apiFetch('/api/investor/notifications');
+      if (!res.ok) return { notifications: [], unreadCount: 0 };
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        return {
+          notifications: data,
+          unreadCount: data.filter((n: NotificationLog) => !n.is_read || Number(n.is_read) === 0).length,
+        };
+      }
+      return {
+        notifications: Array.isArray(data.notifications) ? data.notifications : [],
+        unreadCount: Number(data.unreadCount || 0),
+      };
+    },
+  });
+
+  const notifications = notificationData?.notifications || [];
+  const unreadCount = notificationData?.unreadCount || 0;
+
+  const markAllRead = async () => {
+    try {
+      await apiFetch('/api/investor/notifications/read', { method: 'PATCH' });
+      queryClient.invalidateQueries({ queryKey: ['investor-notifications'] });
+    } catch {
+      // ignore network error
+    }
+  };
+
+  const handleNotificationClick = async (n: NotificationLog) => {
+    const isUnread = !n.is_read || Number(n.is_read) === 0;
+    if (isUnread) {
+      try {
+        await apiFetch(`/api/investor/notifications/${n.id}/read`, { method: 'PATCH' });
+        queryClient.invalidateQueries({ queryKey: ['investor-notifications'] });
+      } catch {
+        // ignore network error
+      }
+    }
+    setNotificationsOpen(false);
+    if (n.project_id) {
+      navigate(`/project/${n.project_id}`);
+    }
+  };
 
   // Close menus on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setProfileOpen(false);
+    setNotificationsOpen(false);
   }, [location.pathname, location.hash]);
 
-  // Profile menu: close on outside click / Escape
+  // Profile & notifications menus: close on outside click / Escape
   useEffect(() => {
-    if (!profileOpen) return;
+    if (!profileOpen && !notificationsOpen) return;
     const onDown = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false);
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) setNotificationsOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setProfileOpen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setProfileOpen(false);
+        setNotificationsOpen(false);
+      }
+    };
     document.addEventListener('mousedown', onDown);
     window.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('mousedown', onDown);
       window.removeEventListener('keydown', onKey);
     };
-  }, [profileOpen]);
+  }, [profileOpen, notificationsOpen]);
 
   // Mobile drawer: Escape closes, background scroll locked
   useEffect(() => {
@@ -73,7 +139,6 @@ export default function Layout({ user, onLogout, sidebarContent, children }: Lay
     .toUpperCase();
   const displayName = user?.name || user?.email || 'User';
   const displayRole = (user?.role || 'User').replace(/_/g, ' ');
-  const isInvestor = user?.role === 'investor';
 
   const isActive = (item: typeof INVESTOR_NAV[number]) => {
     if (item.to !== location.pathname) {
@@ -187,6 +252,108 @@ export default function Layout({ user, onLogout, sidebarContent, children }: Lay
               )}
 
               <div className="flex items-center justify-end gap-2 justify-self-end">
+                {/* Investor Notifications Bell */}
+                {isInvestor && (
+                  <div ref={notificationsRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotificationsOpen(o => !o);
+                        setProfileOpen(false);
+                      }}
+                      aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} new)` : ''}`}
+                      aria-expanded={notificationsOpen}
+                      className="relative w-10 h-10 inline-flex items-center justify-center rounded-full border border-redhill-line hover:border-redhill-stone bg-white text-redhill-charcoal transition-colors cursor-pointer"
+                    >
+                      <Bell className="w-4 h-4" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-redhill-red text-white text-[10px] font-semibold flex items-center justify-center shadow-sm">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </button>
+
+                    <AnimatePresence>
+                      {notificationsOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: reduceMotion ? 0 : -6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: reduceMotion ? 0 : -6 }}
+                          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="absolute right-0 mt-2 w-[min(22rem,calc(100vw-2rem))] bg-white border border-redhill-line rounded-lg shadow-[0_24px_48px_-24px_rgba(29,30,34,0.35)] overflow-hidden z-50"
+                        >
+                          <div className="px-4 py-3 border-b border-redhill-line flex items-center justify-between gap-2 bg-redhill-ivory">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-redhill-charcoal">
+                                Notifications
+                              </span>
+                              {unreadCount > 0 && (
+                                <span className="px-2 py-0.5 rounded-full bg-redhill-red text-white text-[10px] font-semibold">
+                                  {unreadCount} New
+                                </span>
+                              )}
+                            </div>
+                            {unreadCount > 0 && (
+                              <button
+                                type="button"
+                                onClick={markAllRead}
+                                className="inline-flex items-center gap-1 text-[11px] font-medium text-redhill-gold hover:text-redhill-charcoal transition-colors cursor-pointer"
+                              >
+                                <CheckCheck className="w-3.5 h-3.5" />
+                                Mark all read
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="max-h-80 overflow-y-auto divide-y divide-redhill-line">
+                            {notifications.length === 0 ? (
+                              <div className="px-4 py-8 text-center text-xs text-redhill-muted">
+                                No project notifications yet.
+                              </div>
+                            ) : (
+                              notifications.slice(0, 25).map((n) => {
+                                const isUnread = !n.is_read || Number(n.is_read) === 0;
+                                return (
+                                  <button
+                                    key={n.id}
+                                    type="button"
+                                    onClick={() => handleNotificationClick(n)}
+                                    className={`w-full text-left px-4 py-3 transition-colors hover:bg-redhill-sand/60 cursor-pointer ${
+                                      isUnread ? 'bg-redhill-ivory/80' : 'bg-white'
+                                    }`}
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <p className={`text-xs leading-snug ${isUnread ? 'font-semibold text-redhill-charcoal' : 'font-medium text-redhill-charcoal'}`}>
+                                        {n.subject}
+                                      </p>
+                                      {isUnread && (
+                                        <span className="shrink-0 px-1.5 py-0.5 rounded bg-redhill-red/10 text-redhill-red text-[9px] font-bold uppercase tracking-wider">
+                                          New
+                                        </span>
+                                      )}
+                                    </div>
+                                    {(n.message || (!n.content_html?.includes('<') && n.content_html)) && (
+                                      <p className="text-[11px] text-redhill-muted mt-1 line-clamp-2">
+                                        {n.message || n.content_html}
+                                      </p>
+                                    )}
+                                    <div className="flex items-center justify-between gap-2 mt-1.5 text-[10px] text-redhill-muted">
+                                      <span className="uppercase tracking-[0.12em] text-redhill-gold">
+                                        {(n.type || 'update').replace(/_/g, ' ')}
+                                      </span>
+                                      <span>{formatDate(n.created_at)}</span>
+                                    </div>
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
                 {/* Profile menu */}
                 <div ref={profileRef} className="relative hidden md:block">
                   <button

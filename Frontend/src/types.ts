@@ -98,6 +98,9 @@ export interface NotificationLog {
   subject: string;
   type: string;
   content_html: string;
+  message?: string;
+  is_read?: number | boolean;
+  read_at?: string | null;
   status: string;
   created_at: string;
 }

@@ -158,9 +158,15 @@ export async function initPostgresTables() {
         subject VARCHAR(255) NOT NULL,
         type VARCHAR(100) NOT NULL,
         content_html TEXT NOT NULL,
-        status VARCHAR(50) DEFAULT 'sent',
+        message TEXT,
+        is_read INTEGER DEFAULT 0,
+        read_at TIMESTAMPTZ,
+        status VARCHAR(50) DEFAULT 'unread',
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       );
+      ALTER TABLE notifications ADD COLUMN IF NOT EXISTS message TEXT;
+      ALTER TABLE notifications ADD COLUMN IF NOT EXISTS is_read INTEGER DEFAULT 0;
+      ALTER TABLE notifications ADD COLUMN IF NOT EXISTS read_at TIMESTAMPTZ;
 
       CREATE TABLE IF NOT EXISTS ledger (
         id SERIAL PRIMARY KEY,
@@ -302,7 +308,10 @@ function initSqliteTables() {
       subject TEXT NOT NULL,
       type TEXT NOT NULL,
       content_html TEXT NOT NULL,
-      status TEXT DEFAULT 'sent',
+      message TEXT,
+      is_read INTEGER DEFAULT 0,
+      read_at DATETIME,
+      status TEXT DEFAULT 'unread',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -331,6 +340,9 @@ function initSqliteTables() {
     );
   `);
   try { sqliteDb.exec('ALTER TABLE projects ADD COLUMN description TEXT'); } catch {}
+  try { sqliteDb.exec('ALTER TABLE notifications ADD COLUMN message TEXT'); } catch {}
+  try { sqliteDb.exec('ALTER TABLE notifications ADD COLUMN is_read INTEGER DEFAULT 0'); } catch {}
+  try { sqliteDb.exec('ALTER TABLE notifications ADD COLUMN read_at DATETIME'); } catch {}
 }
 
 if (!isPg) {
