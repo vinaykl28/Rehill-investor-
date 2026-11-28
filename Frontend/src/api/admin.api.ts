@@ -28,10 +28,6 @@ export const adminApi = {
     return apiClient.post('/api/admin/projects', data);
   },
 
-  updateCctv: async (projectId: number, cctvUrl: string): Promise<void> => {
-    await apiClient.patch(`/api/admin/projects/${projectId}/cctv`, { cctv_url: cctvUrl });
-  },
-
   // Investors
   getInvestors: async (): Promise<User[]> => {
     return apiClient.get('/api/admin/investors');

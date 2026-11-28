@@ -44,7 +44,7 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
   const [loading, setLoading] = useState(false);
 
   // Active tab
-  const [activeTab, setActiveTab] = useState<'milestones' | 'updates' | 'cctv'>('milestones');
+  const [activeTab, setActiveTab] = useState<'milestones' | 'updates'>('milestones');
 
   // Milestone form state
   const [showMilestoneForm, setShowMilestoneForm] = useState(false);
@@ -71,10 +71,6 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // CCTV state
-  const [cctvUrl, setCctvUrl] = useState('');
-  const [savingCctv, setSavingCctv] = useState(false);
-
   // Milestone inline edit state
   const [editingMilestoneId, setEditingMilestoneId] = useState<number | null>(null);
   const [editMStatus, setEditMStatus] = useState<MilestoneStatus>('pending');
@@ -86,7 +82,6 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
   useEffect(() => {
     if (project) {
       fetchDetails(project.id);
-      setCctvUrl(project.cctv_url || '');
     }
   }, [project?.id]);
 
@@ -323,28 +318,6 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
     }
   };
 
-  const handleSaveCctv = async () => {
-    if (!project) return;
-    setSavingCctv(true);
-    try {
-      const res = await apiFetch(`/api/admin/projects/${project.id}/cctv`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cctv_url: cctvUrl }),
-      });
-      if (res.ok) {
-        showToast('CCTV URL updated successfully!', 'success');
-        onRefreshProjects();
-      } else {
-        showToast('Failed to update CCTV URL', 'error');
-      }
-    } catch {
-      showToast('An error occurred', 'error');
-    } finally {
-      setSavingCctv(false);
-    }
-  };
-
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     if (file.type.startsWith('image/')) {
@@ -384,7 +357,7 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-redhill-charcoal font-serif truncate">{project.name}</h2>
-              <p className="text-xs text-redhill-muted truncate">{project.location} &bull; Manage milestones, media updates & CCTV</p>
+              <p className="text-xs text-redhill-muted truncate">{project.location} &bull; Manage milestones & media updates</p>
             </div>
           </div>
           <button
@@ -400,7 +373,6 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
           {[
             { id: 'milestones' as const, label: 'Milestones', count: milestones.length },
             { id: 'updates' as const, label: 'Media Updates', count: updates.length },
-            { id: 'cctv' as const, label: 'CCTV Feed' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -999,53 +971,6 @@ export default function ProjectDrawer({ project, onClose, onRefreshProjects }: P
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* CCTV TAB */}
-          {!loading && activeTab === 'cctv' && (
-            <div className="space-y-5">
-              <h3 className="text-redhill-charcoal font-bold text-sm">Live CCTV Feed Configuration</h3>
-
-              <div className="bg-redhill-sand/70 rounded-2xl border border-redhill-line p-5 space-y-4">
-                <p className="text-xs text-redhill-muted leading-relaxed">
-                  Configure the CCTV live feed URL for this project. This will be visible to all assigned investors on their project page. Supported formats: YouTube embed URLs, RTSP stream URLs, or any embeddable video URL.
-                </p>
-
-                <div>
-                  <label className="text-[10px] font-bold text-redhill-muted uppercase tracking-wider mb-1 block">CCTV Feed URL</label>
-                  <input
-                    type="url"
-                    value={cctvUrl}
-                    onChange={(e) => setCctvUrl(e.target.value)}
-                    placeholder="https://www.youtube.com/embed/..."
-                    className="w-full bg-redhill-sand/70 border border-redhill-line rounded-xl px-4 py-3 text-sm text-redhill-charcoal placeholder-stone-400 focus:outline-none focus:border-redhill-red/50 focus:ring-1 focus:ring-redhill-red/20"
-                  />
-                </div>
-
-                {cctvUrl && (
-                  <div className="rounded-xl overflow-hidden border border-white/[0.08] bg-black">
-                    <div className="aspect-video">
-                      <iframe
-                        src={cctvUrl}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title="CCTV Preview"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleSaveCctv}
-                  disabled={savingCctv}
-                  className="px-6 py-2.5 bg-redhill-red hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-lg  flex items-center gap-2"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  {savingCctv ? 'Saving...' : 'Save CCTV URL'}
-                </button>
               </div>
             </div>
           )}

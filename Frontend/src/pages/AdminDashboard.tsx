@@ -144,8 +144,6 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [projectUpdates, setProjectUpdates] = useState<ProgressUpdate[]>([]);
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [showCctvModal, setShowCctvModal] = useState(false);
-  const [cctvUrl, setCctvUrl] = useState('');
 
   // Form states for Milestones
   const [mCategory, setMCategory] = useState<MilestoneCategory>('documentation');
@@ -234,7 +232,6 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
 
   const openProjectDrawer = (project: Project) => {
     setSelectedProject(project);
-    setCctvUrl(project.cctv_url || '');
     fetchProjectDetails(project.id);
   };
 

@@ -79,7 +79,7 @@ export default function ProjectManager() {
                     onClick={() => setConfirmDialog({
                       isOpen: true,
                       title: 'Delete Project',
-                      message: `Are you sure you want to delete ${p.name}? This will remove all associated milestones, CCTV feeds, and progress updates. This action cannot be undone.`,
+                      message: `Are you sure you want to delete ${p.name}? This will remove all associated milestones and progress updates. This action cannot be undone.`,
                       onConfirm: () => deleteProjectMutation.mutate(p.id)
                     })}
                     className="p-1.5 bg-redhill-sand/70 hover:bg-red-500/20 text-redhill-muted hover:text-red-700 rounded-lg transition-colors flex-shrink-0 cursor-pointer"
@@ -125,9 +125,6 @@ export default function ProjectManager() {
                     Upload Progress
                   </button>
                 </div>
-                <button className="w-full bg-redhill-red/10 text-red-700 py-2 rounded-lg text-xs font-bold border border-red-500/10 hover:bg-redhill-red/20 transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                  <Video className="w-3 h-3" /> Manage CCTV
-                </button>
               </div>
             </div>
           </div>
