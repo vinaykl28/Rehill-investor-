@@ -163,7 +163,7 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
       projectId: Number(id),
       type: 'project',
       title: 'Project Details Updated',
-      message: `${name || 'Your project'} was updated${status ? ` (Status: ${status})` : ''}.`,
+      message: `${name ? `${name} details were` : 'Project details were'} updated${status ? ` (Status: ${status})` : ''}.`,
     });
 
     res.json({ message: 'Project updated successfully' });
@@ -247,6 +247,15 @@ export const updateAssignment = async (req: AuthRequest, res: Response) => {
       'UPDATE investor_projects SET investment_amount = ?, allotted_sqft = ?, market_price_per_sqft = ?, contribution = ?, price_at_investment = ?, investment_date = ? WHERE user_id = ? AND project_id = ?',
       investment_amount, allotted_sqft, market_price_per_sqft, contribution, price_at_investment || 0, investment_date || null, userId, projectId
     );
+
+    await createPortalNotifications({
+      projectId: Number(projectId),
+      targetUserId: Number(userId),
+      type: 'investment',
+      title: 'Investment Allocation Updated',
+      message: `Your project allocation was updated${allotted_sqft ? ` (${allotted_sqft} sq.ft.)` : ''}.`,
+    });
+
     res.json({ message: 'Updated successfully' });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -528,8 +537,10 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
 
     let notificationResult = null;
 
+    let milestoneCompleted = false;
     if (milestone) {
       const willComplete = is_completed || completion_percentage >= 100;
+      milestoneCompleted = Boolean(willComplete);
       const targetPct = willComplete ? 100 : (completion_percentage !== undefined ? completion_percentage : milestone.completion_percentage);
       const targetStatus = willComplete ? 'completed' : (targetPct > 0 ? 'in_progress' : milestone.status);
       const actualCompletion = willComplete ? date : milestone.actual_completion;
@@ -560,8 +571,10 @@ export const logDailyProgress = async (req: AuthRequest, res: Response) => {
     await createPortalNotifications({
       projectId: Number(project_id),
       milestoneId: milestone?.id ?? null,
-      type: 'progress',
-      title: `Site Progress Update${day_number ? ` (Day ${day_number})` : ''}`,
+      type: milestoneCompleted ? 'milestone' : 'progress',
+      title: milestoneCompleted && milestone
+        ? `Milestone Completed: ${milestone.name}`
+        : `Site Progress Update${day_number ? ` (Day ${day_number})` : ''}`,
       message: work_notes || (milestone ? `Progress logged on ${milestone.name}` : 'New daily site progress update posted.'),
     });
 

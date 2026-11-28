@@ -402,49 +402,64 @@ export default function InvestorDashboard({ user, onLogout }: InvestorDashboardP
 
         {/* Unread In-Portal Updates Banner */}
         {unreadNotifications.length > 0 && (
-          <div className="bg-white border border-redhill-gold/40 rounded-lg p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3.5 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-redhill-red/10 text-redhill-red flex items-center justify-center shrink-0 mt-0.5">
-                <Bell className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2 py-0.5 rounded-full bg-redhill-red text-white text-[10px] font-semibold uppercase tracking-wider">
-                    {unreadNotifications.length} New {unreadNotifications.length === 1 ? 'Update' : 'Updates'}
-                  </span>
-                  <span className="text-xs font-semibold text-redhill-charcoal truncate">
-                    {unreadNotifications[0].subject}
-                  </span>
+          <div className="bg-white border border-redhill-gold/40 rounded-lg p-4 sm:p-5 shadow-sm space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-redhill-red/10 text-redhill-red flex items-center justify-center shrink-0">
+                  <Bell className="w-4 h-4" />
                 </div>
-                {(unreadNotifications[0].message || (!unreadNotifications[0].content_html?.includes('<') && unreadNotifications[0].content_html)) && (
-                  <p className="text-xs text-redhill-muted mt-1 line-clamp-2">
-                    {unreadNotifications[0].message || unreadNotifications[0].content_html}
-                  </p>
-                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full bg-redhill-red text-white text-[10px] font-semibold uppercase tracking-wider">
+                      {unreadNotifications.length} New {unreadNotifications.length === 1 ? 'Update' : 'Updates'}
+                    </span>
+                    <span className="text-xs font-medium text-redhill-muted">
+                      Recent activity from Redhill Admin
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              {unreadNotifications[0].project_id && (
-                <Link
-                  to={`/project/${unreadNotifications[0].project_id}`}
-                  onClick={() => {
-                    apiFetch(`/api/investor/notifications/${unreadNotifications[0].id}/read`, { method: 'PATCH' })
-                      .then(() => queryClient.invalidateQueries({ queryKey: ['investor-notifications'] }))
-                      .catch(() => {});
-                  }}
-                  className="btn-secondary py-2 px-3.5 text-[11px] uppercase tracking-[0.12em]"
-                >
-                  View Update
-                </Link>
-              )}
               <button
                 type="button"
                 onClick={handleMarkAllNotificationsRead}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-redhill-line hover:bg-redhill-sand text-[11px] font-medium text-redhill-charcoal transition-colors cursor-pointer"
+                className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md border border-redhill-line hover:bg-redhill-sand text-[11px] font-medium text-redhill-charcoal transition-colors cursor-pointer"
               >
                 <CheckCheck className="w-3.5 h-3.5 text-redhill-gold" />
                 Mark all read
               </button>
+            </div>
+
+            <div className="divide-y divide-redhill-line border-t border-redhill-line pt-1">
+              {unreadNotifications.slice(0, 3).map((n) => (
+                <div key={n.id} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-redhill-charcoal truncate">{n.subject}</p>
+                    {(n.message || (!n.content_html?.includes('<') && n.content_html)) && (
+                      <p className="text-xs text-redhill-muted mt-0.5 line-clamp-1">
+                        {n.message || n.content_html}
+                      </p>
+                    )}
+                  </div>
+                  {n.project_id && (
+                    <Link
+                      to={`/project/${n.project_id}`}
+                      onClick={() => {
+                        apiFetch(`/api/investor/notifications/${n.id}/read`, { method: 'PATCH' })
+                          .then(() => queryClient.invalidateQueries({ queryKey: ['investor-notifications'] }))
+                          .catch(() => {});
+                      }}
+                      className="self-start sm:self-auto shrink-0 text-[11px] font-medium uppercase tracking-[0.12em] text-redhill-gold hover:text-redhill-charcoal transition-colors"
+                    >
+                      View Update →
+                    </Link>
+                  )}
+                </div>
+              ))}
+              {unreadNotifications.length > 3 && (
+                <p className="pt-2 text-[11px] text-redhill-muted">
+                  + {unreadNotifications.length - 3} more unread notification(s) in the bell menu above.
+                </p>
+              )}
             </div>
           </div>
         )}
